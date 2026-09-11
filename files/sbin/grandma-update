@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# REQUIRES ROOT: apt-get update needs root to refresh /var/lib/apt/lists.
+set -uo pipefail
+
+UU_LOG_DIR="/var/log/unattended-upgrades"
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  cat <<EOF
+Usage: grandma-update
+
+Refreshes apt package lists and reports whether the system is up to date,
+plus the status of the last unattended-upgrades run if configured. Does NOT
+perform an upgrade itself. Requires root for 'apt-get update'.
+EOF
+  exit 0
+fi
+
+if [ "$EUID" -ne 0 ]; then
+  echo "error: grandma-update requires root (apt-get update)" >&2
+  exit 1
+fi
+
+if command -v apt-get >/dev/null 2>&1; then
+  apt-get update -qq >/dev/null 2>&1 || echo "warning: apt-get update reported errors" >&2
+else
+  echo "error: apt-get not found" >&2
+  exit 1
+fi
+
+upgradable=0
+if command -v apt >/dev/null 2>&1; then
+  upgradable=$(apt list --upgradable 2>/dev/null | grep -c '/' || true)
+fi
+
+if [ "$upgradable" -eq 0 ]; then
+  up_to_date="yes"
+else
+  up_to_date="no"
+fi
+
+uu_status="not configured"
+if [ -d "$UU_LOG_DIR" ]; then
+  log_file="$UU_LOG_DIR/unattended-upgrades.log"
+  if [ -f "$log_file" ]; then
+    if tail -n 50 "$log_file" 2>/dev/null | grep -qi "error"; then
+      uu_status="last run had errors"
+    else
+      uu_status="last run OK"
+    fi
+  else
+    uu_status="configured, no log yet"
+  fi
+fi
+
+echo "Up to date:           $up_to_date"
+echo "Upgradable packages:  $upgradable"
+echo "Unattended-upgrades:  $uu_status"
+
+exit 0

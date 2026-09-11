@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Keeps grandma-launcher running for the life of grandma's X session. If she
+# (or a crash) closes it, it comes right back within a second -- she should
+# never be able to get stuck with no way to open anything. Rate-limited so a
+# persistent crash-loop doesn't spin the CPU: if it dies faster than 3
+# seconds after starting, back off for 10s before retrying.
+set -u
+
+while true; do
+  start_ts=$(date +%s)
+  /usr/local/sbin/grandma-launcher
+  end_ts=$(date +%s)
+  if [ $((end_ts - start_ts)) -lt 3 ]; then
+    sleep 10
+  else
+    sleep 1
+  fi
+done

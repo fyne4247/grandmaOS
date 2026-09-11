@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=GrandmaOS Launcher
+Comment=Big-button home screen
+Exec=/usr/local/sbin/grandma-launcher-supervisor
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

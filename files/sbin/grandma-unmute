@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Unconditionally unmutes default sink and ensures an audible minimum volume.
+# Same cross-session caveat as grandma-volume — see NOTE at bottom.
+set -euo pipefail
+
+MIN_AUDIBLE=40
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  cat <<EOF
+Usage: grandma-unmute
+
+Unmutes the default PipeWire sink. If the current volume is 0 (or unreadable),
+bumps it up to a sane audible minimum of ${MIN_AUDIBLE}%.
+EOF
+  exit 0
+fi
+
+if ! command -v wpctl >/dev/null 2>&1 && ! command -v pactl >/dev/null 2>&1; then
+  echo "error: neither wpctl nor pactl found" >&2
+  exit 1
+fi
+
+if command -v wpctl >/dev/null 2>&1; then
+  wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
+  vol_out=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null || echo "")
+  current=$(echo "$vol_out" | awk '{printf "%d", $2*100}' 2>/dev/null || echo "")
+  if [ -z "$current" ] || [ "$current" -le 0 ]; then
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ "${MIN_AUDIBLE}%"
+    echo "Unmuted and raised volume to ${MIN_AUDIBLE}% (was ${current:-unknown})"
+  else
+    echo "Unmuted, volume left at ${current}%"
+  fi
+else
+  pactl set-sink-mute @DEFAULT_SINK@ 0
+  current=$(pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | grep -oE '[0-9]+%' | head -1 | tr -d '%')
+  if [ -z "$current" ] || [ "$current" -le 0 ]; then
+    pactl set-sink-volume @DEFAULT_SINK@ "${MIN_AUDIBLE}%"
+    echo "Unmuted and raised volume to ${MIN_AUDIBLE}% (was ${current:-unknown})"
+  else
+    echo "Unmuted, volume left at ${current}%"
+  fi
+fi
+
+# NOTE on cross-session invocation: identical concern as grandma-volume.
+# Running this as root will not reach grandma's PipeWire session; a wrapper
+# using `sudo -u grandma XDG_RUNTIME_DIR=... DBUS_SESSION_BUS_ADDRESS=...` or
+# `machinectl shell grandma@` will be needed once her account/session exists.

@@ -1,0 +1,228 @@
+#!/usr/bin/env bash
+# REQUIRES ROOT: reads a root-owned backup directory grandma cannot access,
+# and writes into another user's home directory.
+#
+# THIS SCRIPT NEVER RUNS UNATTENDED. There is deliberately no "restore the
+# latest backup" default -- a generation must be named explicitly (by index
+# from `grandma-browser-backups`, or by exact "YYYYMMDD-HHMMSS" timestamp).
+# A restore overwrites live logins/cookies/bookmarks/history; the operator
+# must consciously pick which snapshot they mean.
+#
+# It also refuses to run while Brave has the target profile open, to
+# avoid restoring files out from under a live session (which is a great way
+# to *cause* the exact kind of corruption this whole backup system exists
+# to prevent). Close Brave first, or pass --force-kill -- see the
+# tradeoff note further down and in NOTES.md.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./grandma-browser-backup-common.sh
+source "$SCRIPT_DIR/grandma-browser-backup-common.sh"
+
+usage() {
+  cat <<EOF
+Usage: grandma-browser-restore <generation> [--force-kill] [--yes]
+
+<generation> is REQUIRED and must be one of:
+  - a 1-based index from 'grandma-browser-backups' (1 = newest), or
+  - an exact generation timestamp "YYYYMMDD-HHMMSS", or
+  - an exact pre-restore safety-snapshot name "pre-restore-YYYYMMDD-HHMMSS"
+
+There is no "restore latest" default -- you must say which one.
+
+Options:
+  --force-kill  If Brave is running for grandma, stop it (SIGTERM, wait,
+                SIGKILL if needed) instead of refusing. See NOTES.md for
+                why this is opt-in, not the default: it can discard
+                whatever grandma was in the middle of, with no warning to
+                her, because she isn't necessarily present to confirm it's
+                okay. Default behavior is to refuse and tell the operator
+                to close Brave first.
+  --yes         Skip the interactive "type yes to continue" confirmation
+                (for use from another trusted script/maintenance tool).
+
+Before writing anything, this makes its own safety snapshot of the CURRENT
+live profile under $BACKUP_ROOT/pre-restore-<timestamp>/,
+in case the restore itself turns out to be a mistake.
+
+Restore is an overlay copy, not wipe-then-replace: files present live but
+absent from the chosen backup are left alone rather than deleted. See
+NOTES.md "Restore semantics" for the tradeoff.
+
+Requires root.
+EOF
+}
+
+FORCE_KILL=0
+ASSUME_YES=0
+GEN_ARG=""
+for arg in "$@"; do
+  case "$arg" in
+    --help|-h) usage; exit 0 ;;
+    --force-kill) FORCE_KILL=1 ;;
+    --yes) ASSUME_YES=1 ;;
+    --*) echo "error: unknown option: $arg" >&2; usage >&2; exit 2 ;;
+    *)
+      if [ -n "$GEN_ARG" ]; then
+        echo "error: only one generation argument is accepted (got '$GEN_ARG' and '$arg')" >&2
+        exit 2
+      fi
+      GEN_ARG="$arg"
+      ;;
+  esac
+done
+
+if [ -z "$GEN_ARG" ]; then
+  echo "error: a backup generation argument is required -- there is no 'restore latest' default." >&2
+  echo "Run 'grandma-browser-backups' to see what's available." >&2
+  exit 2
+fi
+
+require_root "grandma-browser-restore" "reads a root-owned backup directory and writes into another user's home directory"
+
+RESOLVED="$(resolve_generation_arg "$GEN_ARG" || true)"
+if [ -z "$RESOLVED" ]; then
+  gbb_die "no such backup generation '$GEN_ARG'. Run 'grandma-browser-backups' to list valid indexes/timestamps."
+fi
+# Belt and suspenders: RESOLVED came only from names we already found on
+# disk under BACKUP_ROOT via resolve_generation_arg, but re-validate its
+# shape before it touches any path, and confirm it resolves to a real
+# directory strictly inside BACKUP_ROOT (no "..", no symlink escape).
+if ! validate_generation_name "$RESOLVED" && ! validate_prerestore_name "$RESOLVED"; then
+  gbb_die "internal error: resolved generation name '$RESOLVED' failed re-validation"
+fi
+SRC_DIR="$BACKUP_ROOT/$RESOLVED"
+SRC_REAL="$(realpath -e "$SRC_DIR" 2>/dev/null || true)"
+BACKUP_ROOT_REAL="$(realpath -e "$BACKUP_ROOT" 2>/dev/null || true)"
+if [ -z "$SRC_REAL" ] || [ -z "$BACKUP_ROOT_REAL" ] || [[ "$SRC_REAL" != "$BACKUP_ROOT_REAL"/* ]]; then
+  gbb_die "resolved backup path '$SRC_DIR' is not a real directory inside $BACKUP_ROOT -- refusing"
+fi
+SRC_PROFILE="$SRC_DIR/profile"
+[ -d "$SRC_PROFILE" ] || gbb_die "backup generation '$RESOLVED' has no profile/ payload (corrupt or interrupted backup?)"
+
+PROFILE_DIR="$(find_grandma_profile_dir)" || {
+  case "$PROFILE_DIR" in
+    NO_SUCH_USER:*) gbb_die "the '$GRANDMA_USER' system account does not exist yet." ;;
+    LOCAL_STATE_MISSING:*) gbb_die "Brave 'Local State' not found at ${PROFILE_DIR#*:} -- has Brave ever been run for $GRANDMA_USER? If this is a first-time disaster recovery onto a fresh account, the profile directory itself may need to be created by running Brave once for grandma first." ;;
+    PROFILE_DIR_MISSING:*) gbb_die "Local State points at ${PROFILE_DIR#*:} but that directory does not exist." ;;
+    *) gbb_die "could not locate the grandma Brave profile ($PROFILE_DIR)." ;;
+  esac
+}
+
+echo "About to restore backup generation: $RESOLVED"
+echo "  from: $SRC_PROFILE"
+echo "  into: $PROFILE_DIR   (live grandma Brave profile)"
+if [ -f "$SRC_DIR/manifest.json" ]; then
+  echo "  made with: $(manifest_field "$SRC_DIR/manifest.json" method_summary)"
+  echo "  size: $(manifest_field "$SRC_DIR/manifest.json" total_size_human)"
+fi
+echo
+
+# --- refuse to run while Brave has this profile open ---
+pids=""
+if pids="$(grandma_brave_pids)"; then
+  if [ "$FORCE_KILL" -eq 1 ]; then
+    echo "Brave is running for $GRANDMA_USER (pid(s): $pids). --force-kill given, stopping it."
+    gbb_log warning "restore: force-killing Brave for $GRANDMA_USER (pids: $pids) before restoring generation $RESOLVED"
+    kill -TERM $pids 2>/dev/null || true
+    for _ in $(seq 1 10); do
+      sleep 1
+      pids="$(grandma_brave_pids || true)"
+      [ -z "$pids" ] && break
+    done
+    if [ -n "$pids" ]; then
+      echo "Still alive after grace period, sending SIGKILL to: $pids"
+      kill -KILL $pids 2>/dev/null || true
+      sleep 1
+    fi
+    if grandma_brave_pids >/dev/null 2>&1; then
+      gbb_die "Brave for $GRANDMA_USER would not stop; refusing to restore onto a live profile"
+    fi
+  else
+    gbb_die "Brave is currently running for $GRANDMA_USER (pid(s): $pids). Restoring onto a live profile risks corrupting it -- close Brave first (as grandma, or via grandma-browser-restart), then re-run. Or pass --force-kill to have this script stop it automatically (see 'grandma-browser-restore --help' for the tradeoff)."
+  fi
+fi
+
+# Secondary check, belt-and-suspenders beyond the process check above:
+# Chromium/Brave marks a live user-data-dir with a "SingletonLock" symlink
+# one level above the profile dir (i.e. next to "Default", not inside it),
+# whose target encodes "<hostname>-<pid>". If that pid is still alive, don't
+# proceed even if our process-name list above missed the binary somehow.
+# Best-effort heuristic (see NOTES.md), not a byte-perfect replica of
+# Chromium's own locking.
+USER_DATA_DIR="$(dirname "$PROFILE_DIR")"
+LOCK_FILE="$USER_DATA_DIR/SingletonLock"
+if [ -L "$LOCK_FILE" ]; then
+  target="$(readlink "$LOCK_FILE" 2>/dev/null || true)"
+  lock_pid="${target##*-}"
+  if [[ "$lock_pid" =~ ^[0-9]+$ ]] && kill -0 "$lock_pid" 2>/dev/null; then
+    gbb_die "$LOCK_FILE points at live pid $lock_pid -- refusing to restore onto what looks like a live profile. Close Brave for $GRANDMA_USER and try again."
+  fi
+fi
+
+if [ "$ASSUME_YES" -ne 1 ]; then
+  if [ -t 0 ]; then
+    read -r -p "Type 'yes' to overwrite the live grandma Brave profile with generation $RESOLVED: " confirm
+    if [ "$confirm" != "yes" ]; then
+      echo "Aborted, nothing changed."
+      exit 1
+    fi
+  else
+    gbb_die "refusing to restore without confirmation in a non-interactive session -- pass --yes if this is intentional (e.g. called from another trusted maintenance tool)"
+  fi
+fi
+
+# --- pre-restore safety snapshot of the CURRENT live profile ---
+# Brave is confirmed stopped at this point, so a plain preserving copy is
+# fine here (no concurrent-writer risk left to guard against).
+PRE_TS="$(date +%Y%m%d-%H%M%S)"
+PRE_NAME="pre-restore-$PRE_TS"
+PRE_DIR="$BACKUP_ROOT/$PRE_NAME"
+mkdir -p "$PRE_DIR"
+gbb_log info "restore: taking pre-restore safety snapshot of $PROFILE_DIR -> $PRE_DIR"
+cp -a "$PROFILE_DIR" "$PRE_DIR/profile" 2>>"$LOG_FILE" || gbb_die "failed to take pre-restore safety snapshot -- aborting before touching the live profile"
+chown -R root:root "$PRE_DIR"
+find "$PRE_DIR" -type d -exec chmod 700 {} +
+find "$PRE_DIR" -type f -exec chmod 600 {} +
+echo "Pre-restore safety snapshot saved as: $PRE_NAME"
+
+# Prune old pre-restore snapshots beyond PRERESTORE_KEEP_N.
+mapfile -t all_pre < <(list_prerestore_sorted)
+if [ "${#all_pre[@]}" -gt "$PRERESTORE_KEEP_N" ]; then
+  for ((i = PRERESTORE_KEEP_N; i < ${#all_pre[@]}; i++)); do
+    old="${all_pre[$i]}"
+    if validate_prerestore_name "$old" && [ -d "$BACKUP_ROOT/$old" ]; then
+      rm -rf "${BACKUP_ROOT:?}/${old:?}"
+    fi
+  done
+fi
+
+# --- the actual restore: overlay-copy the backup's files onto the live profile ---
+# Overlay, not wipe-then-replace: anything present live but not present in
+# the chosen backup generation is left untouched rather than deleted. This
+# is the more conservative default for a draft tool -- see NOTES.md
+# "Restore semantics" for why an explicit wipe mode is a possible future
+# addition rather than the default.
+gbb_log info "restore: copying $SRC_PROFILE -> $PROFILE_DIR (generation $RESOLVED)"
+( cd "$SRC_PROFILE" && find . -mindepth 1 -print0 ) | while IFS= read -r -d '' rel; do
+  src="$SRC_PROFILE/$rel"
+  dst="$PROFILE_DIR/$rel"
+  if [ -d "$src" ]; then
+    mkdir -p "$dst"
+  else
+    mkdir -p "$(dirname "$dst")"
+    cp -a "$src" "$dst"
+  fi
+done
+
+# Brave (running as grandma) needs to own and write these files again.
+chown -R "$GRANDMA_USER:$GRANDMA_USER" "$PROFILE_DIR"
+find "$PROFILE_DIR" -type d -exec chmod 700 {} +
+find "$PROFILE_DIR" -type f -exec chmod 600 {} +
+
+gbb_log info "restore OK: generation=$RESOLVED restored into $PROFILE_DIR, pre-restore snapshot=$PRE_NAME"
+echo
+echo "Restore complete: generation $RESOLVED restored into $PROFILE_DIR"
+echo "If you needed to close/kill Brave for this, start it again for grandma and verify"
+echo "logins, bookmarks and history look right."
+echo "(Undo available: pre-restore snapshot '$PRE_NAME' holds what was live just before this ran.)"

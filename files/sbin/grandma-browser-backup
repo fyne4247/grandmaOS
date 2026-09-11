@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+# REQUIRES ROOT: reads into another user's home directory
+# (/home/grandma/.config/BraveSoftware/...) and writes to a root-owned
+# backup location grandma cannot access. Intended to be invoked by a
+# systemd timer / cron job / admin maintenance tool, not typed interactively
+# by grandma herself.
+#
+# WHY THIS CAN'T JUST BE "cp -r ~grandma/.config/BraveSoftware/.../Default backup/":
+# Brave may be running (and writing) at the moment this fires. Its state
+# lives partly in SQLite databases (History, Cookies, "Login Data", "Web
+# Data", Favicons, "Top Sites", ...) which Brave/Chromium keeps open, some
+# in WAL mode, and writes to continuously. A plain `cp`/`rsync` of a SQLite
+# file while a writer has it open can copy the main file out of sync with
+# its -wal/-journal sibling, or catch the main file mid-page-write --
+# producing a copy that looks complete but is actually corrupt ("torn
+# write"). Losing history is annoying; losing *logins* (the actual point of
+# this backup) because the one time we needed the backup it turned out
+# corrupt would be worse than not having a backup at all.
+#
+# The fix: SQLite ships its own backup API, exposed via the sqlite3 CLI as
+# `sqlite3 SRC ".backup DEST"`. It uses SQLite's own locking/snapshot
+# machinery to produce a transactionally-consistent copy even while another
+# process is actively reading/writing the source. We use it for every real
+# SQLite file found in the profile -- detected by magic bytes, not filename,
+# since Chromium's databases (Cookies, History, "Login Data", "Web Data")
+# have no distinguishing extension and their exact sub-path has moved
+# between Chromium releases. Everything else (Preferences, "Secure
+# Preferences", Bookmarks-equivalent state, LevelDB-backed dirs like Local
+# Storage/Session Storage/Extension State) has no such live-transaction risk
+# in the same way, so a plain preserving copy (cp -a) is used for those.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./grandma-browser-backup-common.sh
+source "$SCRIPT_DIR/grandma-browser-backup-common.sh"
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  cat <<EOF
+Usage: grandma-browser-backup
+
+Makes one new timestamped backup generation of the grandma user's active
+Brave profile under $BACKUP_ROOT (root-owned, mode 0700).
+Safe to run whether or not Brave is currently running -- real SQLite
+databases (detected by magic bytes) are copied with 'sqlite3 .backup', not a
+raw file copy. Keeps the last $KEEP_N generations and prunes older ones.
+Requires root.
+
+On success, updates $STATUS_FILE (mtime = time of last
+successful backup; this is what 'grandma-status' reports as backup age) and
+logs to $LOG_FILE and syslog (tag grandma-browser-backup).
+
+See NOTES.md next to this script for the full design rationale.
+EOF
+  exit 0
+fi
+
+require_root "grandma-browser-backup" "reads another user's home directory and writes a root-owned backup location"
+
+command -v sqlite3 >/dev/null 2>&1 || gbb_die "sqlite3 not found on PATH -- install it (e.g. 'apt install sqlite3') before running this. Refusing to fall back to a raw copy of live SQLite files, since that is exactly the unsafe case this script exists to avoid."
+
+PROFILE_DIR="$(find_grandma_profile_dir)" || {
+  case "$PROFILE_DIR" in
+    NO_SUCH_USER:*)
+      gbb_die "the '$GRANDMA_USER' system account does not exist yet -- nothing to back up." ;;
+    LOCAL_STATE_MISSING:*)
+      gbb_die "Brave 'Local State' not found at ${PROFILE_DIR#*:} -- Brave has probably never been run yet for $GRANDMA_USER. Nothing to back up." ;;
+    PROFILE_DIR_MISSING:*)
+      gbb_die "Local State points at ${PROFILE_DIR#*:} but that directory does not exist." ;;
+    *)
+      gbb_die "could not locate the grandma Brave profile ($PROFILE_DIR)." ;;
+  esac
+}
+
+gbb_log info "starting backup: profile=$PROFILE_DIR"
+
+# Purely informational -- we do NOT refuse to run if Brave is up, and we do
+# NOT try to stop it. That's the entire point of using sqlite3 .backup.
+if grandma_brave_pids >/dev/null 2>&1; then
+  BRAVE_RUNNING="yes"
+  gbb_log info "Brave is currently running for $GRANDMA_USER; proceeding anyway (SQLite-safe backup method)"
+else
+  BRAVE_RUNNING="no"
+fi
+
+mkdir -p "$BACKUP_ROOT"
+chown root:root "$BACKUP_ROOT" 2>/dev/null || true
+chmod 0700 "$BACKUP_ROOT"
+mkdir -p "$STATE_DIR"
+chown root:root "$STATE_DIR" 2>/dev/null || true
+chmod 0755 "$STATE_DIR"   # dir must stay traversable so grandma-status (unprivileged) can stat the file inside it
+
+GEN="$(date +%Y%m%d-%H%M%S)"
+TMPDEST="$BACKUP_ROOT/.tmp-$GEN-$$"
+DEST="$BACKUP_ROOT/$GEN"
+
+cleanup_tmp() {
+  [ -n "${TMPDEST:-}" ] && [ -d "$TMPDEST" ] && rm -rf "$TMPDEST"
+}
+trap 'rc=$?; if [ $rc -ne 0 ]; then gbb_log err "backup FAILED (exit $rc) for generation $GEN"; cleanup_tmp; fi' EXIT
+
+mkdir -p "$TMPDEST/profile"
+
+sqlite_ok=0
+sqlite_fallback=0
+plain_copy=0
+
+prune_expr=()
+for d in "${PROFILE_EXCLUDE_DIRS[@]}"; do
+  if [ "${#prune_expr[@]}" -gt 0 ]; then prune_expr+=(-o); fi
+  prune_expr+=(-name "$d")
+done
+
+while IFS= read -r -d '' f; do
+  rel="${f#"$PROFILE_DIR"/}"
+  base="$(basename "$f")"
+
+  # Skip Brave/Chromium's own live-session lock artifacts -- not data.
+  case "$base" in
+    SingletonLock|SingletonCookie|SingletonSocket|LOCK|lockfile) continue ;;
+  esac
+  # Skip SQLite rollback-journal / WAL side-files: sqlite3 .backup reads
+  # straight through the WAL and produces one consistent main file, so these
+  # transient journal files have nothing to add. Chromium names these
+  # "<basename>-journal" / "<basename>-wal" (no dot before the suffix,
+  # unlike Firefox's "*.sqlite-wal").
+  case "$base" in
+    *-journal|*-wal|*-shm) continue ;;
+  esac
+
+  destdir="$TMPDEST/profile/$(dirname "$rel")"
+  mkdir -p "$destdir"
+
+  if is_sqlite_file "$f"; then
+    dest="$destdir/$base"
+    if sqlite3 "$f" ".backup '$dest'" 2>>"$LOG_FILE"; then
+      sqlite_ok=$((sqlite_ok + 1))
+    else
+      gbb_log warning "sqlite3 .backup failed for $rel, falling back to plain copy (result may be inconsistent if Brave was mid-write)"
+      cp -a "$f" "$dest" 2>>"$LOG_FILE" || gbb_log warning "fallback copy also failed for $rel"
+      sqlite_fallback=$((sqlite_fallback + 1))
+    fi
+  else
+    cp -a "$f" "$destdir/$base" 2>>"$LOG_FILE"
+    plain_copy=$((plain_copy + 1))
+  fi
+done < <(find "$PROFILE_DIR" \( -type d \( "${prune_expr[@]}" \) -prune \) -o -type f -print0)
+
+total_files=$((sqlite_ok + sqlite_fallback + plain_copy))
+if [ "$total_files" -eq 0 ]; then
+  gbb_die "copied zero files out of $PROFILE_DIR -- refusing to keep an empty backup generation"
+fi
+
+# Lock everything down before it is ever visible under its real name.
+chown -R root:root "$TMPDEST"
+find "$TMPDEST" -type d -exec chmod 700 {} +
+find "$TMPDEST" -type f -exec chmod 600 {} +
+
+size_bytes=$(du -sb "$TMPDEST" 2>/dev/null | cut -f1)
+size_human=$(du -sh "$TMPDEST" 2>/dev/null | cut -f1)
+method_summary="$sqlite_ok sqlite (safe .backup), $plain_copy plain-copy"
+[ "$sqlite_fallback" -gt 0 ] && method_summary="$method_summary, $sqlite_fallback sqlite-fallback-cp (see log -- possibly inconsistent)"
+
+cat >"$TMPDEST/manifest.json" <<JSON
+{
+  "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "generation": "$GEN",
+  "source_profile": "$PROFILE_DIR",
+  "hostname": "$(hostname)",
+  "brave_running_at_backup_time": "$BRAVE_RUNNING",
+  "sqlite_backup_count": $sqlite_ok,
+  "sqlite_fallback_copy_count": $sqlite_fallback,
+  "plain_copy_count": $plain_copy,
+  "total_files": $total_files,
+  "total_size_bytes": ${size_bytes:-0},
+  "total_size_human": "$size_human",
+  "method_summary": "$method_summary"
+}
+JSON
+chmod 600 "$TMPDEST/manifest.json"
+
+# Atomic: the generation only becomes visible (to grandma-browser-backups,
+# to pruning, to restore) once it is fully written and locked down.
+mv "$TMPDEST" "$DEST"
+TMPDEST=""
+
+# --- retention: keep the newest KEEP_N generations, prune the rest ---
+mapfile -t all_gens < <(list_generations_sorted)
+kept=${#all_gens[@]}
+pruned=0
+if [ "$kept" -gt "$KEEP_N" ]; then
+  for ((i = KEEP_N; i < kept; i++)); do
+    old="${all_gens[$i]}"
+    if validate_generation_name "$old" && [ -d "$BACKUP_ROOT/$old" ]; then
+      rm -rf "${BACKUP_ROOT:?}/${old:?}"
+      pruned=$((pruned + 1))
+    fi
+  done
+  kept=$KEEP_N
+fi
+
+# --- status file: mtime is what grandma-status reads as "backup age" ---
+date -u +%Y-%m-%dT%H:%M:%SZ >"$STATUS_FILE"
+chown root:root "$STATUS_FILE"
+chmod 0644 "$STATUS_FILE"
+
+gbb_log info "backup OK: generation=$GEN size=$size_human files=$total_files ($method_summary) kept=$kept pruned=$pruned brave_running=$BRAVE_RUNNING"
+echo "Backup complete: $DEST ($size_human, $total_files files, $method_summary)"
+echo "Kept $kept generations, pruned $pruned."

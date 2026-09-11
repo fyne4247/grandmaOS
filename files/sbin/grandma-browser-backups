@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# REQUIRES ROOT: BACKUP_ROOT is root-owned mode 0700 specifically so grandma
+# cannot read backup contents (they hold saved logins/cookies) -- so listing
+# what's in there, or even reading generation manifests, needs root too.
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./grandma-browser-backup-common.sh
+source "$SCRIPT_DIR/grandma-browser-backup-common.sh"
+
+JSON=0
+for arg in "$@"; do
+  case "$arg" in
+    --json) JSON=1 ;;
+    --help|-h)
+      cat <<EOF
+Usage: grandma-browser-backups [--json]
+
+Lists Brave profile backup generations under $BACKUP_ROOT,
+newest first, with index (usable as the argument to
+grandma-browser-restore), timestamp, size, and how each was made
+(SQLite-safe .backup vs. plain copy counts, from that generation's
+manifest.json). Also shows any pending pre-restore safety snapshots and the
+age of the last successful backup. Read-only. Requires root because the
+backup directory is intentionally unreadable by anyone else.
+EOF
+      exit 0
+      ;;
+  esac
+done
+
+require_root "grandma-browser-backups" "the backup directory is root-owned mode 0700 and unreadable otherwise"
+
+mapfile -t gens < <(list_generations_sorted)
+mapfile -t pres < <(list_prerestore_sorted)
+
+if [ "$JSON" -eq 1 ]; then
+  printf '{"backup_root":"%s","generations":[' "$BACKUP_ROOT"
+  first=1
+  idx=0
+  for g in "${gens[@]}"; do
+    idx=$((idx + 1))
+    dir="$BACKUP_ROOT/$g"
+    manifest="$dir/manifest.json"
+    size=$(manifest_field "$manifest" total_size_human)
+    [ -z "$size" ] && size=$(du -sh "$dir" 2>/dev/null | cut -f1)
+    method=$(manifest_field "$manifest" method_summary)
+    [ -z "$method" ] && method="unknown (no manifest)"
+    [ "$first" -eq 1 ] && first=0 || printf ','
+    printf '{"index":%d,"generation":"%s","size":"%s","method":"%s"}' \
+      "$idx" "$g" "$size" "$method"
+  done
+  printf ']}\n'
+  exit 0
+fi
+
+echo "Backup location: $BACKUP_ROOT (root:root, mode 0700 -- grandma cannot read, write or delete these)"
+echo
+
+if [ "${#gens[@]}" -eq 0 ]; then
+  echo "No backup generations found yet."
+else
+  printf "%-5s %-17s %-10s %-8s  %s\n" "IDX" "GENERATION" "SIZE" "AGE" "METHOD"
+  now=$(date +%s)
+  idx=0
+  for g in "${gens[@]}"; do
+    idx=$((idx + 1))
+    dir="$BACKUP_ROOT/$g"
+    manifest="$dir/manifest.json"
+    size=$(manifest_field "$manifest" total_size_human)
+    [ -z "$size" ] && size=$(du -sh "$dir" 2>/dev/null | cut -f1)
+    method=$(manifest_field "$manifest" method_summary)
+    [ -z "$method" ] && method="unknown (no manifest -- possibly from an interrupted run)"
+    # Parse "YYYYMMDD-HHMMSS" into epoch for a human "age" column.
+    ts="${g:0:4}-${g:4:2}-${g:6:2} ${g:9:2}:${g:11:2}:${g:13:2}"
+    gen_epoch=$(date -d "$ts" +%s 2>/dev/null || echo "")
+    age="?"
+    if [ -n "$gen_epoch" ]; then
+      mins=$(((now - gen_epoch) / 60))
+      if [ "$mins" -lt 60 ]; then
+        age="${mins}m"
+      elif [ "$mins" -lt 1440 ]; then
+        age="$((mins / 60))h"
+      else
+        age="$((mins / 1440))d"
+      fi
+    fi
+    printf "%-5s %-17s %-10s %-8s  %s\n" "$idx" "$g" "${size:-?}" "$age" "$method"
+  done
+fi
+
+if [ "${#pres[@]}" -gt 0 ]; then
+  echo
+  echo "Pre-restore safety snapshots (taken automatically before a restore; not"
+  echo "reachable by index -- pass the exact name to grandma-browser-restore):"
+  for p in "${pres[@]}"; do
+    dir="$BACKUP_ROOT/$p"
+    size=$(du -sh "$dir" 2>/dev/null | cut -f1)
+    printf "  %-30s %s\n" "$p" "${size:-?}"
+  done
+fi
+
+echo
+if [ -f "$STATUS_FILE" ]; then
+  last=$(stat -c %Y "$STATUS_FILE" 2>/dev/null || echo "")
+  if [ -n "$last" ]; then
+    now=$(date +%s)
+    mins=$(((now - last) / 60))
+    echo "Last successful backup: ${mins} min ago"
+  else
+    echo "Last successful backup: status file present but unreadable"
+  fi
+else
+  echo "Last successful backup: never (status file $STATUS_FILE not found)"
+fi
+total_size=$(du -sh "$BACKUP_ROOT" 2>/dev/null | cut -f1)
+echo "Total backup storage used: ${total_size:-0}"

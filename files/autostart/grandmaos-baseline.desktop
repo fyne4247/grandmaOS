@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=GrandmaOS Baseline
+Comment=Reasserts GrandmaOS lock-screen and accessibility settings on login
+Exec=/usr/local/sbin/grandma-apply-baseline
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

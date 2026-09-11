@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# REQUIRES ROOT: systemctl reboot requires root. Intended to be called only
+# from a trusted maintenance path (e.g. a scheduled job or OpenClaw action),
+# not run ad hoc interactively - it does not prompt for confirmation.
+set -euo pipefail
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  cat <<'EOF'
+Usage: grandma-reboot
+
+Reboots the machine immediately via 'systemctl reboot'. No confirmation
+prompt - this is meant to be invoked by a trusted maintenance path, not
+interactively by a human who might fat-finger it. Requires root.
+EOF
+  exit 0
+fi
+
+if [ "$EUID" -ne 0 ]; then
+  echo "error: grandma-reboot requires root (systemctl reboot)" >&2
+  exit 1
+fi
+
+echo "Rebooting now."
+systemctl reboot

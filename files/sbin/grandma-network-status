@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# Read-only network diagnostic; never crashes on "no wifi"/"no internet".
+set -uo pipefail
+
+WIFI_IF="wlo1"
+JSON=0
+for arg in "$@"; do
+  case "$arg" in
+    --json) JSON=1 ;;
+    --help|-h)
+      cat <<EOF
+Usage: grandma-network-status [--json]
+
+Reports Wi-Fi ($WIFI_IF) link state, connected SSID, default route presence,
+DNS resolution, and a lightweight connectivity check. Degraded/absent states
+are reported, not treated as errors; exit code stays 0 unless usage is wrong.
+EOF
+      exit 0
+      ;;
+  esac
+done
+
+link_state="unknown"
+if ip link show "$WIFI_IF" >/dev/null 2>&1; then
+  link_state=$(ip -o link show "$WIFI_IF" 2>/dev/null | grep -oE 'state [A-Z]+' | awk '{print $2}')
+  [ -z "$link_state" ] && link_state="unknown"
+else
+  link_state="interface not found"
+fi
+
+ssid="none"
+signal="unknown"
+if command -v nmcli >/dev/null 2>&1; then
+  active_line=$(nmcli -t -f ACTIVE,SSID,SIGNAL,DEVICE dev wifi 2>/dev/null | awk -F: -v dev="$WIFI_IF" '$1=="yes" && $4==dev {print; exit}')
+  if [ -n "$active_line" ]; then
+    ssid=$(echo "$active_line" | cut -d: -f2)
+    signal=$(echo "$active_line" | cut -d: -f3)
+  fi
+fi
+
+default_route="no"
+if ip route show default 2>/dev/null | grep -q default; then
+  default_route="yes"
+fi
+
+dns_ok="no"
+if command -v getent >/dev/null 2>&1; then
+  if timeout 3 getent hosts facebook.com >/dev/null 2>&1; then
+    dns_ok="yes"
+  fi
+fi
+
+internet_ok="no"
+if command -v curl >/dev/null 2>&1; then
+  if curl -sI --max-time 3 https://connectivity-check.ubuntu.com >/dev/null 2>&1; then
+    internet_ok="yes"
+  fi
+fi
+
+if [ "$JSON" -eq 1 ]; then
+  printf '{'
+  printf '"interface":"%s",' "$WIFI_IF"
+  printf '"link_state":"%s",' "$link_state"
+  printf '"ssid":"%s",' "$ssid"
+  printf '"signal_percent":"%s",' "$signal"
+  printf '"default_route":"%s",' "$default_route"
+  printf '"dns_resolves":"%s",' "$dns_ok"
+  printf '"internet_reachable":"%s"' "$internet_ok"
+  printf '}\n'
+else
+  echo "Wi-Fi interface ($WIFI_IF): $link_state"
+  echo "SSID:                    $ssid"
+  echo "Signal:                  ${signal}%"
+  echo "Default route:           $default_route"
+  echo "DNS resolves:            $dns_ok"
+  echo "Internet reachable:      $internet_ok"
+fi
+
+exit 0

@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodically reassert GrandmaOS baseline for grandma
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

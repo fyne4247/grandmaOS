@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+# Read-only audio diagnostic; never fails hard, reports degraded states instead.
+set -uo pipefail
+
+JSON=0
+for arg in "$@"; do
+  case "$arg" in
+    --json) JSON=1 ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: grandma-audio-status [--json]
+
+Reports PipeWire/WirePlumber audio health for the current user session:
+  - detected audio hardware (card name)
+  - default sink name
+  - headphone jack plug state (available/not available)
+  - mute state and volume percentage
+  - whether pipewire, pipewire-pulse and wireplumber user services are active
+
+No root required. Never exits non-zero just because audio is in a degraded
+state; only exits non-zero on genuine usage error.
+EOF
+      exit 0
+      ;;
+  esac
+done
+
+card_name="unknown"
+if command -v pactl >/dev/null 2>&1; then
+  card_name=$(pactl list cards 2>/dev/null | awk -F': ' '/alsa.card_name|device.description/{print $2; exit}')
+fi
+if [ -z "${card_name:-}" ] || [ "$card_name" = "unknown" ]; then
+  if command -v aplay >/dev/null 2>&1; then
+    card_name=$(aplay -l 2>/dev/null | awk -F': ' '/^card /{print $2; exit}')
+  fi
+fi
+[ -z "${card_name:-}" ] && card_name="none detected"
+
+default_sink="unknown"
+if command -v pactl >/dev/null 2>&1; then
+  default_sink=$(pactl get-default-sink 2>/dev/null || echo "unknown")
+fi
+
+headphones_plugged="unknown"
+if command -v pactl >/dev/null 2>&1; then
+  if pactl list cards 2>/dev/null | grep -qi "headphone.*not available"; then
+    headphones_plugged="no"
+  elif pactl list cards 2>/dev/null | grep -qi "headphone.*: available"; then
+    headphones_plugged="yes"
+  fi
+fi
+
+mute_state="unknown"
+volume_pct="unknown"
+if command -v wpctl >/dev/null 2>&1; then
+  vol_out=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null || true)
+  if [ -n "$vol_out" ]; then
+    if echo "$vol_out" | grep -q MUTED; then
+      mute_state="yes"
+    else
+      mute_state="no"
+    fi
+    volume_pct=$(echo "$vol_out" | awk '{printf "%d", $2*100}')
+  fi
+fi
+if [ "$mute_state" = "unknown" ] && command -v pactl >/dev/null 2>&1; then
+  m=$(pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null || true)
+  case "$m" in
+    *yes*) mute_state="yes" ;;
+    *no*) mute_state="no" ;;
+  esac
+fi
+if [ "$volume_pct" = "unknown" ] && command -v pactl >/dev/null 2>&1; then
+  v=$(pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | grep -oE '[0-9]+%' | head -1 | tr -d '%')
+  [ -n "$v" ] && volume_pct="$v"
+fi
+
+svc_state() {
+  systemctl --user is-active "$1" 2>/dev/null || echo "unknown"
+}
+pw_state=$(svc_state pipewire)
+pwp_state=$(svc_state pipewire-pulse)
+wp_state=$(svc_state wireplumber)
+
+health="OK"
+for s in "$pw_state" "$pwp_state" "$wp_state"; do
+  if [ "$s" != "active" ]; then
+    health="degraded"
+  fi
+done
+
+if [ "$JSON" -eq 1 ]; then
+  printf '{'
+  printf '"card":"%s",' "$card_name"
+  printf '"default_sink":"%s",' "$default_sink"
+  printf '"headphones_plugged":"%s",' "$headphones_plugged"
+  printf '"muted":"%s",' "$mute_state"
+  printf '"volume_percent":"%s",' "$volume_pct"
+  printf '"pipewire":"%s",' "$pw_state"
+  printf '"pipewire_pulse":"%s",' "$pwp_state"
+  printf '"wireplumber":"%s",' "$wp_state"
+  printf '"health":"%s"' "$health"
+  printf '}\n'
+else
+  echo "Audio card:        $card_name"
+  echo "Default sink:      $default_sink"
+  echo "Headphones:        $headphones_plugged"
+  echo "Muted:             $mute_state"
+  echo "Volume:            ${volume_pct}%"
+  echo "pipewire:          $pw_state"
+  echo "pipewire-pulse:    $pwp_state"
+  echo "wireplumber:       $wp_state"
+  echo "Overall health:    $health"
+fi
+
+exit 0

@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Sets PipeWire default sink volume. No root needed for the invoking user's own
+# session. SEE NOTE at bottom about cross-user (grandma) invocation.
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: grandma-volume <0-100>
+       grandma-volume --help
+
+Sets the default PipeWire sink volume to the given integer percentage.
+The argument is strictly validated as an integer between 0 and 100
+inclusive before anything is executed.
+EOF
+}
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  usage
+  exit 0
+fi
+
+if [ "$#" -ne 1 ]; then
+  echo "error: expected exactly one argument (volume 0-100)" >&2
+  usage >&2
+  exit 2
+fi
+
+vol="$1"
+
+case "$vol" in
+  ''|*[!0-9]*)
+    echo "error: '$vol' is not a non-negative integer" >&2
+    exit 2
+    ;;
+esac
+
+# Now safe to treat as integer.
+if [ "$vol" -lt 0 ] || [ "$vol" -gt 100 ]; then
+  echo "error: volume must be between 0 and 100 (got $vol)" >&2
+  exit 2
+fi
+
+if command -v wpctl >/dev/null 2>&1; then
+  wpctl set-volume @DEFAULT_AUDIO_SINK@ "${vol}%"
+elif command -v pactl >/dev/null 2>&1; then
+  pactl set-sink-volume @DEFAULT_SINK@ "${vol}%"
+else
+  echo "error: neither wpctl nor pactl found" >&2
+  exit 1
+fi
+
+echo "Volume set to ${vol}%"
+
+# NOTE on cross-session invocation:
+# This script operates on the PipeWire session of the user who RUNS it (it
+# relies on the ambient XDG_RUNTIME_DIR / DBUS_SESSION_BUS_ADDRESS of the
+# calling process). If a root-run maintenance/OpenClaw tool needs to change
+# volume IN GRANDMA'S session, running this script as root will NOT reach her
+# PipeWire instance. The correct approach at wiring time is one of:
+#   sudo -u grandma XDG_RUNTIME_DIR=/run/user/$(id -u grandma) \
+#     DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u grandma)/bus \
+#     grandma-volume <n>
+#   or: machinectl shell grandma@ /usr/local/sbin/grandma-volume <n>
+# This has NOT been implemented here (deliberately, to avoid over-engineering
+# before the grandma account and its session bus layout exist) — verify
+# XDG_RUNTIME_DIR/session bus path once the account is created and adjust the
+# sudoers wiring accordingly. See NOTES.md.

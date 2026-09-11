@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Runs AS the grandma user (invoked by root via 'runuser -u grandma', using
+# her lingering user session's D-Bus bus, or by her own XFCE session
+# autostart entry once she has a live desktop). Idempotently (re)asserts the
+# GrandmaOS baseline: no lock screen, and large-text/high-contrast
+# accessibility settings. Every property write below is safe to re-run --
+# it either updates an existing xfconf property or creates it if this is the
+# first run (her per-user xfconf XML files don't exist until first written;
+# until then xfconfd serves system defaults).
+set -euo pipefail
+
+xset_prop() {
+  local channel="$1" prop="$2" type="$3" value="$4"
+  if xfconf-query -c "$channel" -p "$prop" >/dev/null 2>&1; then
+    xfconf-query -c "$channel" -p "$prop" -s "$value"
+  else
+    xfconf-query -c "$channel" -p "$prop" -n -t "$type" -s "$value"
+  fi
+}
+
+echo "[grandma-apply-baseline] lock-screen elimination..."
+# 1) xflock4 (whatever triggers it: panel button, keybinding, lid/suspend
+#    hooks) runs this command to lock -- make it a no-op.
+xset_prop xfce4-session /general/LockCommand string /bin/true
+# 2) don't re-lock on resume from suspend/hibernate either.
+xset_prop xfce4-power-manager /xfce4-power-manager/lock-screen-suspend-hibernate bool false
+# (light-locker itself and the legacy xscreensaver autostart entry are
+# disabled via root-owned ~/.config/autostart overrides, applied separately
+# by root -- grandma's own account has no write access to that directory.)
+
+echo "[grandma-apply-baseline] accessibility baseline..."
+xset_prop xsettings /Xft/DPI int 192
+xset_prop xsettings /Gtk/FontName string "Ubuntu 13"
+xset_prop xsettings /Gtk/CursorThemeName string "Adwaita"
+xset_prop xsettings /Gtk/CursorThemeSize int 48
+xset_prop xsettings /Net/ThemeName string "HighContrast"
+xset_prop xsettings /Net/IconThemeName string "HighContrast"
+xset_prop xfwm4 /general/title_font string "Ubuntu Bold 13"
+xset_prop xfwm4 /general/theme string "Default"
+xset_prop xfce4-desktop /desktop-icons/icon-size int 64
+xset_prop xfce4-desktop /desktop-icons/tooltip-size int 96
+
+echo "[grandma-apply-baseline] done."

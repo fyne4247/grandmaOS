@@ -1,0 +1,7 @@
+[Unit]
+Description=Reassert GrandmaOS lock-screen/accessibility baseline for grandma
+ConditionUser=root
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/runuser -u grandma -- /usr/bin/env XDG_RUNTIME_DIR=/run/user/1001 /usr/local/sbin/grandma-apply-baseline

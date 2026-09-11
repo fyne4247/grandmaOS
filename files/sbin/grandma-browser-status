@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Reads process table for grandma's Brave. Basic pgrep-by-name across users
+# needs no special privilege, but /proc/<pid>/status for a process owned by
+# another user may return partial/EACCES fields without root — see NOTES.md.
+set -uo pipefail
+
+JSON=0
+for arg in "$@"; do
+  case "$arg" in
+    --json) JSON=1 ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: grandma-browser-status [--json]
+
+Reports whether a Brave process is running for the 'grandma' user, how many
+PIDs, and whether any appear stuck (zombie/D-state). Tries each of Brave's
+known process-table names (the real binary is /opt/brave.com/brave/brave,
+which shows up as "brave" -- comm names are truncated -- not "brave-browser",
+which is just the /usr/bin wrapper script).
+EOF
+      exit 0
+      ;;
+  esac
+done
+
+TARGET_USER="grandma"
+
+candidates="brave brave-browser brave-browser-stable"
+binary_name=""
+pids=""
+for c in $candidates; do
+  found=$(pgrep -u "$TARGET_USER" -x "$c" 2>/dev/null || true)
+  if [ -n "$found" ]; then
+    binary_name="$c"
+    pids="$found"
+    break
+  fi
+done
+[ -z "$binary_name" ] && binary_name="brave"
+
+count=0
+[ -n "$pids" ] && count=$(echo "$pids" | wc -l)
+
+running="no"
+[ "$count" -gt 0 ] && running="yes"
+
+stuck="no"
+if [ "$count" -gt 0 ]; then
+  for pid in $pids; do
+    state=$(awk '/^State:/{print $2}' "/proc/$pid/status" 2>/dev/null || echo "?")
+    case "$state" in
+      Z|D) stuck="yes" ;;
+    esac
+  done
+fi
+
+if [ "$JSON" -eq 1 ]; then
+  printf '{'
+  printf '"binary":"%s",' "$binary_name"
+  printf '"running":"%s",' "$running"
+  printf '"pid_count":%d,' "$count"
+  printf '"stuck":"%s"' "$stuck"
+  printf '}\n'
+else
+  echo "Brave binary:     $binary_name"
+  echo "Running:          $running"
+  echo "PID count:        $count"
+  echo "Stuck (Z/D state): $stuck"
+fi
+
+exit 0

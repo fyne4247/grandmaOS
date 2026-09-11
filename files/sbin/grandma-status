@@ -1,0 +1,226 @@
+#!/usr/bin/env bash
+# Master read-only overview. Delegates to grandma-audio-status,
+# grandma-network-status and grandma-browser-status (assumed on PATH).
+# Never crashes; every field falls back to "unknown"/"not present" rather
+# than a hard failure. See NOTES.md for the /var/lib/grandmaos/ paths.
+#
+# Observability additions are deliberately shallow: error counts and
+# timestamps only, never message content, browsing history, or keystrokes --
+# see the original brief's "no invasive surveillance" constraint.
+set -uo pipefail
+
+BACKUP_TIMESTAMP_FILE="/var/lib/grandmaos/last-browser-backup"
+OPENCLAW_PROCESS_PATTERN="openclaw"
+UU_LOG="/var/log/unattended-upgrades/unattended-upgrades.log"
+DISK_LOW_THRESHOLD_GB=5
+
+JSON=0
+for arg in "$@"; do
+  case "$arg" in
+    --json) JSON=1 ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: grandma-status [--json]
+
+Master human-readable (or --json) status overview for GrandmaOS. Calls the
+individual grandma-* diagnostic scripts and summarizes: internet, Wi-Fi,
+Brave browser, Facebook reachability, audio, touchpad presence, disk free
+space, last browser backup age, OpenClaw process presence, pending updates,
+last unattended-upgrade result, recent system errors, and grandma's last
+login. Never exits non-zero due to a degraded subsystem, only on usage error.
+EOF
+      exit 0
+      ;;
+  esac
+done
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# --- network ---
+net_json=""
+if have grandma-network-status; then
+  net_json=$(grandma-network-status --json 2>/dev/null || true)
+fi
+jget() { echo "$1" | grep -oE "\"$2\":\"[^\"]*\"" | head -1 | sed -E "s/.*:\"([^\"]*)\"/\1/"; }
+
+internet="unknown"
+wifi="unknown"
+if [ -n "$net_json" ]; then
+  ir=$(jget "$net_json" internet_reachable)
+  [ "$ir" = "yes" ] && internet="OK" || internet="unreachable"
+  ls=$(jget "$net_json" link_state)
+  ssid=$(jget "$net_json" ssid)
+  if [ "$ls" = "UP" ] && [ -n "$ssid" ] && [ "$ssid" != "none" ]; then
+    wifi="connected"
+  elif [ "$ls" = "interface not found" ]; then
+    wifi="not present"
+  else
+    wifi="disconnected"
+  fi
+fi
+
+# --- facebook reachability (independent lightweight check) ---
+facebook="unknown"
+if have curl; then
+  if curl -sI --max-time 3 https://www.facebook.com >/dev/null 2>&1; then
+    facebook="reachable"
+  else
+    facebook="unreachable"
+  fi
+fi
+
+# --- browser ---
+browser_json=""
+if have grandma-browser-status; then
+  browser_json=$(grandma-browser-status --json 2>/dev/null || true)
+fi
+browser="unknown"
+if [ -n "$browser_json" ]; then
+  r=$(jget "$browser_json" running)
+  [ "$r" = "yes" ] && browser="running" || browser="not running"
+fi
+
+# --- audio ---
+audio_json=""
+if have grandma-audio-status; then
+  audio_json=$(grandma-audio-status --json 2>/dev/null || true)
+fi
+audio="unknown"
+muted="unknown"
+volume="unknown"
+output_label="unknown"
+if [ -n "$audio_json" ]; then
+  h=$(jget "$audio_json" health)
+  audio="$h"
+  muted=$(jget "$audio_json" muted)
+  volume=$(jget "$audio_json" volume_percent)
+  hp=$(jget "$audio_json" headphones_plugged)
+  if [ "$hp" = "yes" ]; then
+    output_label="Headphones"
+  else
+    output_label="Speakers"
+  fi
+fi
+
+# --- touchpad (no touchscreen exists on this machine; report honestly) ---
+# Checked via /proc, not xinput -- xinput needs a live X connection, which
+# this script won't have when invoked as root/no-session (e.g. via pkexec or
+# a future OpenClaw call), and would silently under-report otherwise.
+touchpad_status="not present"
+if [ -f /proc/bus/input/devices ] && grep -qi "touchpad" /proc/bus/input/devices 2>/dev/null; then
+  touchpad_status="detected"
+fi
+
+# --- disk free ---
+disk_free="unknown"
+disk_low="no"
+if have df; then
+  disk_free_raw=$(df -BG --output=avail / 2>/dev/null | tail -1 | tr -dc '0-9')
+  if [ -n "$disk_free_raw" ]; then
+    disk_free="${disk_free_raw} GB"
+    [ "$disk_free_raw" -lt "$DISK_LOW_THRESHOLD_GB" ] && disk_low="yes"
+  fi
+fi
+
+# --- browser backup age ---
+backup_age="never"
+if [ -f "$BACKUP_TIMESTAMP_FILE" ]; then
+  last=$(stat -c %Y "$BACKUP_TIMESTAMP_FILE" 2>/dev/null || echo "")
+  if [ -n "$last" ]; then
+    now=$(date +%s)
+    mins=$(( (now - last) / 60 ))
+    backup_age="${mins} min ago"
+  fi
+fi
+
+# --- OpenClaw ---
+openclaw="not running"
+if have pgrep; then
+  if pgrep -f "$OPENCLAW_PROCESS_PATTERN" >/dev/null 2>&1; then
+    openclaw="running"
+  fi
+fi
+
+# --- updates: pending count + last unattended-upgrade run result ---
+updates="unknown"
+if have apt; then
+  n=$(apt list --upgradable 2>/dev/null | grep -c '/' || true)
+  if [ "$n" -eq 0 ]; then
+    updates="OK"
+  else
+    updates="${n} pending"
+  fi
+fi
+
+last_update_run="never"
+if [ -r "$UU_LOG" ]; then
+  last_line=$(grep -E 'INFO Package|ERROR' "$UU_LOG" 2>/dev/null | tail -1)
+  last_ts=$(grep -oE '^[0-9-]+ [0-9:]+' "$UU_LOG" 2>/dev/null | tail -1)
+  if echo "$last_line" | grep -q ERROR; then
+    last_update_run="ERROR at ${last_ts:-unknown time} -- check $UU_LOG"
+  elif [ -n "$last_ts" ]; then
+    last_update_run="OK, last activity ${last_ts}"
+  fi
+fi
+
+# --- failed systemd units (actionable signal; raw journalctl -p err is
+# dominated by harmless recurring ACPI/BIOS firmware noise on this hardware
+# and isn't useful here). casper-md5check is excluded: it's a live-USB-only
+# checksum verifier that permanently shows "failed" on any installed system
+# and never indicates a real problem. ---
+error_count="unknown"
+if have systemctl; then
+  error_count=$(systemctl --failed --no-legend --no-pager 2>/dev/null | grep -v 'casper-md5check' | wc -l)
+fi
+
+# --- grandma's last login (timestamp only) ---
+last_login="unknown"
+if have last; then
+  ll=$(last -1 grandma 2>/dev/null | head -1)
+  if [ -n "$ll" ] && ! echo "$ll" | grep -q "^wtmp"; then
+    last_login=$(echo "$ll" | awk '{$1=$2=""; print $0}' | sed -E 's/^ +//; s/ +/ /g')
+  fi
+fi
+
+if [ "$JSON" -eq 1 ]; then
+  printf '{'
+  printf '"internet":"%s",' "$internet"
+  printf '"wifi":"%s",' "$wifi"
+  printf '"browser":"%s",' "$browser"
+  printf '"facebook":"%s",' "$facebook"
+  printf '"audio":"%s",' "$audio"
+  printf '"output":"%s",' "$output_label"
+  printf '"muted":"%s",' "$muted"
+  printf '"volume_percent":"%s",' "$volume"
+  printf '"touchpad":"%s",' "$touchpad_status"
+  printf '"disk_free":"%s",' "$disk_free"
+  printf '"disk_low":"%s",' "$disk_low"
+  printf '"browser_backup":"%s",' "$backup_age"
+  printf '"openclaw":"%s",' "$openclaw"
+  printf '"updates":"%s",' "$updates"
+  printf '"last_update_run":"%s",' "$last_update_run"
+  printf '"failed_services":"%s",' "$error_count"
+  printf '"grandma_last_login":"%s"' "$last_login"
+  printf '}\n'
+else
+  echo "GrandmaOS status"
+  echo ""
+  printf '%-18s%s\n' "Internet:" "$internet"
+  printf '%-18s%s\n' "Wi-Fi:" "$wifi"
+  printf '%-18s%s\n' "Browser (Brave):" "$browser"
+  printf '%-18s%s\n' "Facebook:" "$facebook"
+  printf '%-18s%s\n' "Audio:" "$audio"
+  printf '%-18s%s\n' "Output:" "$output_label"
+  printf '%-18s%s\n' "Muted:" "$muted"
+  printf '%-18s%s\n' "Volume:" "${volume}%"
+  printf '%-18s%s\n' "Touchpad:" "$touchpad_status"
+  printf '%-18s%s%s\n' "Disk free:" "$disk_free" "$([ "$disk_low" = "yes" ] && echo "  ** LOW **")"
+  printf '%-18s%s\n' "Browser backup:" "$backup_age"
+  printf '%-18s%s\n' "OpenClaw:" "$openclaw"
+  printf '%-18s%s\n' "Updates:" "$updates"
+  printf '%-18s%s\n' "Last update run:" "$last_update_run"
+  printf '%-18s%s\n' "Failed services:" "$error_count"
+  printf '%-18s%s\n' "Grandma last login:" "$last_login"
+fi
+
+exit 0

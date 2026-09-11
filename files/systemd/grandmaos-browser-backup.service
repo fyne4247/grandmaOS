@@ -1,0 +1,7 @@
+[Unit]
+Description=Backup grandma's Brave browser profile (SQLite-safe)
+ConditionUser=root
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/grandma-browser-backup

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# REQUIRES ROOT: restarts the system-wide NetworkManager.service unit.
+set -euo pipefail
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  cat <<'EOF'
+Usage: grandma-network-restart
+
+Restarts NetworkManager to recover from a wedged Wi-Fi/network state.
+Requires root (systemctl restart on a system unit).
+EOF
+  exit 0
+fi
+
+if [ "$EUID" -ne 0 ]; then
+  echo "error: grandma-network-restart requires root (restarts a system service)" >&2
+  echo "hint: run via sudo, or through the sudoers-wired maintenance path" >&2
+  exit 1
+fi
+
+systemctl restart NetworkManager
+echo "NetworkManager restarted"

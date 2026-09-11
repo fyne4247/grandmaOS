@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""GrandmaOS launcher: fullscreen, undecorated, huge square icon+label buttons.
+Runs as grandma via her (root-owned, un-removable) autostart entry, under a
+respawn supervisor (grandma-launcher-supervisor) so an accidental close just
+brings it right back. No root needed -- it only launches brave-browser
+windows and calls the existing unprivileged grandma-volume/grandma-unmute
+scripts, all in grandma's own session.
+"""
+import os
+import subprocess
+import gi
+
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk, Gdk, GdkPixbuf  # noqa: E402
+
+ICON_DIR = "/usr/local/share/grandmaos/icons"
+ICON_PX = 220
+BUTTON_PX = 420
+
+CSS = b"""
+window { background-color: #000000; }
+button {
+    font-size: 26px;
+    font-weight: bold;
+    border-radius: 18px;
+}
+button:disabled {
+    color: #888888;
+}
+label.section {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-top: 10px;
+}
+"""
+
+# App-mode windows share grandma's normal Brave profile/cookies -- launching
+# facebook.com here and youtube.com there are still the same logged-in
+# session, just scoped to one site per window (no tabs/address bar to get
+# lost in).
+SITES = [
+    ("Facebook", "https://www.facebook.com/", "facebook.png"),
+    ("YouTube", "https://www.youtube.com/", "youtube.png"),
+]
+
+
+def launch_app(url: str):
+    subprocess.Popen(
+        ["brave-browser", f"--app={url}"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+
+
+def launch_browser():
+    subprocess.Popen(
+        ["brave-browser"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+
+
+def make_image(icon_file: str = None, icon_name: str = None, px: int = ICON_PX) -> Gtk.Image:
+    if icon_file:
+        path = os.path.join(ICON_DIR, icon_file)
+        if os.path.isfile(path):
+            try:
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, px, px, True)
+                return Gtk.Image.new_from_pixbuf(pixbuf)
+            except Exception:
+                pass
+    img = Gtk.Image.new_from_icon_name(icon_name or "image-missing", Gtk.IconSize.DIALOG)
+    img.set_pixel_size(px)
+    return img
+
+
+def make_square_button(label_text: str, icon_file: str = None, icon_name: str = None) -> Gtk.Button:
+    btn = Gtk.Button()
+    btn.set_size_request(BUTTON_PX, BUTTON_PX)
+    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+    box.set_halign(Gtk.Align.CENTER)
+    box.set_valign(Gtk.Align.CENTER)
+    box.pack_start(make_image(icon_file, icon_name), False, False, 0)
+    label = Gtk.Label(label=label_text)
+    box.pack_start(label, False, False, 0)
+    btn.add(box)
+    return btn
+
+
+class Launcher(Gtk.Window):
+    def __init__(self):
+        super().__init__(title="GrandmaOS")
+        self.set_decorated(False)
+        self.fullscreen()
+        self.connect("destroy", Gtk.main_quit)
+
+        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        outer.set_margin_top(30)
+        outer.set_margin_bottom(30)
+        outer.set_margin_start(30)
+        outer.set_margin_end(30)
+        self.add(outer)
+
+        apps_label = Gtk.Label(label="Apps")
+        apps_label.get_style_context().add_class("section")
+        outer.pack_start(apps_label, False, False, 0)
+
+        apps_grid = Gtk.FlowBox()
+        apps_grid.set_selection_mode(Gtk.SelectionMode.NONE)
+        apps_grid.set_max_children_per_line(2)
+        apps_grid.set_min_children_per_line(2)
+        apps_grid.set_row_spacing(24)
+        apps_grid.set_column_spacing(24)
+        apps_grid.set_halign(Gtk.Align.CENTER)
+        outer.pack_start(apps_grid, True, True, 0)
+
+        for name, url, icon_file in SITES:
+            btn = make_square_button(name, icon_file=icon_file)
+            btn.connect("clicked", lambda _b, u=url: launch_app(u))
+            apps_grid.add(btn)
+
+        internet_btn = make_square_button("Internet", icon_name="web-browser")
+        internet_btn.connect("clicked", lambda _b: launch_browser())
+        apps_grid.add(internet_btn)
+
+        bank_btn = make_square_button("Banking", icon_name="emblem-money")
+        bank_btn.set_sensitive(False)
+        bank_btn.set_tooltip_text("Not set up yet -- ask for help setting this up.")
+        apps_grid.add(bank_btn)
+
+
+def main():
+    provider = Gtk.CssProvider()
+    provider.load_from_data(CSS)
+    Gtk.StyleContext.add_provider_for_screen(
+        Gdk.Screen.get_default(),
+        provider,
+        Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+    )
+    win = Launcher()
+    win.show_all()
+    Gtk.main()
+
+
+if __name__ == "__main__":
+    main()
