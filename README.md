@@ -19,6 +19,12 @@ through GrandmaOS provisioning, hardware verification, and the interactive
 OpenClaw setup. OpenClaw cannot perform this initial handoff before OpenClaw
 itself has been installed; Codex can.
 
+Codex command approvals are separate from Linux `sudo`. To avoid approving each
+command, deliberately start the local Codex task with its session/full-access
+permission option, then give it the prompt above. The repository does not add a
+passwordless unrestricted sudo rule; the provisioner already performs its
+system changes through one auditable `sudo ./provision.sh` invocation.
+
 1. Do normal Mint setup first: create the admin account, connect to Wi-Fi,
    let it boot to a working desktop.
 2. Copy this whole `provisioning/` directory onto the new machine (USB

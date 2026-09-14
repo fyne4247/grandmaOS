@@ -16,6 +16,25 @@ GrandmaOS, then guide the owner through the credential-dependent OpenClaw
 setup. Work incrementally and report which checks are confirmed, failed, or
 still unverified.
 
+## Codex command approvals
+
+Codex's command-approval prompts are controlled by the Codex host/application,
+not by this repository or Linux sudo. Do not attempt to weaken or bypass that
+boundary with a persistent `NOPASSWD: ALL` sudoers entry.
+
+If the owner has deliberately started this local repository task with Codex's
+full-access or session-approval mode, honor that mode and complete all safe
+steps without repeatedly asking for conversational confirmation. Batch related
+read-only checks into one shell invocation and run provisioning as the single
+existing `sudo ./provision.sh` command. Stop only for the administrator sudo
+password, secrets, interactive account authorization or pairing, an unexpected
+destructive choice, or a genuine failure requiring owner judgment.
+
+An `AGENTS.md` file cannot change the Codex task's approval mode after the task
+starts. If the current task is approval-gated, tell the owner to select the
+application's session or full-access option and begin a new local task in this
+repository; do not create an OS-level backdoor as a workaround.
+
 ## Safety boundaries
 
 - Do not partition disks, erase another operating system, alter UEFI settings,
