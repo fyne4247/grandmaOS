@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # REQUIRES ROOT: reads into another user's home directory
-# (/home/grandma/.config/BraveSoftware/...) and writes to a root-owned
+# (/home/grandma/.config/google-chrome/...) and writes to a root-owned
 # backup location grandma cannot access. Intended to be invoked by a
 # systemd timer / cron job / admin maintenance tool, not typed interactively
 # by grandma herself.
 #
-# WHY THIS CAN'T JUST BE "cp -r ~grandma/.config/BraveSoftware/.../Default backup/":
-# Brave may be running (and writing) at the moment this fires. Its state
+# WHY THIS CAN'T JUST BE "cp -r ~grandma/.config/google-chrome/Default backup/":
+# Chrome may be running (and writing) at the moment this fires. Its state
 # lives partly in SQLite databases (History, Cookies, "Login Data", "Web
-# Data", Favicons, "Top Sites", ...) which Brave/Chromium keeps open, some
+# Data", Favicons, "Top Sites", ...) which Chrome/Chromium keeps open, some
 # in WAL mode, and writes to continuously. A plain `cp`/`rsync` of a SQLite
 # file while a writer has it open can copy the main file out of sync with
 # its -wal/-journal sibling, or catch the main file mid-page-write --
@@ -39,8 +39,8 @@ if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
 Usage: grandma-browser-backup
 
 Makes one new timestamped backup generation of the grandma user's active
-Brave profile under $BACKUP_ROOT (root-owned, mode 0700).
-Safe to run whether or not Brave is currently running -- real SQLite
+Chrome profile under $BACKUP_ROOT (root-owned, mode 0700).
+Safe to run whether or not Chrome is currently running -- real SQLite
 databases (detected by magic bytes) are copied with 'sqlite3 .backup', not a
 raw file copy. Keeps the last $KEEP_N generations and prunes older ones.
 Requires root.
@@ -63,23 +63,23 @@ PROFILE_DIR="$(find_grandma_profile_dir)" || {
     NO_SUCH_USER:*)
       gbb_die "the '$GRANDMA_USER' system account does not exist yet -- nothing to back up." ;;
     LOCAL_STATE_MISSING:*)
-      gbb_die "Brave 'Local State' not found at ${PROFILE_DIR#*:} -- Brave has probably never been run yet for $GRANDMA_USER. Nothing to back up." ;;
+      gbb_die "Chrome 'Local State' not found at ${PROFILE_DIR#*:} -- Chrome has probably never been run yet for $GRANDMA_USER. Nothing to back up." ;;
     PROFILE_DIR_MISSING:*)
       gbb_die "Local State points at ${PROFILE_DIR#*:} but that directory does not exist." ;;
     *)
-      gbb_die "could not locate the grandma Brave profile ($PROFILE_DIR)." ;;
+      gbb_die "could not locate the grandma Chrome profile ($PROFILE_DIR)." ;;
   esac
 }
 
 gbb_log info "starting backup: profile=$PROFILE_DIR"
 
-# Purely informational -- we do NOT refuse to run if Brave is up, and we do
+# Purely informational -- we do NOT refuse to run if Chrome is up, and we do
 # NOT try to stop it. That's the entire point of using sqlite3 .backup.
-if grandma_brave_pids >/dev/null 2>&1; then
-  BRAVE_RUNNING="yes"
-  gbb_log info "Brave is currently running for $GRANDMA_USER; proceeding anyway (SQLite-safe backup method)"
+if grandma_chrome_pids >/dev/null 2>&1; then
+  CHROME_RUNNING="yes"
+  gbb_log info "Chrome is currently running for $GRANDMA_USER; proceeding anyway (SQLite-safe backup method)"
 else
-  BRAVE_RUNNING="no"
+  CHROME_RUNNING="no"
 fi
 
 mkdir -p "$BACKUP_ROOT"
@@ -114,7 +114,7 @@ while IFS= read -r -d '' f; do
   rel="${f#"$PROFILE_DIR"/}"
   base="$(basename "$f")"
 
-  # Skip Brave/Chromium's own live-session lock artifacts -- not data.
+  # Skip Chrome/Chromium's own live-session lock artifacts -- not data.
   case "$base" in
     SingletonLock|SingletonCookie|SingletonSocket|LOCK|lockfile) continue ;;
   esac
@@ -135,7 +135,7 @@ while IFS= read -r -d '' f; do
     if sqlite3 "$f" ".backup '$dest'" 2>>"$LOG_FILE"; then
       sqlite_ok=$((sqlite_ok + 1))
     else
-      gbb_log warning "sqlite3 .backup failed for $rel, falling back to plain copy (result may be inconsistent if Brave was mid-write)"
+      gbb_log warning "sqlite3 .backup failed for $rel, falling back to plain copy (result may be inconsistent if Chrome was mid-write)"
       cp -a "$f" "$dest" 2>>"$LOG_FILE" || gbb_log warning "fallback copy also failed for $rel"
       sqlite_fallback=$((sqlite_fallback + 1))
     fi
@@ -166,7 +166,7 @@ cat >"$TMPDEST/manifest.json" <<JSON
   "generation": "$GEN",
   "source_profile": "$PROFILE_DIR",
   "hostname": "$(hostname)",
-  "brave_running_at_backup_time": "$BRAVE_RUNNING",
+  "chrome_running_at_backup_time": "$CHROME_RUNNING",
   "sqlite_backup_count": $sqlite_ok,
   "sqlite_fallback_copy_count": $sqlite_fallback,
   "plain_copy_count": $plain_copy,
@@ -203,6 +203,6 @@ date -u +%Y-%m-%dT%H:%M:%SZ >"$STATUS_FILE"
 chown root:root "$STATUS_FILE"
 chmod 0644 "$STATUS_FILE"
 
-gbb_log info "backup OK: generation=$GEN size=$size_human files=$total_files ($method_summary) kept=$kept pruned=$pruned brave_running=$BRAVE_RUNNING"
+gbb_log info "backup OK: generation=$GEN size=$size_human files=$total_files ($method_summary) kept=$kept pruned=$pruned chrome_running=$CHROME_RUNNING"
 echo "Backup complete: $DEST ($size_human, $total_files files, $method_summary)"
 echo "Kept $kept generations, pruned $pruned."

@@ -2,7 +2,7 @@
 """GrandmaOS launcher: fullscreen, undecorated, huge square icon+label buttons.
 Runs as grandma via her (root-owned, un-removable) autostart entry, under a
 respawn supervisor (grandma-launcher-supervisor) so an accidental close just
-brings it right back. No root needed -- it only launches brave-browser
+brings it right back. No root needed -- it only launches Google Chrome
 windows and calls the existing unprivileged grandma-volume/grandma-unmute
 scripts, all in grandma's own session.
 """
@@ -14,8 +14,8 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GdkPixbuf  # noqa: E402
 
 ICON_DIR = "/usr/local/share/grandmaos/icons"
-ICON_PX = 220
-BUTTON_PX = 420
+ICON_PX = 160
+BUTTON_PX = 300
 
 CSS = b"""
 window { background-color: #000000; }
@@ -35,7 +35,7 @@ label.section {
 }
 """
 
-# App-mode windows share grandma's normal Brave profile/cookies -- launching
+# App-mode windows share grandma's normal Chrome profile/cookies -- launching
 # facebook.com here and youtube.com there are still the same logged-in
 # session, just scoped to one site per window (no tabs/address bar to get
 # lost in).
@@ -47,7 +47,7 @@ SITES = [
 
 def launch_app(url: str):
     subprocess.Popen(
-        ["brave-browser", f"--app={url}"],
+        ["google-chrome-stable", f"--app={url}"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         start_new_session=True,
@@ -56,7 +56,7 @@ def launch_app(url: str):
 
 def launch_browser():
     subprocess.Popen(
-        ["brave-browser"],
+        ["google-chrome-stable"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         start_new_session=True,
@@ -77,13 +77,14 @@ def make_image(icon_file: str = None, icon_name: str = None, px: int = ICON_PX) 
     return img
 
 
-def make_square_button(label_text: str, icon_file: str = None, icon_name: str = None) -> Gtk.Button:
+def make_square_button(label_text: str, icon_file: str = None, icon_name: str = None,
+                       button_px: int = BUTTON_PX, icon_px: int = ICON_PX) -> Gtk.Button:
     btn = Gtk.Button()
-    btn.set_size_request(BUTTON_PX, BUTTON_PX)
+    btn.set_size_request(button_px, button_px)
     box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
     box.set_halign(Gtk.Align.CENTER)
     box.set_valign(Gtk.Align.CENTER)
-    box.pack_start(make_image(icon_file, icon_name), False, False, 0)
+    box.pack_start(make_image(icon_file, icon_name, icon_px), False, False, 0)
     label = Gtk.Label(label=label_text)
     box.pack_start(label, False, False, 0)
     btn.add(box)
@@ -96,6 +97,15 @@ class Launcher(Gtk.Window):
         self.set_decorated(False)
         self.fullscreen()
         self.connect("destroy", Gtk.main_quit)
+
+        # Size controls from the logical desktop dimensions, not a presumed
+        # panel resolution. This remains usable at 1x or 2x scaling and on an
+        # external monitor while keeping generous touch targets.
+        screen = Gdk.Screen.get_default()
+        logical_w = screen.get_width()
+        logical_h = screen.get_height()
+        button_px = max(180, min(340, (logical_h - 150) // 2, (logical_w - 90) // 2))
+        icon_px = max(96, min(180, button_px // 2))
 
         outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         outer.set_margin_top(30)
@@ -118,15 +128,15 @@ class Launcher(Gtk.Window):
         outer.pack_start(apps_grid, True, True, 0)
 
         for name, url, icon_file in SITES:
-            btn = make_square_button(name, icon_file=icon_file)
+            btn = make_square_button(name, icon_file=icon_file, button_px=button_px, icon_px=icon_px)
             btn.connect("clicked", lambda _b, u=url: launch_app(u))
             apps_grid.add(btn)
 
-        internet_btn = make_square_button("Internet", icon_name="web-browser")
+        internet_btn = make_square_button("Internet", icon_name="web-browser", button_px=button_px, icon_px=icon_px)
         internet_btn.connect("clicked", lambda _b: launch_browser())
         apps_grid.add(internet_btn)
 
-        bank_btn = make_square_button("Banking", icon_name="emblem-money")
+        bank_btn = make_square_button("Banking", icon_name="emblem-money", button_px=button_px, icon_px=icon_px)
         bank_btn.set_sensitive(False)
         bank_btn.set_tooltip_text("Not set up yet -- ask for help setting this up.")
         apps_grid.add(bank_btn)

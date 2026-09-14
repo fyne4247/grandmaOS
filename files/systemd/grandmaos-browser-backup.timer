@@ -1,5 +1,5 @@
 [Unit]
-Description=Periodic grandma Brave profile backups
+Description=Periodic grandma Chrome profile backups
 
 [Timer]
 OnBootSec=5min

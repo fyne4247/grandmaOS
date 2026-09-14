@@ -24,7 +24,7 @@ Usage: grandma-status [--json]
 
 Master human-readable (or --json) status overview for GrandmaOS. Calls the
 individual grandma-* diagnostic scripts and summarizes: internet, Wi-Fi,
-Brave browser, Facebook reachability, audio, touchpad presence, disk free
+Chrome browser, Facebook reachability, audio, touchpad presence, disk free
 space, last browser backup age, OpenClaw process presence, pending updates,
 last unattended-upgrade result, recent system errors, and grandma's last
 login. Never exits non-zero due to a degraded subsystem, only on usage error.
@@ -102,13 +102,17 @@ if [ -n "$audio_json" ]; then
   fi
 fi
 
-# --- touchpad (no touchscreen exists on this machine; report honestly) ---
+# --- input devices (works without a live X session) ---
 # Checked via /proc, not xinput -- xinput needs a live X connection, which
 # this script won't have when invoked as root/no-session (e.g. via pkexec or
 # a future OpenClaw call), and would silently under-report otherwise.
 touchpad_status="not present"
 if [ -f /proc/bus/input/devices ] && grep -qi "touchpad" /proc/bus/input/devices 2>/dev/null; then
   touchpad_status="detected"
+fi
+touchscreen_status="not present"
+if [ -f /proc/bus/input/devices ] && grep -Eqi "touchscreen|touch screen" /proc/bus/input/devices 2>/dev/null; then
+  touchscreen_status="detected"
 fi
 
 # --- disk free ---
@@ -193,6 +197,7 @@ if [ "$JSON" -eq 1 ]; then
   printf '"muted":"%s",' "$muted"
   printf '"volume_percent":"%s",' "$volume"
   printf '"touchpad":"%s",' "$touchpad_status"
+  printf '"touchscreen":"%s",' "$touchscreen_status"
   printf '"disk_free":"%s",' "$disk_free"
   printf '"disk_low":"%s",' "$disk_low"
   printf '"browser_backup":"%s",' "$backup_age"
@@ -207,13 +212,14 @@ else
   echo ""
   printf '%-18s%s\n' "Internet:" "$internet"
   printf '%-18s%s\n' "Wi-Fi:" "$wifi"
-  printf '%-18s%s\n' "Browser (Brave):" "$browser"
+  printf '%-18s%s\n' "Browser (Chrome):" "$browser"
   printf '%-18s%s\n' "Facebook:" "$facebook"
   printf '%-18s%s\n' "Audio:" "$audio"
   printf '%-18s%s\n' "Output:" "$output_label"
   printf '%-18s%s\n' "Muted:" "$muted"
   printf '%-18s%s\n' "Volume:" "${volume}%"
   printf '%-18s%s\n' "Touchpad:" "$touchpad_status"
+  printf '%-18s%s\n' "Touchscreen:" "$touchscreen_status"
   printf '%-18s%s%s\n' "Disk free:" "$disk_free" "$([ "$disk_low" = "yes" ] && echo "  ** LOW **")"
   printf '%-18s%s\n' "Browser backup:" "$backup_age"
   printf '%-18s%s\n' "OpenClaw:" "$openclaw"

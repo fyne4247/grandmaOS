@@ -16,7 +16,7 @@ for arg in "$@"; do
       cat <<EOF
 Usage: grandma-browser-backups [--json]
 
-Lists Brave profile backup generations under $BACKUP_ROOT,
+Lists Chrome profile backup generations under $BACKUP_ROOT,
 newest first, with index (usable as the argument to
 grandma-browser-restore), timestamp, size, and how each was made
 (SQLite-safe .backup vs. plain copy counts, from that generation's

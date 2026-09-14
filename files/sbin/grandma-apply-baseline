@@ -29,7 +29,11 @@ xset_prop xfce4-power-manager /xfce4-power-manager/lock-screen-suspend-hibernate
 # by root -- grandma's own account has no write access to that directory.)
 
 echo "[grandma-apply-baseline] accessibility baseline..."
+# 192 DPI gives an effective 2x desktop scale on the Dell's small high-DPI
+# panel. Keep window scaling at 1 so GTK does not apply a second 2x factor.
 xset_prop xsettings /Xft/DPI int 192
+xset_prop xsettings /Gdk/WindowScalingFactor int 1
+xset_prop xsettings /Gdk/UnscaledDPI int 196608
 xset_prop xsettings /Gtk/FontName string "Ubuntu 13"
 xset_prop xsettings /Gtk/CursorThemeName string "Adwaita"
 xset_prop xsettings /Gtk/CursorThemeSize int 48
@@ -39,5 +43,9 @@ xset_prop xfwm4 /general/title_font string "Ubuntu Bold 13"
 xset_prop xfwm4 /general/theme string "Default"
 xset_prop xfce4-desktop /desktop-icons/icon-size int 64
 xset_prop xfce4-desktop /desktop-icons/tooltip-size int 96
+# Touch-friendly XFCE panel defaults. These apply to the normal first panel;
+# the fullscreen launcher remains the primary UI.
+xset_prop xfce4-panel /panels/panel-1/size uint 56
+xset_prop xfce4-panel /panels/panel-1/icon-size uint 40
 
 echo "[grandma-apply-baseline] done."

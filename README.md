@@ -2,7 +2,13 @@
 
 Reproduces the GrandmaOS build (see `/etc/grandmaos/CHANGELOG.md` and
 `HANDOFF.md` on the original machine) on a fresh Linux Mint 22.3 (XFCE, X11)
-laptop.
+laptop. The primary target is now the 2026 Dell XPS 13 touchscreen configuration
+documented in [`hardware/dell-xps-13-2026/`](hardware/dell-xps-13-2026/README.md).
+The checked-in bundle was built for a Samsung 750GX-era installation; an even
+earlier prototype ran on a ThinkPad 100e Chromebook. Neither machine is a
+supported configuration source for the Dell: do not copy the Chromebook's
+firmware/audio workarounds or infer Dell support from hardware that happened to
+work normally on the Samsung.
 
 ## Use on a new machine
 
@@ -20,7 +26,7 @@ laptop.
 
 The script is idempotent -- re-running it on an already-provisioned machine
 only touches what's missing or different; it won't recreate the grandma
-account, re-add the Brave repo, etc. if they're already there.
+account, re-add the Chrome repo, etc. if they're already there.
 
 ## What it automates
 
@@ -28,18 +34,23 @@ account, re-add the Brave repo, etc. if they're already there.
   can reach her session non-interactively (needed for the next item)
 - LightDM autologin as `grandma`
 - All `grandma-*` maintenance/diagnostic scripts to `/usr/local/sbin`
-- XFCE accessibility baseline (large text/cursor, high-contrast theme) and
+- XFCE accessibility baseline (high-DPI text, large cursor/panel/icons,
+  high-contrast theme) and
   full lock-screen elimination (3 mechanisms: LockCommand, power-manager
   suspend-lock, light-locker/xscreensaver autostart disabled) for grandma
   only -- never touches the admin's own session/theme
 - The big-button launcher (Facebook / YouTube / Internet / Banking
   placeholder), auto-relaunching if closed
-- Brave browser + an enterprise policy (extensions blocked, password
-  manager forced ON since she doesn't reliably remember passwords,
-  notifications off, no guest/second-profile, Shields locked on for the
-  launcher's known sites)
+- Google Chrome + a root-owned enterprise policy: extensions, notifications,
+  browser sign-in/sync, guest mode, and extra profiles are blocked; the
+  password manager remains ON since she doesn't reliably remember passwords.
+  Pages default to 125% zoom while pinch zoom remains available.
+  Gemini and Chrome's other generative-AI surfaces, built-in AI APIs, webpage
+  content sharing, and local AI-model download are explicitly disabled.
+  DuckDuckGo replaces Google on startup, new tabs, Home, and address-bar search
+  so Google-hosted AI promotions are not the default browsing surface.
 - Automatic updates via `unattended-upgrades`, covering both the Mint/Ubuntu
-  archives and Brave's own repo, with a scheduled 4:30am reboot so patches
+  archives and Chrome's own repo, with a scheduled 4:30am reboot so patches
   actually take effect
 - Self-healing systemd timers: the accessibility/lock-screen baseline
   reasserts every 15 minutes (catches mid-session drift, not just login),
@@ -50,7 +61,7 @@ account, re-add the Brave repo, etc. if they're already there.
 
 ## What it deliberately does NOT automate
 
-- **OpenClaw** (remote control via Telegram). This needs a bot token from
+- **OpenClaw itself** (remote control via Telegram). This needs a bot token from
   @BotFather and pairing your own Telegram account -- inherently
   interactive and tied to your personal credentials, not something to bake
   into a script. On the new machine: install per openclaw.ai's own
@@ -60,16 +71,21 @@ account, re-add the Brave repo, etc. if they're already there.
   install` refused to run because `~/.config/systemd/user` was
   group-writable -- fix with `chmod go-w` on exactly that directory if you
   hit the same thing; don't sudo/recursive-chmod around it.)
+  After the gateway is installed and healthy, run
+  `grandma-install-openclaw-watchdog` as that same non-root admin user, then
+  run the printed one-time `sudo loginctl enable-linger <admin-user>` command.
 - **The Banking launcher button.** Ships disabled/greyed out. Once you have
   the real bank login URL, edit the `bank_btn` line in
   `/usr/local/sbin/grandma-launcher` (see the other `SITES` entries for the
   pattern) and re-run `grandma-launcher-supervisor` or just wait for
   grandma's next login.
-- **Audio.** On the original hardware (Intel Raptor Lake-U + ALC256, PipeWire
-  stack) everything worked out of the box, so there was nothing to
-  provision. On new hardware, run `grandma-audio-status` after first boot
-  and only chase it if something's actually wrong -- don't assume the same
-  fix path applies to different audio hardware.
+- **Hardware-specific fixes.** No Chromebook audio, firmware, kernel, display,
+  input, or power workaround is installed. On the Dell, run
+  `grandma-hardware-report` and `grandma-audio-status` after first boot and
+  only add a fix for a demonstrated problem.
+- **Automatic screen rotation and on-screen-keyboard presentation.** Support
+  depends on the real sensors and touch workflow. The required first-boot tests
+  are listed in the Dell target profile rather than guessed here.
 - **The admin's own account/sudo/SSH access.** Assumed to already exist.
 - **Package removal of any kind, ever, unattended.** `Remove-Unused-
   Dependencies` is deliberately never enabled in the unattended-upgrades
@@ -83,14 +99,65 @@ account, re-add the Brave repo, etc. if they're already there.
 - `provision.sh` -- the orchestrator, one function per phase.
 - `files/sbin/` -- all `grandma-*` scripts, installed verbatim to
   `/usr/local/sbin`.
+- `hardware/dell-xps-13-2026/` -- known target facts, validation procedure,
+  and hardware-dependent TODOs.
+- `MIGRATION-DELL-XPS-13-2026.md` -- repository assessment and migration record.
 - `files/autostart/` -- root-owned XDG autostart entries (baseline
   reassertion, the launcher, and Hidden=true overrides that disable
   light-locker/xscreensaver for grandma only).
 - `files/systemd/` -- the two timer/service pairs (baseline reassertion,
   browser backup).
-- `files/brave-policy.json` -- installed to
-  `/etc/brave/policies/managed/policy.json`.
+- `files/systemd-user/` -- optional OpenClaw watchdog user-unit templates.
+- `files/chrome-policy.json` -- installed to
+  `/etc/opt/chrome/policies/managed/grandmaos.json`. Verify the active and
+  recognized policy set at `chrome://policy` after Chrome's first launch.
+
+## Chrome AI exclusion
+
+The managed policy prevents Chrome from downloading its on-device generative-AI
+model and disables the currently policy-controlled Gemini/AI features and their
+browser UI. It cannot remove dormant code compiled into Chrome, or control AI
+content on arbitrary websites Grandma deliberately visits. Google may add new
+features and policy names later, so `chrome://policy` and Chrome's current
+enterprise policy documentation are part of the first-boot and update audit.
+Chrome's umbrella `GenAiDefaultSettings` is Admin-console-only, so this local
+Linux installation explicitly sets each applicable AI policy instead.
+
+The installer does not uninstall an existing Brave installation or delete its
+profile, in keeping with GrandmaOS's no-unattended-removal rule. On the new Dell,
+Chrome is the only browser GrandmaOS installs and launches.
 
 Icons for the launcher (Facebook/Messenger/YouTube favicons) are fetched
 fresh from Google's public favicon proxy at provision time rather than
 bundled, to keep this directory small and avoid shipping stale logos.
+
+## OpenClaw watchdog
+
+The optional watchdog runs every five minutes in the OpenClaw owner's user
+systemd manager. It is local/offline in scope: it checks the loopback gateway,
+not Telegram or general internet availability. This prevents a router or
+provider outage from triggering destructive-looking repair activity.
+
+After two failed local probes ten seconds apart, it runs
+`openclaw doctor --fix --non-interactive`, performs one graceful
+`openclaw gateway restart`, and makes three bounded recovery probes. Concurrent
+runs are locked out, systemd does not restart failed watchdog executions, and a
+failed recovery waits for the next five-minute timer rather than spinning.
+OpenClaw is never run as root.
+
+```sh
+# Run as the non-root admin/OpenClaw owner after `openclaw gateway install`:
+grandma-install-openclaw-watchdog
+
+# One-time persistence while that user is logged out:
+sudo loginctl enable-linger ADMIN_USERNAME
+
+# Inspect timer, last run, and logs:
+systemctl --user status grandmaos-openclaw-watchdog.timer
+cat ~/.local/state/grandmaos/openclaw-watchdog-last-result
+journalctl --user -u grandmaos-openclaw-watchdog.service
+```
+
+The watcher is deliberately installed only after OpenClaw setup because the
+gateway's owning admin account and executable path cannot safely be guessed by
+the root provisioning pass.

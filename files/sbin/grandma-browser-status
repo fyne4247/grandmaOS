@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reads process table for grandma's Brave. Basic pgrep-by-name across users
+# Reads process table for grandma's Chrome. Basic pgrep-by-name across users
 # needs no special privilege, but /proc/<pid>/status for a process owned by
 # another user may return partial/EACCES fields without root — see NOTES.md.
 set -uo pipefail
@@ -12,11 +12,8 @@ for arg in "$@"; do
       cat <<'EOF'
 Usage: grandma-browser-status [--json]
 
-Reports whether a Brave process is running for the 'grandma' user, how many
-PIDs, and whether any appear stuck (zombie/D-state). Tries each of Brave's
-known process-table names (the real binary is /opt/brave.com/brave/brave,
-which shows up as "brave" -- comm names are truncated -- not "brave-browser",
-which is just the /usr/bin wrapper script).
+Reports whether a Google Chrome process is running for the 'grandma' user,
+how many PIDs, and whether any appear stuck (zombie/D-state).
 EOF
       exit 0
       ;;
@@ -25,7 +22,7 @@ done
 
 TARGET_USER="grandma"
 
-candidates="brave brave-browser brave-browser-stable"
+candidates="chrome google-chrome google-chrome-stable"
 binary_name=""
 pids=""
 for c in $candidates; do
@@ -36,7 +33,7 @@ for c in $candidates; do
     break
   fi
 done
-[ -z "$binary_name" ] && binary_name="brave"
+[ -z "$binary_name" ] && binary_name="chrome"
 
 count=0
 [ -n "$pids" ] && count=$(echo "$pids" | wc -l)
@@ -62,7 +59,7 @@ if [ "$JSON" -eq 1 ]; then
   printf '"stuck":"%s"' "$stuck"
   printf '}\n'
 else
-  echo "Brave binary:     $binary_name"
+  echo "Chrome binary:    $binary_name"
   echo "Running:          $running"
   echo "PID count:        $count"
   echo "Stuck (Z/D state): $stuck"

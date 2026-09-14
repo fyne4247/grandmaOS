@@ -2,8 +2,8 @@
 # Shared configuration + helper functions for grandma-browser-backup,
 # grandma-browser-backups and grandma-browser-restore.
 #
-# ADAPTED FOR BRAVE (Chromium-family), not Firefox -- see NOTES.md for why
-# the browser choice changed. The original Firefox-oriented draft's design
+# Uses Google Chrome (Chromium-family), not Firefox. The original
+# Firefox-oriented draft's design
 # (SQLite-safe .backup, atomic mv, root-owned 0700 store, strict generation
 # validation) is preserved; only profile-location and SQLite-detection logic
 # changed, since Chromium's on-disk layout differs from Firefox's in two
@@ -27,7 +27,7 @@ GRANDMA_USER="${GRANDMA_USER:-grandma}"
 
 # Root-owned, mode 0700, outside grandma's home. grandma has no sudo and no
 # write access here at all -- see NOTES.md "Backup location & permissions".
-BACKUP_ROOT="${BACKUP_ROOT:-/var/backups/grandmaos/brave}"
+BACKUP_ROOT="${BACKUP_ROOT:-/var/backups/grandmaos/chrome}"
 
 # Small piece of shared GrandmaOS state: just a timestamp file that other
 # grandma-* tools (grandma-status) already expect at this exact path:
@@ -56,7 +56,7 @@ PRERESTORE_KEEP_N="${PRERESTORE_KEEP_N:-3}"
 GEN_NAME_RE='^[0-9]{8}-[0-9]{6}$'
 PRERESTORE_NAME_RE='^pre-restore-[0-9]{8}-[0-9]{6}$'
 
-# Directories inside a Chromium/Brave profile that are pure, regenerable
+# Directories inside a Chromium/Chrome profile that are pure, regenerable
 # cache data -- never logins, cookies, bookmarks or history. Excluding them
 # keeps backups small and fast.
 PROFILE_EXCLUDE_DIRS=(Cache "Code Cache" GPUCache "Service Worker"
@@ -97,15 +97,14 @@ require_root() {
 }
 
 # ---------------------------------------------------------------------------
-# locate the grandma user's active Brave profile
+# locate the grandma user's active Chrome profile
 # ---------------------------------------------------------------------------
-# Chromium/Brave's "Local State" JSON (one level above the profile
+# Chromium/Chrome's "Local State" JSON (one level above the profile
 # directories) records which profile directory name is the currently active
 # one under profile.last_used, e.g. "Default" or "Profile 1". We parse that
 # rather than assuming "Default", though on this single-user appliance it
 # will always be "Default" in practice (profile creation is locked out via
-# Brave policy -- see firefox-policy sibling directory's BrowserAddPerson
-# equivalent for Brave in the policy draft).
+# Chrome policy prevents creation of additional profiles.
 #
 # Prints the resolved absolute profile directory path on stdout and returns
 # 0 on success. On failure, prints a machine-readable "REASON:detail" token
@@ -120,7 +119,7 @@ find_grandma_profile_dir() {
 
   home=$(getent passwd "$GRANDMA_USER" | cut -d: -f6)
   [ -z "$home" ] && home="/home/$GRANDMA_USER"
-  userdatadir="$home/.config/BraveSoftware/Brave-Browser"
+  userdatadir="$home/.config/google-chrome"
   localstate="$userdatadir/Local State"
 
   if [ ! -f "$localstate" ]; then
@@ -224,12 +223,9 @@ manifest_field() {
     | sed -E 's/.*:[[:space:]]*"([^"]*)"/\1/'
 }
 
-# Is a Brave process currently running for the grandma user? The installed
-# package provides /usr/bin/brave-browser (a wrapper) which execs the real
-# binary; checked candidate names cover both the wrapper and the real
-# binary name across Brave package versions.
-grandma_brave_pids() {
-  local candidates="brave brave-browser brave-browser-stable"
+# Is a Chrome process currently running for the grandma user?
+grandma_chrome_pids() {
+  local candidates="chrome google-chrome google-chrome-stable"
   local c found
   for c in $candidates; do
     found=$(pgrep -u "$GRANDMA_USER" -x "$c" 2>/dev/null || true)

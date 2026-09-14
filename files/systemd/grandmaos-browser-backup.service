@@ -1,5 +1,5 @@
 [Unit]
-Description=Backup grandma's Brave browser profile (SQLite-safe)
+Description=Backup grandma's Chrome browser profile (SQLite-safe)
 ConditionUser=root
 
 [Service]

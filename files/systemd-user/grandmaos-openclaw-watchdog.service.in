@@ -1,0 +1,12 @@
+[Unit]
+Description=Check and recover the local OpenClaw gateway
+Documentation=https://docs.openclaw.ai/gateway/restart-recovery
+
+[Service]
+Type=oneshot
+ExecStart=@WATCHDOG_BIN@ @OPENCLAW_BIN@
+TimeoutStartSec=10min
+
+# The watchdog handles its own bounded retry sequence. Do not create a second
+# systemd restart loop around it.
+Restart=no

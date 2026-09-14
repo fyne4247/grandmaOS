@@ -3,15 +3,15 @@
 set -euo pipefail
 
 TARGET_USER="grandma"
-candidates="brave brave-browser brave-browser-stable"
+candidates="chrome google-chrome google-chrome-stable"
 
 if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
   cat <<'EOF'
 Usage: grandma-browser-restart
 
-Cleanly stops Brave for the grandma user (SIGTERM, wait, SIGKILL if still
+Cleanly stops Chrome for the grandma user (SIGTERM, wait, SIGKILL if still
 alive) so any stuck window/tab goes away. Requires root, since it signals
-another user's processes. Does NOT relaunch Brave itself -- grandma clicks
+another user's processes. Does NOT relaunch Chrome itself -- grandma clicks
 her launcher buttons again to reopen whatever she needs.
 EOF
   exit 0
@@ -34,7 +34,7 @@ for c in $candidates; do
 done
 
 if [ -z "$pids" ]; then
-  echo "No Brave process found for user $TARGET_USER; nothing to do."
+  echo "No Chrome process found for user $TARGET_USER; nothing to do."
   exit 0
 fi
 
@@ -53,4 +53,4 @@ if [ -n "$still" ]; then
   kill -KILL $still 2>/dev/null || true
 fi
 
-echo "Brave stopped for $TARGET_USER. She'll need to tap a launcher button again to reopen anything."
+echo "Chrome stopped for $TARGET_USER. She'll need to tap a launcher button again to reopen anything."

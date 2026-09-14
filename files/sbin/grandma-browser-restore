@@ -8,10 +8,10 @@
 # A restore overwrites live logins/cookies/bookmarks/history; the operator
 # must consciously pick which snapshot they mean.
 #
-# It also refuses to run while Brave has the target profile open, to
+# It also refuses to run while Chrome has the target profile open, to
 # avoid restoring files out from under a live session (which is a great way
 # to *cause* the exact kind of corruption this whole backup system exists
-# to prevent). Close Brave first, or pass --force-kill -- see the
+# to prevent). Close Chrome first, or pass --force-kill -- see the
 # tradeoff note further down and in NOTES.md.
 set -euo pipefail
 
@@ -31,13 +31,13 @@ Usage: grandma-browser-restore <generation> [--force-kill] [--yes]
 There is no "restore latest" default -- you must say which one.
 
 Options:
-  --force-kill  If Brave is running for grandma, stop it (SIGTERM, wait,
+  --force-kill  If Chrome is running for grandma, stop it (SIGTERM, wait,
                 SIGKILL if needed) instead of refusing. See NOTES.md for
                 why this is opt-in, not the default: it can discard
                 whatever grandma was in the middle of, with no warning to
                 her, because she isn't necessarily present to confirm it's
                 okay. Default behavior is to refuse and tell the operator
-                to close Brave first.
+                to close Chrome first.
   --yes         Skip the interactive "type yes to continue" confirmation
                 (for use from another trusted script/maintenance tool).
 
@@ -103,31 +103,31 @@ SRC_PROFILE="$SRC_DIR/profile"
 PROFILE_DIR="$(find_grandma_profile_dir)" || {
   case "$PROFILE_DIR" in
     NO_SUCH_USER:*) gbb_die "the '$GRANDMA_USER' system account does not exist yet." ;;
-    LOCAL_STATE_MISSING:*) gbb_die "Brave 'Local State' not found at ${PROFILE_DIR#*:} -- has Brave ever been run for $GRANDMA_USER? If this is a first-time disaster recovery onto a fresh account, the profile directory itself may need to be created by running Brave once for grandma first." ;;
+    LOCAL_STATE_MISSING:*) gbb_die "Chrome 'Local State' not found at ${PROFILE_DIR#*:} -- has Chrome ever been run for $GRANDMA_USER? If this is a first-time disaster recovery onto a fresh account, the profile directory itself may need to be created by running Chrome once for grandma first." ;;
     PROFILE_DIR_MISSING:*) gbb_die "Local State points at ${PROFILE_DIR#*:} but that directory does not exist." ;;
-    *) gbb_die "could not locate the grandma Brave profile ($PROFILE_DIR)." ;;
+    *) gbb_die "could not locate the grandma Chrome profile ($PROFILE_DIR)." ;;
   esac
 }
 
 echo "About to restore backup generation: $RESOLVED"
 echo "  from: $SRC_PROFILE"
-echo "  into: $PROFILE_DIR   (live grandma Brave profile)"
+echo "  into: $PROFILE_DIR   (live grandma Chrome profile)"
 if [ -f "$SRC_DIR/manifest.json" ]; then
   echo "  made with: $(manifest_field "$SRC_DIR/manifest.json" method_summary)"
   echo "  size: $(manifest_field "$SRC_DIR/manifest.json" total_size_human)"
 fi
 echo
 
-# --- refuse to run while Brave has this profile open ---
+# --- refuse to run while Chrome has this profile open ---
 pids=""
-if pids="$(grandma_brave_pids)"; then
+if pids="$(grandma_chrome_pids)"; then
   if [ "$FORCE_KILL" -eq 1 ]; then
-    echo "Brave is running for $GRANDMA_USER (pid(s): $pids). --force-kill given, stopping it."
-    gbb_log warning "restore: force-killing Brave for $GRANDMA_USER (pids: $pids) before restoring generation $RESOLVED"
+    echo "Chrome is running for $GRANDMA_USER (pid(s): $pids). --force-kill given, stopping it."
+    gbb_log warning "restore: force-killing Chrome for $GRANDMA_USER (pids: $pids) before restoring generation $RESOLVED"
     kill -TERM $pids 2>/dev/null || true
     for _ in $(seq 1 10); do
       sleep 1
-      pids="$(grandma_brave_pids || true)"
+      pids="$(grandma_chrome_pids || true)"
       [ -z "$pids" ] && break
     done
     if [ -n "$pids" ]; then
@@ -135,16 +135,16 @@ if pids="$(grandma_brave_pids)"; then
       kill -KILL $pids 2>/dev/null || true
       sleep 1
     fi
-    if grandma_brave_pids >/dev/null 2>&1; then
-      gbb_die "Brave for $GRANDMA_USER would not stop; refusing to restore onto a live profile"
+    if grandma_chrome_pids >/dev/null 2>&1; then
+      gbb_die "Chrome for $GRANDMA_USER would not stop; refusing to restore onto a live profile"
     fi
   else
-    gbb_die "Brave is currently running for $GRANDMA_USER (pid(s): $pids). Restoring onto a live profile risks corrupting it -- close Brave first (as grandma, or via grandma-browser-restart), then re-run. Or pass --force-kill to have this script stop it automatically (see 'grandma-browser-restore --help' for the tradeoff)."
+    gbb_die "Chrome is currently running for $GRANDMA_USER (pid(s): $pids). Restoring onto a live profile risks corrupting it -- close Chrome first (as grandma, or via grandma-browser-restart), then re-run. Or pass --force-kill to have this script stop it automatically (see 'grandma-browser-restore --help' for the tradeoff)."
   fi
 fi
 
 # Secondary check, belt-and-suspenders beyond the process check above:
-# Chromium/Brave marks a live user-data-dir with a "SingletonLock" symlink
+# Chromium/Chrome marks a live user-data-dir with a "SingletonLock" symlink
 # one level above the profile dir (i.e. next to "Default", not inside it),
 # whose target encodes "<hostname>-<pid>". If that pid is still alive, don't
 # proceed even if our process-name list above missed the binary somehow.
@@ -156,13 +156,13 @@ if [ -L "$LOCK_FILE" ]; then
   target="$(readlink "$LOCK_FILE" 2>/dev/null || true)"
   lock_pid="${target##*-}"
   if [[ "$lock_pid" =~ ^[0-9]+$ ]] && kill -0 "$lock_pid" 2>/dev/null; then
-    gbb_die "$LOCK_FILE points at live pid $lock_pid -- refusing to restore onto what looks like a live profile. Close Brave for $GRANDMA_USER and try again."
+    gbb_die "$LOCK_FILE points at live pid $lock_pid -- refusing to restore onto what looks like a live profile. Close Chrome for $GRANDMA_USER and try again."
   fi
 fi
 
 if [ "$ASSUME_YES" -ne 1 ]; then
   if [ -t 0 ]; then
-    read -r -p "Type 'yes' to overwrite the live grandma Brave profile with generation $RESOLVED: " confirm
+    read -r -p "Type 'yes' to overwrite the live grandma Chrome profile with generation $RESOLVED: " confirm
     if [ "$confirm" != "yes" ]; then
       echo "Aborted, nothing changed."
       exit 1
@@ -173,7 +173,7 @@ if [ "$ASSUME_YES" -ne 1 ]; then
 fi
 
 # --- pre-restore safety snapshot of the CURRENT live profile ---
-# Brave is confirmed stopped at this point, so a plain preserving copy is
+# Chrome is confirmed stopped at this point, so a plain preserving copy is
 # fine here (no concurrent-writer risk left to guard against).
 PRE_TS="$(date +%Y%m%d-%H%M%S)"
 PRE_NAME="pre-restore-$PRE_TS"
@@ -215,7 +215,7 @@ gbb_log info "restore: copying $SRC_PROFILE -> $PROFILE_DIR (generation $RESOLVE
   fi
 done
 
-# Brave (running as grandma) needs to own and write these files again.
+# Chrome (running as grandma) needs to own and write these files again.
 chown -R "$GRANDMA_USER:$GRANDMA_USER" "$PROFILE_DIR"
 find "$PROFILE_DIR" -type d -exec chmod 700 {} +
 find "$PROFILE_DIR" -type f -exec chmod 600 {} +
@@ -223,6 +223,6 @@ find "$PROFILE_DIR" -type f -exec chmod 600 {} +
 gbb_log info "restore OK: generation=$RESOLVED restored into $PROFILE_DIR, pre-restore snapshot=$PRE_NAME"
 echo
 echo "Restore complete: generation $RESOLVED restored into $PROFILE_DIR"
-echo "If you needed to close/kill Brave for this, start it again for grandma and verify"
+echo "If you needed to close/kill Chrome for this, start it again for grandma and verify"
 echo "logins, bookmarks and history look right."
 echo "(Undo available: pre-restore snapshot '$PRE_NAME' holds what was live just before this ran.)"

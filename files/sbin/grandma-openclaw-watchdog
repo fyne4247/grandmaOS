@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# Local OpenClaw gateway watchdog. Runs as the admin/OpenClaw owner, never root.
+# It intentionally checks only the local gateway: an internet or Telegram outage
+# is not a reason to rewrite configuration or restart a healthy local service.
+set -uo pipefail
+
+OPENCLAW_BIN="${1:-${OPENCLAW_BIN:-}}"
+PROBE_TIMEOUT="${GRANDMAOS_OPENCLAW_PROBE_TIMEOUT:-25}"
+REPAIR_TIMEOUT="${GRANDMAOS_OPENCLAW_REPAIR_TIMEOUT:-180}"
+RESTART_TIMEOUT="${GRANDMAOS_OPENCLAW_RESTART_TIMEOUT:-330}"
+CONFIRM_DELAY="${GRANDMAOS_OPENCLAW_CONFIRM_DELAY:-10}"
+RECOVERY_DELAY="${GRANDMAOS_OPENCLAW_RECOVERY_DELAY:-10}"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/grandmaos"
+RESULT_FILE="$STATE_DIR/openclaw-watchdog-last-result"
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/grandmaos-openclaw-watchdog.lock"
+
+log() { echo "[grandma-openclaw-watchdog] $*"; }
+record() {
+  mkdir -p "$STATE_DIR"
+  printf '%s %s\n' "$(date --iso-8601=seconds 2>/dev/null || date)" "$*" >"$RESULT_FILE"
+}
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  cat <<'EOF'
+Usage: grandma-openclaw-watchdog [OPENCLAW-BINARY]
+
+Checks the local OpenClaw gateway. After two failed probes it runs:
+  openclaw doctor --fix --non-interactive
+  openclaw gateway restart
+and performs bounded recovery probes. Intended for the supplied systemd timer.
+EOF
+  exit 0
+fi
+
+if [ "$(id -u)" -eq 0 ]; then
+  log "refusing to run as root; run as the user who owns the OpenClaw configuration"
+  exit 2
+fi
+
+if [ -z "$OPENCLAW_BIN" ]; then
+  OPENCLAW_BIN=$(command -v openclaw 2>/dev/null || true)
+fi
+if [ -z "$OPENCLAW_BIN" ] || [ ! -x "$OPENCLAW_BIN" ]; then
+  log "OpenClaw executable not found: ${OPENCLAW_BIN:-not on PATH}"
+  record "ERROR openclaw executable not found"
+  exit 1
+fi
+
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$LOCK_FILE"
+  if ! flock -n 9; then
+    log "another watchdog run is active; exiting"
+    exit 0
+  fi
+fi
+
+probe() {
+  timeout "$PROBE_TIMEOUT" "$OPENCLAW_BIN" gateway status --deep >/dev/null 2>&1
+}
+
+if probe; then
+  log "local gateway healthy"
+  record "OK local gateway healthy"
+  exit 0
+fi
+
+log "first local gateway probe failed; confirming before repair"
+sleep "$CONFIRM_DELAY"
+if probe; then
+  log "local gateway recovered without intervention"
+  record "OK recovered before repair"
+  exit 0
+fi
+
+log "two local probes failed; running doctor repair"
+doctor_rc=0
+timeout "$REPAIR_TIMEOUT" "$OPENCLAW_BIN" doctor --fix --non-interactive || doctor_rc=$?
+if [ "$doctor_rc" -ne 0 ]; then
+  log "doctor repair exited $doctor_rc; attempting one gateway restart anyway"
+else
+  log "doctor repair completed; restarting gateway to activate repaired state"
+fi
+
+restart_rc=0
+timeout "$RESTART_TIMEOUT" "$OPENCLAW_BIN" gateway restart || restart_rc=$?
+if [ "$restart_rc" -ne 0 ]; then
+  log "gateway restart exited $restart_rc"
+fi
+
+for attempt in 1 2 3; do
+  sleep "$RECOVERY_DELAY"
+  if probe; then
+    log "gateway healthy after recovery (verification attempt $attempt)"
+    record "RECOVERED doctor_rc=$doctor_rc restart_rc=$restart_rc attempt=$attempt"
+    exit 0
+  fi
+done
+
+log "gateway remains unhealthy after bounded recovery; administrator attention required"
+record "FAILED doctor_rc=$doctor_rc restart_rc=$restart_rc"
+exit 1

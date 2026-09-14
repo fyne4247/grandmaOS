@@ -2,7 +2,7 @@
 # Read-only network diagnostic; never crashes on "no wifi"/"no internet".
 set -uo pipefail
 
-WIFI_IF="wlo1"
+WIFI_IF="${GRANDMAOS_WIFI_IF:-}"
 JSON=0
 for arg in "$@"; do
   case "$arg" in
@@ -11,7 +11,7 @@ for arg in "$@"; do
       cat <<EOF
 Usage: grandma-network-status [--json]
 
-Reports Wi-Fi ($WIFI_IF) link state, connected SSID, default route presence,
+Reports the detected Wi-Fi link state, connected SSID, default route presence,
 DNS resolution, and a lightweight connectivity check. Degraded/absent states
 are reported, not treated as errors; exit code stays 0 unless usage is wrong.
 EOF
@@ -19,6 +19,22 @@ EOF
       ;;
   esac
 done
+
+# Interface names depend on firmware and the Wi-Fi chipset. Prefer the active
+# NetworkManager Wi-Fi device, then any managed Wi-Fi device. An administrator
+# can override detection with GRANDMAOS_WIFI_IF for diagnostics.
+if [ -z "$WIFI_IF" ] && command -v nmcli >/dev/null 2>&1; then
+  WIFI_IF=$(nmcli -t -f DEVICE,TYPE,STATE device status 2>/dev/null \
+    | awk -F: '$2=="wifi" && $3=="connected" {print $1; exit}')
+  [ -n "$WIFI_IF" ] || WIFI_IF=$(nmcli -t -f DEVICE,TYPE device status 2>/dev/null \
+    | awk -F: '$2=="wifi" {print $1; exit}')
+fi
+if [ -z "$WIFI_IF" ]; then
+  WIFI_IF=$(find /sys/class/net -mindepth 1 -maxdepth 1 -type l 2>/dev/null \
+    | while read -r dev; do [ -d "$dev/wireless" ] && basename "$dev"; done \
+    | head -1)
+fi
+[ -n "$WIFI_IF" ] || WIFI_IF="not-detected"
 
 link_state="unknown"
 if ip link show "$WIFI_IF" >/dev/null 2>&1; then

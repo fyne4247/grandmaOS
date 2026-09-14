@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Root-side bridge into grandma's user session. The UID is discovered instead
+# of assuming it will be 1001 on every Mint installation.
+set -euo pipefail
+
+GRANDMA_USER="${GRANDMA_USER:-grandma}"
+uid=$(id -u "$GRANDMA_USER")
+runtime_dir="/run/user/$uid"
+
+if [ ! -d "$runtime_dir" ]; then
+  echo "grandma-apply-baseline-system: $runtime_dir is not available yet; login autostart will apply the baseline" >&2
+  exit 0
+fi
+
+exec /usr/sbin/runuser -u "$GRANDMA_USER" -- /usr/bin/env \
+  XDG_RUNTIME_DIR="$runtime_dir" \
+  DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime_dir/bus" \
+  /usr/local/sbin/grandma-apply-baseline

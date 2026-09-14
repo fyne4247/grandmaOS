@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodically check the local OpenClaw gateway
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=5min
+RandomizedDelaySec=30s
+Persistent=false
+Unit=grandmaos-openclaw-watchdog.service
+
+[Install]
+WantedBy=timers.target

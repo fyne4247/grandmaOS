@@ -99,6 +99,13 @@ phase_install_scripts() {
   done
   note "installed $(ls "$FILES"/sbin | wc -l) scripts to /usr/local/sbin"
 
+  local user_unit_share=/usr/local/share/grandmaos/systemd-user
+  run install -d -m 0755 -o root -g root "$user_unit_share"
+  for f in "$FILES"/systemd-user/*; do
+    run install -m 0644 -o root -g root "$f" "$user_unit_share/$(basename "$f")"
+  done
+  note "installed optional OpenClaw user-watchdog unit templates"
+
   local icon_dir=/usr/local/share/grandmaos/icons
   run install -d -m 0755 -o root -g root "$icon_dir"
   if [ "$DRY_RUN" -eq 1 ]; then
@@ -145,24 +152,34 @@ phase_accessibility() {
 }
 
 # ---------------------------------------------------------------------------
-phase_brave() {
-  log "Phase: Brave browser + policy"
-  if ! command -v brave-browser >/dev/null 2>&1; then
-    run curl -fsSL https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
-      -o /usr/share/keyrings/brave-browser-archive-keyring.gpg
-    if [ "$DRY_RUN" -eq 0 ]; then
-      echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" \
-        > /etc/apt/sources.list.d/brave-browser-release.list
+phase_chrome() {
+  log "Phase: Google Chrome + locked-down, AI-disabled policy"
+  local arch
+  arch=$(dpkg --print-architecture)
+  if [ "$arch" != "amd64" ]; then
+    echo "error: the Dell Chrome target requires amd64; detected $arch" >&2
+    exit 1
+  fi
+  if ! command -v google-chrome-stable >/dev/null 2>&1; then
+    run apt-get install -y curl gnupg
+    if [ "$DRY_RUN" -eq 1 ]; then
+      note "[dry-run] would install Google's signing key and Chrome apt repository"
+    else
+      curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
+        | gpg --dearmor --yes -o /usr/share/keyrings/google-chrome.gpg
+      echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" \
+        > /etc/apt/sources.list.d/google-chrome.list
     fi
     run apt-get update
-    run apt-get install -y brave-browser
+    run apt-get install -y google-chrome-stable
   else
-    note "brave-browser already installed, skipping"
+    note "google-chrome-stable already installed, skipping"
   fi
 
-  run install -d -m 0755 -o root -g root /etc/brave/policies/managed
-  run install -m 0644 -o root -g root "$FILES/brave-policy.json" /etc/brave/policies/managed/policy.json
-  note "Brave policy installed (extensions blocked, notifications off, password manager forced ON, guest/add-person off, Shields locked on for facebook/messenger/youtube)"
+  run install -d -m 0755 -o root -g root /etc/opt/chrome/policies/managed
+  run install -m 0644 -o root -g root "$FILES/chrome-policy.json" /etc/opt/chrome/policies/managed/grandmaos.json
+  note "Chrome policy installed (AI/model downloads disabled, AI surfaces hidden, extensions/notifications/sign-in/sync blocked, DuckDuckGo default, password manager ON)"
+  note "Verify every policy after first launch at chrome://policy; unsupported future/retired keys are reported there rather than silently assumed."
   note "REMINDER: launcher's Banking button is a disabled placeholder until you edit /usr/local/sbin/grandma-launcher with a real bank URL."
 }
 
@@ -177,11 +194,11 @@ phase_updates() {
 
   local conf=/etc/apt/apt.conf.d/50unattended-upgrades
   if [ "$DRY_RUN" -eq 1 ]; then
-    note "[dry-run] would extend Allowed-Origins with \${distro_id}:\${distro_codename}-updates and Brave Software:stable, and set Automatic-Reboot true/WithUsers true/Time 04:30"
+    note "[dry-run] would extend Allowed-Origins with \${distro_id}:\${distro_codename}-updates and Google LLC:stable, and set Automatic-Reboot true/WithUsers true/Time 04:30"
   else
     cp "$conf" "${conf}.bak.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
-    if ! grep -q 'Brave Software:stable' "$conf"; then
-      sed -i '/"\${distro_id}ESM:\${distro_codename}-infra-security";/a\\t"${distro_id}:${distro_codename}-updates";\n\t"Brave Software:stable";' "$conf"
+    if ! grep -q 'Google LLC:stable' "$conf"; then
+      sed -i '/"\${distro_id}ESM:\${distro_codename}-infra-security";/a\\t"${distro_id}:${distro_codename}-updates";\n\t"Google LLC:stable";' "$conf"
     fi
     if ! grep -q 'GrandmaOS additions' "$conf"; then
       cat >> "$conf" <<'EOF'
@@ -267,7 +284,7 @@ phase_grandma_account
 phase_autologin
 phase_install_scripts
 phase_accessibility
-phase_brave
+phase_chrome
 phase_updates
 phase_timers
 phase_dns
