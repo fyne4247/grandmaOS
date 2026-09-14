@@ -12,6 +12,13 @@ work normally on the Samsung.
 
 ## Use on a new machine
 
+If Codex or another coding agent will perform the installation, open this
+repository on the new machine and ask it to follow [`AGENTS.md`](AGENTS.md).
+That file provides the complete guarded handoff from a working Mint desktop
+through GrandmaOS provisioning, hardware verification, and the interactive
+OpenClaw setup. OpenClaw cannot perform this initial handoff before OpenClaw
+itself has been installed; Codex can.
+
 1. Do normal Mint setup first: create the admin account, connect to Wi-Fi,
    let it boot to a working desktop.
 2. Copy this whole `provisioning/` directory onto the new machine (USB
@@ -66,7 +73,7 @@ account, re-add the Chrome repo, etc. if they're already there.
   interactive and tied to your personal credentials, not something to bake
   into a script. On the new machine: install per openclaw.ai's own
   installer, `openclaw channels add --channel telegram --token <token>`,
-  pair yourself, then `openclaw daemon install` + `loginctl enable-linger
+  pair yourself, then `openclaw gateway install` + `loginctl enable-linger
   <admin-user>` for persistence. (On the original machine, `openclaw daemon
   install` refused to run because `~/.config/systemd/user` was
   group-writable -- fix with `chmod go-w` on exactly that directory if you
@@ -97,6 +104,8 @@ account, re-add the Chrome repo, etc. if they're already there.
 ## Files
 
 - `provision.sh` -- the orchestrator, one function per phase.
+- `AGENTS.md` -- guarded end-to-end instructions for Codex or another coding
+  agent setting up the freshly installed Dell.
 - `files/sbin/` -- all `grandma-*` scripts, installed verbatim to
   `/usr/local/sbin`.
 - `hardware/dell-xps-13-2026/` -- known target facts, validation procedure,
