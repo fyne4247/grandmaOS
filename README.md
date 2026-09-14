@@ -25,6 +25,21 @@ permission option, then give it the prompt above. The repository does not add a
 passwordless unrestricted sudo rule; the provisioner already performs its
 system changes through one auditable `sudo ./provision.sh` invocation.
 
+For the lowest-interaction complete bootstrap, run this yourself from the
+repository root:
+
+```sh
+sudo ./bootstrap-grandmaos
+```
+
+That one command previews and applies GrandmaOS, saves a read-only hardware
+report, installs OpenClaw with its official rootless local-prefix installer,
+runs interactive onboarding as the administrator, installs the user gateway,
+enables lingering, and enables the GrandmaOS watchdog. It pauses for real
+credentials and pairing but does not require an agent to issue a long sequence
+of separately approved root commands. Use `--skip-openclaw` to provision only
+GrandmaOS or `--wifi-connection="NAME"` to select a specific connection.
+
 1. Do normal Mint setup first: create the admin account, connect to Wi-Fi,
    let it boot to a working desktop.
 2. Copy this whole `provisioning/` directory onto the new machine (USB
@@ -110,6 +125,8 @@ account, re-add the Chrome repo, etc. if they're already there.
 ## Files
 
 - `provision.sh` -- the orchestrator, one function per phase.
+- `bootstrap-grandmaos` -- one-command GrandmaOS plus interactive OpenClaw
+  bootstrap, designed to require only one initial sudo invocation.
 - `AGENTS.md` -- guarded end-to-end instructions for Codex or another coding
   agent setting up the freshly installed Dell.
 - `files/sbin/` -- all `grandma-*` scripts, installed verbatim to

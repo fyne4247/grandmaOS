@@ -80,6 +80,12 @@ repository; do not create an OS-level backdoor as a workaround.
 
    Review warnings and resolve actual failures before running the real pass.
 
+   If the owner requested the single-command bootstrap, use
+   `sudo ./bootstrap-grandmaos` instead of issuing the remaining provisioning
+   and OpenClaw commands separately. The bootstrap performs its own dry run,
+   keeps OpenClaw under the non-root administrator, and pauses for interactive
+   credentials and pairing.
+
 4. Run the provisioner:
 
    ```sh

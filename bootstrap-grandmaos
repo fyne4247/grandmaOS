@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+# One-command bootstrap for a freshly installed Linux Mint XFCE system.
+#
+# Run from this repository as:
+#   sudo ./bootstrap-grandmaos [--wifi-connection="NAME"] [--skip-openclaw]
+#
+# Root is used for GrandmaOS system provisioning. OpenClaw is always installed,
+# configured, and run as the non-root administrator who invoked sudo.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WIFI_ARG=""
+SKIP_OPENCLAW=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --wifi-connection=*) WIFI_ARG="$arg" ;;
+    --skip-openclaw) SKIP_OPENCLAW=1 ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: sudo ./bootstrap-grandmaos [OPTIONS]
+
+Options:
+  --wifi-connection="NAME"  Select the NetworkManager connection GrandmaOS uses.
+  --skip-openclaw            Provision GrandmaOS without installing OpenClaw.
+  --help                     Show this help.
+
+This script performs the deterministic installation in one sudo invocation.
+OpenClaw onboarding remains interactive so credentials and pairing are entered
+directly by the owner rather than stored in this repository or shell history.
+EOF
+      exit 0
+      ;;
+    *) echo "error: unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
+
+if [ "$EUID" -ne 0 ]; then
+  echo "error: run this once with sudo: sudo ./bootstrap-grandmaos" >&2
+  exit 1
+fi
+
+ADMIN_USER="${SUDO_USER:-}"
+if [ -z "$ADMIN_USER" ] || [ "$ADMIN_USER" = root ]; then
+  echo "error: cannot identify the non-root administrator from SUDO_USER" >&2
+  echo "       sign in as the administrator and run: sudo ./bootstrap-grandmaos" >&2
+  exit 1
+fi
+if ! id "$ADMIN_USER" >/dev/null 2>&1; then
+  echo "error: sudo invoker '$ADMIN_USER' is not a local account" >&2
+  exit 1
+fi
+
+ADMIN_HOME="$(getent passwd "$ADMIN_USER" | cut -d: -f6)"
+if [ -z "$ADMIN_HOME" ] || [ ! -d "$ADMIN_HOME" ]; then
+  echo "error: cannot determine a valid home directory for '$ADMIN_USER'" >&2
+  exit 1
+fi
+
+if [ ! -r /etc/os-release ]; then
+  echo "error: /etc/os-release is unavailable" >&2
+  exit 1
+fi
+. /etc/os-release
+if [ "${ID:-}" != linuxmint ]; then
+  echo "error: expected Linux Mint; detected ${PRETTY_NAME:-unknown operating system}" >&2
+  exit 1
+fi
+if [ "$(uname -m)" != x86_64 ]; then
+  echo "error: expected the Dell's x86-64 architecture; detected $(uname -m)" >&2
+  exit 1
+fi
+if [ ! -x "$SCRIPT_DIR/provision.sh" ]; then
+  echo "error: provision.sh is missing or not executable in $SCRIPT_DIR" >&2
+  exit 1
+fi
+
+log() { printf '\n==> %s\n' "$*"; }
+
+run_as_admin() {
+  local command="$1"
+  runuser -u "$ADMIN_USER" -- env \
+    HOME="$ADMIN_HOME" \
+    USER="$ADMIN_USER" \
+    LOGNAME="$ADMIN_USER" \
+    PATH="$ADMIN_HOME/.openclaw/bin:$ADMIN_HOME/.local/bin:/usr/local/bin:/usr/bin:/bin" \
+    XDG_RUNTIME_DIR="/run/user/$(id -u "$ADMIN_USER")" \
+    bash -o pipefail -c "$command"
+}
+
+find_openclaw() {
+  local candidate
+  for candidate in \
+    "$ADMIN_HOME/.openclaw/bin/openclaw" \
+    "$ADMIN_HOME/.local/bin/openclaw" \
+    /usr/local/bin/openclaw \
+    /usr/bin/openclaw; do
+    if [ -x "$candidate" ]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+log "Preflight"
+printf 'Operating system: %s\n' "${PRETTY_NAME:-unknown}"
+printf 'Architecture:     %s\n' "$(uname -m)"
+printf 'Kernel:           %s\n' "$(uname -r)"
+printf 'Administrator:    %s\n' "$ADMIN_USER"
+
+log "GrandmaOS dry run"
+if [ -n "$WIFI_ARG" ]; then
+  "$SCRIPT_DIR/provision.sh" --dry-run "$WIFI_ARG"
+else
+  "$SCRIPT_DIR/provision.sh" --dry-run
+fi
+
+log "GrandmaOS provisioning"
+if [ -n "$WIFI_ARG" ]; then
+  "$SCRIPT_DIR/provision.sh" "$WIFI_ARG"
+else
+  "$SCRIPT_DIR/provision.sh"
+fi
+
+log "Read-only hardware report"
+REPORT_DIR="$ADMIN_HOME/grandmaos-reports"
+install -d -m 0750 -o "$ADMIN_USER" -g "$(id -gn "$ADMIN_USER")" "$REPORT_DIR"
+REPORT_PATH="$REPORT_DIR/hardware-$(date +%Y%m%d-%H%M%S).txt"
+/usr/local/sbin/grandma-hardware-report >"$REPORT_PATH" 2>&1 || true
+chown "$ADMIN_USER:$(id -gn "$ADMIN_USER")" "$REPORT_PATH"
+chmod 0640 "$REPORT_PATH"
+printf 'Hardware report: %s\n' "$REPORT_PATH"
+
+if [ "$SKIP_OPENCLAW" -eq 1 ]; then
+  log "OpenClaw skipped by request"
+  printf 'GrandmaOS provisioning is complete. Reboot after reviewing the summary below.\n'
+  exit 0
+fi
+
+log "OpenClaw rootless CLI installation"
+OPENCLAW_BIN="$(find_openclaw || true)"
+if [ -z "$OPENCLAW_BIN" ]; then
+  # The official local-prefix installer keeps OpenClaw and Node in the admin's
+  # home and does not require another sudo session.
+  run_as_admin "curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash"
+  OPENCLAW_BIN="$(find_openclaw || true)"
+fi
+if [ -z "$OPENCLAW_BIN" ]; then
+  echo "error: official OpenClaw installer completed but the CLI was not found" >&2
+  exit 1
+fi
+printf 'OpenClaw CLI: %s\n' "$OPENCLAW_BIN"
+run_as_admin "'$OPENCLAW_BIN' --version"
+
+loginctl enable-linger "$ADMIN_USER"
+
+log "Interactive OpenClaw onboarding"
+echo "The following wizard may request provider credentials and channel pairing."
+echo "Enter secrets only into the wizard; do not put them in this repository."
+run_as_admin "'$OPENCLAW_BIN' onboard --install-daemon"
+
+log "OpenClaw persistence and GrandmaOS watchdog"
+run_as_admin "'$OPENCLAW_BIN' gateway status --deep"
+run_as_admin "/usr/local/sbin/grandma-install-openclaw-watchdog"
+run_as_admin "systemctl --user status grandmaos-openclaw-watchdog.timer --no-pager"
+
+log "Bootstrap complete"
+cat <<EOF
+GrandmaOS is provisioned and OpenClaw's local gateway and watchdog were checked.
+Hardware report: $REPORT_PATH
+
+Before handing over the laptop:
+  1. Reboot.
+  2. Test the built-in keyboard, trackpad, touchscreen, Wi-Fi, audio, suspend,
+     lid behavior, display scaling, Chrome policy, and GrandmaOS autologin.
+  3. Send a real message through the configured OpenClaw remote channel.
+
+Gateway health and remote-channel health are separate checks. The bootstrap
+does not claim remote administration is complete until that message succeeds.
+EOF
