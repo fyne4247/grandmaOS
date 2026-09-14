@@ -67,6 +67,11 @@ account, re-add the Chrome repo, etc. if they're already there.
   full lock-screen elimination (3 mechanisms: LockCommand, power-manager
   suspend-lock, light-locker/xscreensaver autostart disabled) for grandma
   only -- never touches the admin's own session/theme
+- Grandma's standard non-volume media/function-row hotkeys are swallowed to
+  prevent accidental brightness, radio, display, touchpad, microphone-mute,
+  sleep, and launcher actions. Volume down, volume up, and speaker mute remain
+  enabled, and ordinary F1-F12 behavior is unchanged. Firmware-handled keys
+  still require a physical first-boot test on the Dell.
 - The big-button launcher (Facebook / YouTube / Internet / Banking
   placeholder), auto-relaunching if closed
 - Google Chrome + a root-owned enterprise policy: extensions, notifications,

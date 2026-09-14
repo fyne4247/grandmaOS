@@ -46,6 +46,10 @@ report is also run once from a terminal in Grandma's logged-in session without
   is convertible.
 - Test speakers, microphone, headphone switching, Wi-Fi, Bluetooth, lid close,
   suspend, resume, wake, brightness controls, and battery reporting.
+- Test every physical function-row key in Grandma's session. Volume down,
+  volume up, and speaker mute should work; other media actions should be
+  swallowed. Record any key handled directly by firmware or reported under an
+  unexpected name instead of guessing a Dell-specific mapping.
 - Review LightDM greeter sizing on the native panel. Autologin is the normal
   path, so greeter changes should be based on the actual fallback screen.
 - Open `chrome://policy`, reload policies, and confirm the AI exclusions in

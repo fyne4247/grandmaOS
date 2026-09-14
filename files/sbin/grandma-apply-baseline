@@ -48,4 +48,25 @@ xset_prop xfce4-desktop /desktop-icons/tooltip-size int 96
 xset_prop xfce4-panel /panels/panel-1/size uint 56
 xset_prop xfce4-panel /panels/panel-1/icon-size uint 40
 
+echo "[grandma-apply-baseline] function-row safety..."
+# Keep the three playback-volume keys under XFCE's normal control, but swallow
+# other standard media/function-row events in grandma's session. This does not
+# disable ordinary F1-F12 input (for example, F5 can still refresh a page).
+# Exact legends and firmware behavior vary, so the physical Dell row must be
+# tested after first boot; firmware-handled keys may never reach XFCE.
+xset_prop xfce4-power-manager /xfce4-power-manager/handle-brightness-keys bool false
+for hotkey in \
+  XF86MonBrightnessDown XF86MonBrightnessUp \
+  XF86KbdBrightnessDown XF86KbdBrightnessUp XF86KbdLightOnOff \
+  XF86TouchpadToggle XF86TouchpadOn XF86TouchpadOff \
+  XF86WLAN XF86RFKill XF86Bluetooth \
+  XF86Display XF86RotationLockToggle \
+  XF86ScreenSaver XF86Camera XF86AudioMicMute \
+  XF86AudioPlay XF86AudioPause XF86AudioStop XF86AudioPrev XF86AudioNext \
+  XF86AudioRecord XF86Eject \
+  XF86Search XF86Calculator XF86Mail XF86HomePage XF86Favorites XF86Tools \
+  XF86Launch1 XF86Launch2 XF86Sleep XF86Suspend; do
+  xset_prop xfce4-keyboard-shortcuts "/commands/custom/$hotkey" string /bin/true
+done
+
 echo "[grandma-apply-baseline] done."
