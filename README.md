@@ -48,8 +48,9 @@ GrandmaOS or `--wifi-connection="NAME"` to select a specific connection.
    - Add `--dry-run` first to preview every change with no side effects.
    - Add `--wifi-connection="Your SSID"` if you want DNS blocking applied to
      a connection other than whichever one is currently active.
-4. Reboot. Grandma's account should autologin straight into the launcher,
-   locked down, no lock screen, no admin authority.
+4. Reboot. Grandma's account should autologin with the permanent sidebar
+   visible and Facebook already open in Chrome, with no lock screen or admin
+   authority.
 5. Do the manual steps below.
 
 The script is idempotent -- re-running it on an already-provisioned machine
@@ -72,14 +73,13 @@ account, re-add the Chrome repo, etc. if they're already there.
   sleep, and launcher actions. Volume down, volume up, and speaker mute remain
   enabled, and ordinary F1-F12 behavior is unchanged. Firmware-handled keys
   still require a physical first-boot test on the Dell.
-- The big-button launcher (Facebook / YouTube / Internet / Truist Banking),
-  with a fixed 2x2 grid of large square controls; every button opens a new tab
-  in the shared maximized Chrome window, the Windows/Super key returns to the
-  Apps screen, and the launcher auto-relaunches if closed
-- A locked, 120-pixel bottom panel containing only the window switcher, with
-  88-pixel icons, readable labels, one button per window, and hover outlines;
-  it stays hidden until the pointer reaches the bottom edge. XFWM's Alt-Tab
-  switcher also previews the selected window.
+- A permanent left sidebar that replaces both the fullscreen Apps screen and
+  XFCE's window switcher. Its large Facebook / YouTube / Internet / Truist
+  Banking / AOL buttons open or raise stable Chrome windows, and its Volume Up
+  and Volume Down buttons change sound in ten-percent steps. The sidebar
+  measures the active logical display at login, never uses more than one tenth
+  of its width, reserves that space so Chrome cannot cover it, and relaunches
+  automatically if closed. Facebook opens automatically once per boot.
 - Mint Update Manager hidden for Grandma's account while remaining available
   to the administrator
 - Google Chrome + a root-owned enterprise policy: extensions, notifications,

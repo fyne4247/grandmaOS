@@ -122,9 +122,9 @@ phase_install_scripts() {
   local icon_dir=/usr/local/share/grandmaos/icons
   run install -d -m 0755 -o root -g root "$icon_dir"
   if [ "$DRY_RUN" -eq 1 ]; then
-    note "[dry-run] would fetch facebook/messenger/youtube/truist favicons into $icon_dir"
+    note "[dry-run] would fetch facebook/messenger/youtube/truist/aol favicons into $icon_dir"
   else
-    for pair in "facebook.com:facebook" "messenger.com:messenger" "youtube.com:youtube" "truist.com:truist"; do
+    for pair in "facebook.com:facebook" "messenger.com:messenger" "youtube.com:youtube" "truist.com:truist" "aol.com:aol"; do
       local domain="${pair%%:*}" name="${pair##*:}"
       if [ ! -s "$icon_dir/$name.png" ]; then
         curl -fsSL "https://www.google.com/s2/favicons?domain=${domain}&sz=128" -o "$icon_dir/$name.png" \
@@ -173,8 +173,11 @@ phase_chrome() {
     echo "error: the Dell Chrome target requires amd64; detected $arch" >&2
     exit 1
   fi
+  # The permanent sidebar uses wmctrl to raise existing site windows and
+  # xprop to reserve desktop space. Install them even when Chrome is already
+  # present on an incrementally provisioned machine.
+  run apt-get install -y curl gnupg wmctrl x11-utils
   if ! command -v google-chrome-stable >/dev/null 2>&1; then
-  run apt-get install -y curl gnupg wmctrl
     if [ "$DRY_RUN" -eq 1 ]; then
       note "[dry-run] would install Google's signing key and Chrome apt repository"
     else

@@ -53,8 +53,8 @@ run_in_session() {
 run_in_session /usr/local/sbin/grandma-apply-baseline
 
 if pgrep -u "$GRANDMA_USER" -x xfce4-panel >/dev/null 2>&1; then
-  run_in_session /usr/bin/xfce4-panel --restart || \
-    echo "grandma-apply-baseline-system: warning: live panel restart failed" >&2
+  run_in_session /usr/bin/xfce4-panel --quit || \
+    echo "grandma-apply-baseline-system: warning: live panel shutdown failed" >&2
 fi
 
 # The autostart override prevents future launches. Stop a current instance for

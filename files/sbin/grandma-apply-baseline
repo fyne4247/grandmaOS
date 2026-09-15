@@ -18,12 +18,18 @@ xset_prop() {
   fi
 }
 
-xset_single_int_array() {
-  local channel="$1" prop="$2" value="$3"
+xset_string_array() {
+  local channel="$1" prop="$2"
+  shift 2
   if xfconf-query -c "$channel" -p "$prop" >/dev/null 2>&1; then
     xfconf-query -c "$channel" -p "$prop" -r
   fi
-  xfconf-query -c "$channel" -p "$prop" -n -a -t int -s "$value"
+  local args=()
+  local value
+  for value in "$@"; do
+    args+=(-t string -s "$value")
+  done
+  xfconf-query -c "$channel" -p "$prop" -n -a "${args[@]}"
 }
 
 echo "[grandma-apply-baseline] lock-screen elimination..."
@@ -51,41 +57,38 @@ xset_prop xfwm4 /general/title_font string "Ubuntu Bold 13"
 xset_prop xfwm4 /general/theme string "Default"
 xset_prop xfce4-desktop /desktop-icons/icon-size int 64
 xset_prop xfce4-desktop /desktop-icons/tooltip-size int 96
-# Keep one extra-large, locked, auto-hidden bottom panel with only the window
-# switcher. Moving the pointer to the bottom edge reveals large icons and
-# readable window names; launchers, settings, status icons, and session
-# controls remain absent.
-xset_single_int_array xfce4-panel /panels 1
-xset_prop xfce4-panel /panels/panel-1/position string "p=10;x=0;y=0"
-xset_prop xfce4-panel /panels/panel-1/length uint 100
-xset_prop xfce4-panel /panels/panel-1/position-locked bool true
-xset_prop xfce4-panel /panels/panel-1/autohide-behavior uint 2
-xset_prop xfce4-panel /panels/panel-1/size uint 120
-xset_prop xfce4-panel /panels/panel-1/icon-size uint 88
-xset_single_int_array xfce4-panel /panels/panel-1/plugin-ids 1
-xfconf-query -c xfce4-panel -p /plugins/plugin-1 -r -R >/dev/null 2>&1 || true
-xset_prop xfce4-panel /plugins/plugin-1 string tasklist
-xset_prop xfce4-panel /plugins/plugin-1/grouping uint 0
-xset_prop xfce4-panel /plugins/plugin-1/show-labels bool true
-xset_prop xfce4-panel /plugins/plugin-1/show-tooltips bool true
-xset_prop xfce4-panel /plugins/plugin-1/show-wireframes bool true
-xset_prop xfce4-panel /plugins/plugin-1/flat-buttons bool false
-xset_prop xfce4-panel /plugins/plugin-1/max-button-length uint 360
-xset_prop xfce4-panel /plugins/plugin-1/max-button-size uint 120
+# GrandmaOS's permanent sidebar replaces the XFCE panel and its task list.
+# Rebuild Mint XFCE's failsafe client list without xfce4-panel so it remains
+# absent at future logins. The live panel is stopped by the root-side baseline
+# wrapper after these session settings have been written.
+xset_prop xfce4-session /general/SaveOnExit bool false
+xset_prop xfce4-session /sessions/Failsafe/Count int 4
+xset_string_array xfce4-session /sessions/Failsafe/Client0_Command xfwm4
+xset_prop xfce4-session /sessions/Failsafe/Client0_Priority int 15
+xset_prop xfce4-session /sessions/Failsafe/Client0_PerScreen bool false
+xset_string_array xfce4-session /sessions/Failsafe/Client1_Command xfsettingsd
+xset_prop xfce4-session /sessions/Failsafe/Client1_Priority int 20
+xset_prop xfce4-session /sessions/Failsafe/Client1_PerScreen bool false
+xset_string_array xfce4-session /sessions/Failsafe/Client2_Command Thunar --daemon
+xset_prop xfce4-session /sessions/Failsafe/Client2_Priority int 30
+xset_prop xfce4-session /sessions/Failsafe/Client2_PerScreen bool false
+xset_string_array xfce4-session /sessions/Failsafe/Client3_Command xfdesktop
+xset_prop xfce4-session /sessions/Failsafe/Client3_Priority int 35
+xset_prop xfce4-session /sessions/Failsafe/Client3_PerScreen bool false
+xfconf-query -c xfce4-session -p /sessions/Failsafe/Client4_Command -r -R >/dev/null 2>&1 || true
 
-# XFWM's Alt-Tab switcher can show a live preview of the selected window.
-# Keep that enabled as the visual alternative to the panel task list, whose
-# built-in plugin offers large icons, labels, and outlines but not thumbnails.
+# Keep XFWM's large Alt-Tab preview as a fallback for any unexpected window
+# that is not represented by one of the sidebar's fixed app buttons.
 xset_prop xfwm4 /general/cycle_preview bool true
 xset_prop xfwm4 /general/cycle_draw_frame bool true
 xset_prop xfwm4 /general/cycle_raise bool true
 xset_prop xfwm4 /general/cycle_tabwin_mode int 0
 
-echo "[grandma-apply-baseline] Apps screen shortcut..."
-# The Windows/Super key raises the persistent GrandmaOS launcher. wmctrl also
-# restores it if it was minimized or covered by an app window.
-xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_L string "/usr/bin/wmctrl -a GrandmaOS"
-xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_R string "/usr/bin/wmctrl -a GrandmaOS"
+echo "[grandma-apply-baseline] sidebar shortcut..."
+# The sidebar normally remains visible, but Super can raise it if a badly
+# behaved window ever covers the reserved dock area.
+xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_L string "/usr/bin/wmctrl -a 'GrandmaOS Sidebar'"
+xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_R string "/usr/bin/wmctrl -a 'GrandmaOS Sidebar'"
 
 echo "[grandma-apply-baseline] function-row safety..."
 # Keep the three playback-volume keys under XFCE's normal control, but swallow

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=GrandmaOS Launcher
-Comment=Big-button home screen
+Name=GrandmaOS Sidebar
+Comment=Permanent app and volume sidebar
 Exec=/usr/local/sbin/grandma-launcher-supervisor
 NoDisplay=true
 X-GNOME-Autostart-enabled=true
