@@ -7,7 +7,7 @@
   "HomepageLocation": "https://duckduckgo.com/",
   "NewTabPageLocation": "https://duckduckgo.com/",
   "ShowHomeButton": true,
-  "DefaultZoomLevel": 0.22314355131420976,
+  "DefaultZoomLevel": 3.8017840169239308,
   "DefaultSearchProviderEnabled": true,
   "DefaultSearchProviderName": "DuckDuckGo",
   "DefaultSearchProviderSearchURL": "https://duckduckgo.com/?q={searchTerms}",

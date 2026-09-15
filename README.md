@@ -72,8 +72,16 @@ account, re-add the Chrome repo, etc. if they're already there.
   sleep, and launcher actions. Volume down, volume up, and speaker mute remain
   enabled, and ordinary F1-F12 behavior is unchanged. Firmware-handled keys
   still require a physical first-boot test on the Dell.
-- The big-button launcher (Facebook / YouTube / Internet / Banking
-  placeholder), auto-relaunching if closed
+- The big-button launcher (Facebook / YouTube / Internet / Truist Banking),
+  with a fixed 2x2 grid of large square controls; every button opens a new tab
+  in the shared maximized Chrome window, the Windows/Super key returns to the
+  Apps screen, and the launcher auto-relaunches if closed
+- A locked, 120-pixel bottom panel containing only the window switcher, with
+  88-pixel icons, readable labels, one button per window, and hover outlines;
+  it stays hidden until the pointer reaches the bottom edge. XFWM's Alt-Tab
+  switcher also previews the selected window.
+- Mint Update Manager hidden for Grandma's account while remaining available
+  to the administrator
 - Google Chrome + a root-owned enterprise policy: extensions, notifications,
   browser sign-in/sync, guest mode, and extra profiles are blocked; the
   password manager remains ON since she doesn't reliably remember passwords.
@@ -107,11 +115,6 @@ account, re-add the Chrome repo, etc. if they're already there.
   After the gateway is installed and healthy, run
   `grandma-install-openclaw-watchdog` as that same non-root admin user, then
   run the printed one-time `sudo loginctl enable-linger <admin-user>` command.
-- **The Banking launcher button.** Ships disabled/greyed out. Once you have
-  the real bank login URL, edit the `bank_btn` line in
-  `/usr/local/sbin/grandma-launcher` (see the other `SITES` entries for the
-  pattern) and re-run `grandma-launcher-supervisor` or just wait for
-  grandma's next login.
 - **Hardware-specific fixes.** No Chromebook audio, firmware, kernel, display,
   input, or power workaround is installed. On the Dell, run
   `grandma-hardware-report` and `grandma-audio-status` after first boot and

@@ -18,6 +18,14 @@ xset_prop() {
   fi
 }
 
+xset_single_int_array() {
+  local channel="$1" prop="$2" value="$3"
+  if xfconf-query -c "$channel" -p "$prop" >/dev/null 2>&1; then
+    xfconf-query -c "$channel" -p "$prop" -r
+  fi
+  xfconf-query -c "$channel" -p "$prop" -n -a -t int -s "$value"
+}
+
 echo "[grandma-apply-baseline] lock-screen elimination..."
 # 1) xflock4 (whatever triggers it: panel button, keybinding, lid/suspend
 #    hooks) runs this command to lock -- make it a no-op.
@@ -43,10 +51,41 @@ xset_prop xfwm4 /general/title_font string "Ubuntu Bold 13"
 xset_prop xfwm4 /general/theme string "Default"
 xset_prop xfce4-desktop /desktop-icons/icon-size int 64
 xset_prop xfce4-desktop /desktop-icons/tooltip-size int 96
-# Touch-friendly XFCE panel defaults. These apply to the normal first panel;
-# the fullscreen launcher remains the primary UI.
-xset_prop xfce4-panel /panels/panel-1/size uint 56
-xset_prop xfce4-panel /panels/panel-1/icon-size uint 40
+# Keep one extra-large, locked, auto-hidden bottom panel with only the window
+# switcher. Moving the pointer to the bottom edge reveals large icons and
+# readable window names; launchers, settings, status icons, and session
+# controls remain absent.
+xset_single_int_array xfce4-panel /panels 1
+xset_prop xfce4-panel /panels/panel-1/position string "p=10;x=0;y=0"
+xset_prop xfce4-panel /panels/panel-1/length uint 100
+xset_prop xfce4-panel /panels/panel-1/position-locked bool true
+xset_prop xfce4-panel /panels/panel-1/autohide-behavior uint 2
+xset_prop xfce4-panel /panels/panel-1/size uint 120
+xset_prop xfce4-panel /panels/panel-1/icon-size uint 88
+xset_single_int_array xfce4-panel /panels/panel-1/plugin-ids 1
+xfconf-query -c xfce4-panel -p /plugins/plugin-1 -r -R >/dev/null 2>&1 || true
+xset_prop xfce4-panel /plugins/plugin-1 string tasklist
+xset_prop xfce4-panel /plugins/plugin-1/grouping uint 0
+xset_prop xfce4-panel /plugins/plugin-1/show-labels bool true
+xset_prop xfce4-panel /plugins/plugin-1/show-tooltips bool true
+xset_prop xfce4-panel /plugins/plugin-1/show-wireframes bool true
+xset_prop xfce4-panel /plugins/plugin-1/flat-buttons bool false
+xset_prop xfce4-panel /plugins/plugin-1/max-button-length uint 360
+xset_prop xfce4-panel /plugins/plugin-1/max-button-size uint 120
+
+# XFWM's Alt-Tab switcher can show a live preview of the selected window.
+# Keep that enabled as the visual alternative to the panel task list, whose
+# built-in plugin offers large icons, labels, and outlines but not thumbnails.
+xset_prop xfwm4 /general/cycle_preview bool true
+xset_prop xfwm4 /general/cycle_draw_frame bool true
+xset_prop xfwm4 /general/cycle_raise bool true
+xset_prop xfwm4 /general/cycle_tabwin_mode int 0
+
+echo "[grandma-apply-baseline] Apps screen shortcut..."
+# The Windows/Super key raises the persistent GrandmaOS launcher. wmctrl also
+# restores it if it was minimized or covered by an app window.
+xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_L string "/usr/bin/wmctrl -a GrandmaOS"
+xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_R string "/usr/bin/wmctrl -a GrandmaOS"
 
 echo "[grandma-apply-baseline] function-row safety..."
 # Keep the three playback-volume keys under XFCE's normal control, but swallow

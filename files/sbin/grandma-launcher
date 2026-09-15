@@ -20,9 +20,10 @@ BUTTON_PX = 300
 CSS = b"""
 window { background-color: #000000; }
 button {
-    font-size: 26px;
+    font-size: 30px;
     font-weight: bold;
-    border-radius: 18px;
+    border-radius: 0;
+    padding: 12px;
 }
 button:disabled {
     color: #888888;
@@ -35,28 +36,25 @@ label.section {
 }
 """
 
-# App-mode windows share grandma's normal Chrome profile/cookies -- launching
-# facebook.com here and youtube.com there are still the same logged-in
-# session, just scoped to one site per window (no tabs/address bar to get
-# lost in).
+# Every launcher button opens a normal tab in Grandma's single Chrome profile.
+# Chrome reuses its existing browser window when one is running and creates a
+# maximized window when it is not.
 SITES = [
     ("Facebook", "https://www.facebook.com/", "facebook.png"),
     ("YouTube", "https://www.youtube.com/", "youtube.png"),
 ]
 
+TRUIST_URL = "https://www.truist.com/"
 
-def launch_app(url: str):
+
+def launch_tab(url: str = "chrome://newtab/"):
     subprocess.Popen(
-        ["google-chrome-stable", f"--app={url}"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        start_new_session=True,
-    )
-
-
-def launch_browser():
-    subprocess.Popen(
-        ["google-chrome-stable"],
+        [
+            "google-chrome-stable",
+            "--start-maximized",
+            "--new-tab",
+            url,
+        ],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         start_new_session=True,
@@ -81,6 +79,8 @@ def make_square_button(label_text: str, icon_file: str = None, icon_name: str = 
                        button_px: int = BUTTON_PX, icon_px: int = ICON_PX) -> Gtk.Button:
     btn = Gtk.Button()
     btn.set_size_request(button_px, button_px)
+    btn.set_hexpand(False)
+    btn.set_vexpand(False)
     box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
     box.set_halign(Gtk.Align.CENTER)
     box.set_valign(Gtk.Align.CENTER)
@@ -104,8 +104,8 @@ class Launcher(Gtk.Window):
         screen = Gdk.Screen.get_default()
         logical_w = screen.get_width()
         logical_h = screen.get_height()
-        button_px = max(180, min(340, (logical_h - 150) // 2, (logical_w - 90) // 2))
-        icon_px = max(96, min(180, button_px // 2))
+        button_px = max(240, min(420, (logical_h - 140) // 2, (logical_w - 72) // 2))
+        icon_px = max(144, min(256, (button_px * 3) // 5))
 
         outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         outer.set_margin_top(30)
@@ -118,28 +118,32 @@ class Launcher(Gtk.Window):
         apps_label.get_style_context().add_class("section")
         outer.pack_start(apps_label, False, False, 0)
 
-        apps_grid = Gtk.FlowBox()
-        apps_grid.set_selection_mode(Gtk.SelectionMode.NONE)
-        apps_grid.set_max_children_per_line(2)
-        apps_grid.set_min_children_per_line(2)
+        apps_grid = Gtk.Grid()
         apps_grid.set_row_spacing(24)
         apps_grid.set_column_spacing(24)
         apps_grid.set_halign(Gtk.Align.CENTER)
+        apps_grid.set_valign(Gtk.Align.CENTER)
         outer.pack_start(apps_grid, True, True, 0)
 
-        for name, url, icon_file in SITES:
+        for index, (name, url, icon_file) in enumerate(SITES):
             btn = make_square_button(name, icon_file=icon_file, button_px=button_px, icon_px=icon_px)
-            btn.connect("clicked", lambda _b, u=url: launch_app(u))
-            apps_grid.add(btn)
+            btn.connect("clicked", lambda _b, u=url: launch_tab(u))
+            apps_grid.attach(btn, index % 2, index // 2, 1, 1)
 
         internet_btn = make_square_button("Internet", icon_name="web-browser", button_px=button_px, icon_px=icon_px)
-        internet_btn.connect("clicked", lambda _b: launch_browser())
-        apps_grid.add(internet_btn)
+        internet_btn.connect("clicked", lambda _b: launch_tab())
+        apps_grid.attach(internet_btn, 0, 1, 1, 1)
 
-        bank_btn = make_square_button("Banking", icon_name="emblem-money", button_px=button_px, icon_px=icon_px)
-        bank_btn.set_sensitive(False)
-        bank_btn.set_tooltip_text("Not set up yet -- ask for help setting this up.")
-        apps_grid.add(bank_btn)
+        bank_btn = make_square_button(
+            "Banking",
+            icon_file="truist.png",
+            icon_name="emblem-money",
+            button_px=button_px,
+            icon_px=icon_px,
+        )
+        bank_btn.connect("clicked", lambda _b: launch_tab(TRUIST_URL))
+        bank_btn.set_tooltip_text("Open Truist online banking")
+        apps_grid.attach(bank_btn, 1, 1, 1, 1)
 
 
 def main():

@@ -12,7 +12,59 @@ if [ ! -d "$runtime_dir" ]; then
   exit 0
 fi
 
-exec /usr/sbin/runuser -u "$GRANDMA_USER" -- /usr/bin/env \
-  XDG_RUNTIME_DIR="$runtime_dir" \
-  DBUS_SESSION_BUS_ADDRESS="unix:path=$runtime_dir/bus" \
-  /usr/local/sbin/grandma-apply-baseline
+session_pid=$(pgrep -o -u "$GRANDMA_USER" xfce4-session 2>/dev/null || true)
+if [ -z "$session_pid" ]; then
+  session_pid=$(pgrep -o -u "$GRANDMA_USER" xfce4-panel 2>/dev/null || true)
+fi
+if [ -z "$session_pid" ]; then
+  echo "grandma-apply-baseline-system: no live XFCE session; login autostart will apply the baseline" >&2
+  exit 0
+fi
+
+session_env="/proc/$session_pid/environ"
+proc_env() {
+  local name="$1"
+  tr '\0' '\n' <"$session_env" | sed -n "s/^${name}=//p" | head -n 1
+}
+
+dbus_address=$(proc_env DBUS_SESSION_BUS_ADDRESS)
+display=$(proc_env DISPLAY)
+xauthority=$(proc_env XAUTHORITY)
+
+if [ -z "$dbus_address" ] && [ -S "$runtime_dir/bus" ]; then
+  dbus_address="unix:path=$runtime_dir/bus"
+fi
+if [ -z "$dbus_address" ]; then
+  echo "grandma-apply-baseline-system: live XFCE D-Bus address not found; login autostart will apply the baseline" >&2
+  exit 0
+fi
+
+session_vars=(
+  "XDG_RUNTIME_DIR=$runtime_dir"
+  "DBUS_SESSION_BUS_ADDRESS=$dbus_address"
+)
+[ -z "$display" ] || session_vars+=("DISPLAY=$display")
+[ -z "$xauthority" ] || session_vars+=("XAUTHORITY=$xauthority")
+
+run_in_session() {
+  /usr/sbin/runuser -u "$GRANDMA_USER" -- /usr/bin/env "${session_vars[@]}" "$@"
+}
+
+run_in_session /usr/local/sbin/grandma-apply-baseline
+
+if pgrep -u "$GRANDMA_USER" -x xfce4-panel >/dev/null 2>&1; then
+  run_in_session /usr/bin/xfce4-panel --restart || \
+    echo "grandma-apply-baseline-system: warning: live panel restart failed" >&2
+fi
+
+# The autostart override prevents future launches. Stop a current instance for
+# grandma without affecting the administrator's Update Manager.
+pkill -u "$GRANDMA_USER" -f '(^|/)mintupdate(-launcher)?([[:space:]]|$)' 2>/dev/null || true
+
+if pgrep -u "$GRANDMA_USER" -f '/usr/local/sbin/grandma-launcher-supervisor([[:space:]]|$)' >/dev/null 2>&1; then
+  # The supervisor immediately starts the newly installed launcher after this
+  # old process exits.
+  pkill -u "$GRANDMA_USER" -f '/usr/local/sbin/grandma-launcher([[:space:]]|$)' 2>/dev/null || true
+else
+  run_in_session /usr/bin/setsid --fork /usr/local/sbin/grandma-launcher-supervisor
+fi

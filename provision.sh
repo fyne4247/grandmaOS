@@ -7,9 +7,7 @@
 # Usage: sudo ./provision.sh [--dry-run] [--wifi-connection "NAME"]
 #
 # What this does NOT do (see README.md): install/configure OpenClaw (token +
-# Telegram pairing are inherently interactive and personal), set a real
-# Banking launcher URL (edit files/sbin/grandma-launcher's SITES-adjacent
-# bank_btn line yourself first, or re-run with BANK_URL set), or set up the
+# Telegram pairing are inherently interactive and personal), or set up the
 # admin's own account (assumed to already exist and have sudo).
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
@@ -64,6 +62,21 @@ phase_grandma_account() {
     note "confirmed: '$GRANDMA_USER' has no sudo/admin group membership"
   fi
 
+  # Mint's LightDM PAM policy allows passwordless/autologin sessions only for
+  # members of nopasswdlogin. Without this, LightDM ignores the configured
+  # autologin path and presents a password prompt for the intentionally locked
+  # grandma account.
+  if ! getent group nopasswdlogin >/dev/null 2>&1; then
+    echo "    !! ERROR: required LightDM group 'nopasswdlogin' does not exist" >&2
+    exit 1
+  fi
+  if id -nG "$GRANDMA_USER" 2>/dev/null | tr ' ' '\n' | grep -qx nopasswdlogin; then
+    note "'$GRANDMA_USER' is already allowed to autologin"
+  else
+    run usermod -aG nopasswdlogin "$GRANDMA_USER"
+    note "enabled passwordless LightDM autologin for '$GRANDMA_USER'"
+  fi
+
   run loginctl enable-linger "$GRANDMA_USER"
   note "lingering enabled for '$GRANDMA_USER' (needed so root can reach her xfconf/D-Bus session via runuser without a live GUI login -- see phase_accessibility)"
 }
@@ -109,9 +122,9 @@ phase_install_scripts() {
   local icon_dir=/usr/local/share/grandmaos/icons
   run install -d -m 0755 -o root -g root "$icon_dir"
   if [ "$DRY_RUN" -eq 1 ]; then
-    note "[dry-run] would fetch facebook/messenger/youtube favicons into $icon_dir"
+    note "[dry-run] would fetch facebook/messenger/youtube/truist favicons into $icon_dir"
   else
-    for pair in "facebook.com:facebook" "messenger.com:messenger" "youtube.com:youtube"; do
+    for pair in "facebook.com:facebook" "messenger.com:messenger" "youtube.com:youtube" "truist.com:truist"; do
       local domain="${pair%%:*}" name="${pair##*:}"
       if [ ! -s "$icon_dir/$name.png" ]; then
         curl -fsSL "https://www.google.com/s2/favicons?domain=${domain}&sz=128" -o "$icon_dir/$name.png" \
@@ -128,13 +141,13 @@ phase_accessibility() {
   log "Phase: XFCE accessibility baseline + lock-screen elimination"
   local auto_dir="/home/$GRANDMA_USER/.config/autostart"
   run install -d -m 0755 -o root -g root "$auto_dir"
-  for f in grandmaos-baseline.desktop grandmaos-launcher.desktop light-locker.desktop xscreensaver.desktop; do
+  for f in grandmaos-baseline.desktop grandmaos-launcher.desktop light-locker.desktop mintupdate.desktop xscreensaver.desktop; do
     run install -m 0644 -o root -g root "$FILES/autostart/$f" "$auto_dir/$f"
   done
   note "installed root-owned autostart overrides (grandma can read/run but not edit/delete)"
 
   if [ "$DRY_RUN" -eq 1 ]; then
-    note "[dry-run] would run grandma-apply-baseline as $GRANDMA_USER via runuser"
+    note "[dry-run] would apply and refresh the baseline in $GRANDMA_USER's live XFCE session"
     return
   fi
   local uid
@@ -144,8 +157,8 @@ phase_accessibility() {
     for _ in $(seq 1 10); do sleep 1; [ -d "/run/user/$uid" ] && break; done
   fi
   if [ -d "/run/user/$uid" ]; then
-    runuser -u "$GRANDMA_USER" -- env XDG_RUNTIME_DIR="/run/user/$uid" /usr/local/sbin/grandma-apply-baseline
-    note "applied baseline xfconf settings for $GRANDMA_USER"
+    GRANDMA_USER="$GRANDMA_USER" /usr/local/sbin/grandma-apply-baseline-system
+    note "applied and refreshed baseline settings in $GRANDMA_USER's live session"
   else
     echo "    !! /run/user/$uid never appeared -- baseline not applied yet. It will self-apply on grandma's first login (autostart entry) and every 15min after (systemd timer, installed in phase_timers)." >&2
   fi
@@ -161,7 +174,7 @@ phase_chrome() {
     exit 1
   fi
   if ! command -v google-chrome-stable >/dev/null 2>&1; then
-    run apt-get install -y curl gnupg
+  run apt-get install -y curl gnupg wmctrl
     if [ "$DRY_RUN" -eq 1 ]; then
       note "[dry-run] would install Google's signing key and Chrome apt repository"
     else
@@ -180,7 +193,7 @@ phase_chrome() {
   run install -m 0644 -o root -g root "$FILES/chrome-policy.json" /etc/opt/chrome/policies/managed/grandmaos.json
   note "Chrome policy installed (AI/model downloads disabled, AI surfaces hidden, extensions/notifications/sign-in/sync blocked, DuckDuckGo default, password manager ON)"
   note "Verify every policy after first launch at chrome://policy; unsupported future/retired keys are reported there rather than silently assumed."
-  note "REMINDER: launcher's Banking button is a disabled placeholder until you edit /usr/local/sbin/grandma-launcher with a real bank URL."
+  note "The launcher's Banking button opens Truist's official website."
 }
 
 # ---------------------------------------------------------------------------
@@ -291,4 +304,4 @@ phase_dns
 phase_grub
 
 log "Done."
-note "NOT automated (see README.md): OpenClaw setup, real Banking URL, audio (worked out of the box on the original hardware -- re-check on new hardware with grandma-audio-status), a reboot to activate autologin."
+note "NOT automated (see README.md): OpenClaw setup, audio (worked out of the box on the original hardware -- re-check on new hardware with grandma-audio-status), a reboot to activate autologin."
