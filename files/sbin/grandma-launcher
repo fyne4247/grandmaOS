@@ -7,7 +7,6 @@ window for that site, while the volume buttons adjust Grandma's own PipeWire
 session. The window reserves space at the left edge so Chrome cannot cover it.
 """
 import os
-import re
 import subprocess
 
 import gi
@@ -20,7 +19,6 @@ from gi.repository import Gdk, GdkPixbuf, GdkX11, GLib, Gtk  # noqa: E402
 ICON_DIR = "/usr/local/share/grandmaos/icons"
 MAX_SIDEBAR_PX = 220
 SIDEBAR_WIDTH_FRACTION = 10
-VOLUME_STEP = 10
 
 CSS = b"""
 window { background-color: #000000; }
@@ -115,41 +113,16 @@ def launch_or_focus(url: str, window_class: str, app_mode: bool):
     )
 
 
-def current_volume_percent():
-    try:
-        result = subprocess.check_output(
-            ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"],
-            stderr=subprocess.DEVNULL,
-            text=True,
-        )
-        match = re.search(r"Volume:\s*([0-9.]+)", result)
-        if match:
-            return round(float(match.group(1)) * 100)
-    except (FileNotFoundError, subprocess.CalledProcessError, ValueError):
-        pass
-
-    try:
-        result = subprocess.check_output(
-            ["pactl", "get-sink-volume", "@DEFAULT_SINK@"],
-            stderr=subprocess.DEVNULL,
-            text=True,
-        )
-        match = re.search(r"(\d+)%", result)
-        if match:
-            return int(match.group(1))
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        pass
-    return None
-
-
 def adjust_volume(delta: int):
-    current = current_volume_percent()
-    if current is None:
-        return
-    target = max(0, min(100, current + delta))
+    # Step the same clamped path as the volume keys (see grandma-volume-step for
+    # the MAX_VOLUME_PERCENT ceiling). Sharing one helper keeps the whole system
+    # on a single limit, so the level can never run away.
     if delta > 0:
         quiet_run(["/usr/local/sbin/grandma-unmute"])
-    quiet_run(["/usr/local/sbin/grandma-volume", str(target)])
+    quiet_run([
+        "/usr/local/sbin/grandma-volume-step",
+        "up" if delta > 0 else "down",
+    ])
 
 
 def make_image(icon_file, icon_name, px):
@@ -240,12 +213,12 @@ class Sidebar(Gtk.Window):
 
         volume_up = make_button("Volume\nUp", icon_px, icon_name="audio-volume-high")
         volume_up.set_tooltip_text("Turn the sound up")
-        volume_up.connect("clicked", lambda _button: adjust_volume(VOLUME_STEP))
+        volume_up.connect("clicked", lambda _button: adjust_volume(1))
         buttons.pack_start(volume_up, True, True, 0)
 
         volume_down = make_button("Volume\nDown", icon_px, icon_name="audio-volume-low")
         volume_down.set_tooltip_text("Turn the sound down")
-        volume_down.connect("clicked", lambda _button: adjust_volume(-VOLUME_STEP))
+        volume_down.connect("clicked", lambda _button: adjust_volume(-1))
         buttons.pack_start(volume_down, True, True, 0)
 
     def reserve_desktop_space(self):

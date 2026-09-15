@@ -91,11 +91,18 @@ xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_L string "/usr/bin/wmc
 xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_R string "/usr/bin/wmctrl -a 'GrandmaOS Sidebar'"
 
 echo "[grandma-apply-baseline] function-row safety..."
-# Keep the three playback-volume keys under XFCE's normal control, but swallow
-# other standard media/function-row events in grandma's session. This does not
-# disable ordinary F1-F12 input (for example, F5 can still refresh a page).
-# Exact legends and firmware behavior vary, so the physical Dell row must be
-# tested after first boot; firmware-handled keys may never reach XFCE.
+# Route the volume keys through grandma-volume-step, which clamps the result to
+# a sane maximum (MAX_VOLUME_PERCENT). XFCE's stock binding is an unbounded
+# relative 'pactl ... +3%': holding the key ran the level far past 100%, and
+# WirePlumber then saved that runaway value as Grandma's "preferred" volume,
+# so it kept snapping back up. All volume changes now share one ceiling.
+xset_prop xfce4-keyboard-shortcuts /commands/custom/XF86AudioRaiseVolume string "/usr/local/sbin/grandma-volume-step up"
+xset_prop xfce4-keyboard-shortcuts /commands/custom/XF86AudioLowerVolume string "/usr/local/sbin/grandma-volume-step down"
+# Swallow the remaining standard media/function-row events in grandma's
+# session. This does not disable ordinary F1-F12 input (for example, F5 can
+# still refresh a page). Exact legends and firmware behavior vary, so the
+# physical Dell row must be tested after first boot; firmware-handled keys may
+# never reach XFCE.
 xset_prop xfce4-power-manager /xfce4-power-manager/handle-brightness-keys bool false
 for hotkey in \
   XF86MonBrightnessDown XF86MonBrightnessUp \

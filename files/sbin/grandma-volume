@@ -3,13 +3,18 @@
 # session. SEE NOTE at bottom about cross-user (grandma) invocation.
 set -euo pipefail
 
+# Global ceiling shared with grandma-volume-step. Keeping volume changes at or
+# below this stops WirePlumber from ever saving a runaway (>100%) level as
+# Grandma's preferred volume.
+MAX_VOLUME_PERCENT=125
+
 usage() {
-  cat <<'EOF'
-Usage: grandma-volume <0-100>
+  cat <<EOF
+Usage: grandma-volume <0-${MAX_VOLUME_PERCENT}>
        grandma-volume --help
 
 Sets the default PipeWire sink volume to the given integer percentage.
-The argument is strictly validated as an integer between 0 and 100
+The argument is strictly validated as an integer between 0 and ${MAX_VOLUME_PERCENT}
 inclusive before anything is executed.
 EOF
 }
@@ -20,7 +25,7 @@ if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
 fi
 
 if [ "$#" -ne 1 ]; then
-  echo "error: expected exactly one argument (volume 0-100)" >&2
+  echo "error: expected exactly one argument (volume 0-$MAX_VOLUME_PERCENT)" >&2
   usage >&2
   exit 2
 fi
@@ -35,8 +40,8 @@ case "$vol" in
 esac
 
 # Now safe to treat as integer.
-if [ "$vol" -lt 0 ] || [ "$vol" -gt 100 ]; then
-  echo "error: volume must be between 0 and 100 (got $vol)" >&2
+if [ "$vol" -lt 0 ] || [ "$vol" -gt "$MAX_VOLUME_PERCENT" ]; then
+  echo "error: volume must be between 0 and $MAX_VOLUME_PERCENT (got $vol)" >&2
   exit 2
 fi
 

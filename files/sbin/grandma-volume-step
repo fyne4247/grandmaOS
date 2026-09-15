@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Steps Grandma's default PipeWire sink volume up or down by a fixed amount,
+# never above MAX_VOLUME_PERCENT and never below 0. This is what her volume
+# keys AND the sidebar's Volume Up/Down buttons call, so every volume change
+# shares one ceiling and the level can no longer run away past it.
+#
+# Why this exists: the stock XFCE binding is an unbounded relative step
+# ('pactl set-sink-volume @DEFAULT_SINK@ +3%'). Holding the key ran the level
+# far past 100%; WirePlumber then saved that runaway value as Grandma's
+# "preferred" volume and restored it whenever the USB audio device re-opened
+# -- which read to her as "I turn it down and it jumps back up".
+#
+# Same cross-session caveat as grandma-volume -- see NOTE at bottom.
+set -euo pipefail
+
+MAX_VOLUME_PERCENT=125
+STEP_PERCENT=5
+
+usage() {
+  cat <<EOF
+Usage: grandma-volume-step up|down
+
+Steps the default PipeWire sink volume by ${STEP_PERCENT}%, clamped to
+[0, ${MAX_VOLUME_PERCENT}].
+EOF
+}
+
+case "${1:-}" in
+  --help|-h) usage; exit 0 ;;
+  up|down) direction="$1" ;;
+  *)
+    echo "error: expected exactly one argument: 'up' or 'down'" >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+
+if command -v wpctl >/dev/null 2>&1; then
+  # wpctl's -l clamps the resulting volume (1.0 == 100%).
+  limit=$(awk -v p="$MAX_VOLUME_PERCENT" 'BEGIN { printf "%.4f", p / 100 }')
+  if [ "$direction" = up ]; then
+    wpctl set-volume -l "$limit" @DEFAULT_AUDIO_SINK@ "${STEP_PERCENT}%+"
+  else
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ "${STEP_PERCENT}%-"
+  fi
+  exit 0
+fi
+
+# pactl fallback: no native ceiling, so compute and clamp by hand.
+if command -v pactl >/dev/null 2>&1; then
+  current=$(pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | grep -oE '[0-9]+%' | head -1 | tr -d '%')
+  [ -n "$current" ] || current=0
+  if [ "$direction" = up ]; then
+    target=$((current + STEP_PERCENT))
+    if [ "$target" -gt "$MAX_VOLUME_PERCENT" ]; then target=$MAX_VOLUME_PERCENT; fi
+  else
+    target=$((current - STEP_PERCENT))
+    if [ "$target" -lt 0 ]; then target=0; fi
+  fi
+  pactl set-sink-volume @DEFAULT_SINK@ "${target}%"
+  exit 0
+fi
+
+echo "error: neither wpctl nor pactl found" >&2
+exit 1
+
+# NOTE on cross-session invocation: identical concern as grandma-volume.
+# Running this as root will NOT reach Grandma's PipeWire session; a wrapper
+# using 'sudo -u grandma XDG_RUNTIME_DIR=... DBUS_SESSION_BUS_ADDRESS=...' or
+# 'machinectl shell grandma@' is needed for cross-user use.
