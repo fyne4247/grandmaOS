@@ -176,7 +176,9 @@ phase_chrome() {
   # The permanent bottom dock uses wmctrl to raise existing site windows and
   # xprop to reserve desktop space. Install them even when Chrome is already
   # present on an incrementally provisioned machine.
-  run apt-get install -y curl gnupg wmctrl x11-utils python3-pyatspi
+  # wmctrl/x11-utils drive the dock and the browser-hygiene helper; xprintidle
+  # lets hygiene act only after grandma has actually been idle, never mid-task.
+  run apt-get install -y curl gnupg wmctrl x11-utils python3-pyatspi xprintidle
   if ! command -v google-chrome-stable >/dev/null 2>&1; then
     if [ "$DRY_RUN" -eq 1 ]; then
       note "[dry-run] would install Google's signing key and Chrome apt repository"

@@ -1,0 +1,240 @@
+#!/usr/bin/env python3
+"""GrandmaOS Chrome hygiene: reclaim RAM from *background* Chrome windows.
+
+Runs in grandma's own session (needs her X display + accessibility bus), so it
+needs no root. Inspects every Chrome top-level window and only ever touches
+windows that are NOT the currently active one:
+
+  * an unresponsive window ("Page Unresponsive" / "Not Responding") is closed;
+  * a background window whose Chrome-reported memory is a large hog is reloaded
+    only when grandma has been idle for a while, or RAM is genuinely low.
+
+This pairs with Chrome's own Memory Saver policy (HighEfficiencyModeEnabled):
+the browser discards ordinary idle tabs on its own, and this helper catches the
+app-mode windows and runaway/unresponsive cases the policy leaves alone.
+
+Nothing here is invasive: it reads window titles and Chrome's own per-tab
+"Memory usage" figure (already exposed via the accessibility tree), never page
+content, history, or keystrokes. Safe to re-run; nothing to do is success.
+"""
+from __future__ import annotations
+
+import os
+import re
+import subprocess
+import sys
+
+GRANDMA_USER = os.environ.get("GRANDMA_USER", "grandma")
+
+# --- thresholds (deliberately conservative) ---
+HOG_MB = 800                 # Chrome-reported memory that counts as a "hog"
+IDLE_MS = 10 * 60 * 1000     # act on a hog only after 10 min of no input
+LOW_AVAIL_MB = 600           # ...or when available RAM drops below this
+UNRESPONSIVE_MARKERS = ("page unresponsive", "not responding", "unresponsive")
+
+MEM_RE = re.compile(r"memory usage\s*-\s*(\d+)\s*mb", re.IGNORECASE)
+
+
+def log(msg: str) -> None:
+    print(msg)
+
+
+def run(cmd, env=None):
+    try:
+        return subprocess.run(cmd, text=True, capture_output=True,
+                              check=False, env=env)
+    except FileNotFoundError:
+        return None
+
+
+def session_env() -> dict:
+    """Environment pointing at grandma's live X/DBus session."""
+    import pwd
+    try:
+        account = pwd.getpwnam(GRANDMA_USER)
+        home, uid = account.pw_dir, account.pw_uid
+    except KeyError:
+        home, uid = f"/home/{GRANDMA_USER}", 1001
+    env = dict(os.environ)
+    env.setdefault("HOME", home)
+    env.setdefault("DISPLAY", ":0")
+    env.setdefault("XAUTHORITY", os.path.join(home, ".Xauthority"))
+    env.setdefault("XDG_RUNTIME_DIR", f"/run/user/{uid}")
+    bus = f"/run/user/{uid}/bus"
+    if not env.get("DBUS_SESSION_BUS_ADDRESS") and os.path.exists(bus):
+        env["DBUS_SESSION_BUS_ADDRESS"] = f"unix:path={bus}"
+    return env
+
+
+def normalize(title: str) -> str:
+    """Strip Chrome's dynamic trailing flags so titles can be matched.
+
+    The accessibility tree reports e.g. "(5) Facebook - Audio playing - Grammy"
+    while wmctrl reports "(5) Facebook".
+    """
+    base = title.strip()
+    for marker in (" - Audio playing", " - Audio muted", " - Media playing",
+                   " - Unresponsive", " - Not Responding", " - Grammy"):
+        idx = base.find(marker)
+        if idx != -1:
+            base = base[:idx]
+    return base.strip().casefold()
+
+
+def title_matches(a: str, b: str) -> bool:
+    na, nb = normalize(a), normalize(b)
+    if not na or not nb:
+        return False
+    return na in nb or nb in na
+
+
+def chrome_frames():
+    """[(frame_title, memory_mb, unresponsive)] for each Chrome window."""
+    import pyatspi
+
+    frames = []
+    desktop = pyatspi.Registry.getDesktop(0)
+    for app in desktop:
+        try:
+            if "chrome" not in (app.name or "").casefold():
+                continue
+        except Exception:
+            continue
+        for frame in app:
+            try:
+                title = frame.name or ""
+            except Exception:
+                title = ""
+            state = {"mem": 0, "bad": False}
+
+            def walk(node, state=state, top=True):
+                try:
+                    role = node.getRoleName()
+                    name = node.name or ""
+                except Exception:
+                    return
+                if any(m in name.casefold() for m in UNRESPONSIVE_MARKERS):
+                    state["bad"] = True
+                if role == "page tab":
+                    m = MEM_RE.search(name)
+                    if m:
+                        state["mem"] += int(m.group(1))
+                try:
+                    if not top and role == "document web":
+                        return  # never descend into page content
+                    for child in node:
+                        walk(child, state, top=False)
+                except Exception:
+                    return
+
+            walk(frame)
+            if title:
+                frames.append((title, state["mem"], state["bad"]))
+    return frames
+
+
+def wmctrl_windows(env):
+    """[(xid, title)] for Chrome top-level windows."""
+    out = run(["wmctrl", "-lx"], env=env)
+    if not out or out.returncode != 0:
+        return []
+    windows = []
+    for line in out.stdout.splitlines():
+        fields = line.split(None, 4)
+        if len(fields) < 5:
+            continue
+        xid, wm_class, title = fields[0], fields[2], fields[4]
+        cls = wm_class.casefold()
+        if "chrome" in cls or cls.startswith("www."):
+            windows.append((xid, title))
+    return windows
+
+
+def active_xid(env):
+    out = run(["xdotool", "getactivewindow"], env=env)
+    if out and out.returncode == 0:
+        return out.stdout.strip()
+    return ""
+
+
+def idle_ms(env) -> int:
+    """Milliseconds since last X input, or -1 when undetermined."""
+    out = run(["xprintidle"], env=env)
+    if out and out.returncode == 0:
+        try:
+            return int(out.stdout.strip())
+        except ValueError:
+            pass
+    return -1
+
+
+def available_mb() -> int:
+    try:
+        with open("/proc/meminfo") as fh:
+            for line in fh:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) // 1024
+    except OSError:
+        pass
+    return 10 ** 9
+
+
+def reload_window(env, xid, prev_xid):
+    run(["xdotool", "windowactivate", "--sync", xid], env=env)
+    run(["xdotool", "key", "--clearmodifiers", "ctrl+r"], env=env)
+    if prev_xid:
+        run(["xdotool", "windowactivate", "--sync", prev_xid], env=env)
+
+
+def close_window(env, xid):
+    run(["wmctrl", "-i", "-c", xid], env=env)
+
+
+def main() -> int:
+    dry = "--dry-run" in sys.argv
+    env = session_env()
+    windows = wmctrl_windows(env)
+    if not windows:
+        log("chrome-hygiene: no Chrome windows to inspect")
+        return 0
+
+    frames = chrome_frames()
+    active = active_xid(env)
+    avail = available_mb()
+    idle = idle_ms(env)
+    acted = 0
+
+    for xid, title in windows:
+        if xid == active:
+            continue  # never touch the active window
+        match = next((f for f in frames if title_matches(title, f[0])), None)
+        if match is None:
+            continue
+        _, mem, unresponsive = match
+
+        if unresponsive:
+            log(f"chrome-hygiene: closing unresponsive background window {title!r}")
+            if not dry:
+                close_window(env, xid)
+            acted += 1
+            continue
+
+        # Act only on a demonstrated hog: either grandma has clearly been idle,
+        # or RAM is genuinely low. An undetermined idle time (idle < 0, e.g.
+        # xprintidle missing) must NEVER trigger a reload -- she could be
+        # mid-task right now, and her session is not ours to disturb.
+        idle_confirms = 0 <= idle >= IDLE_MS
+        hog = mem >= HOG_MB and (idle_confirms or avail < LOW_AVAIL_MB)
+        if hog:
+            log(f"chrome-hygiene: reloading background RAM hog {title!r} ({mem} MB)")
+            if not dry:
+                reload_window(env, xid, active)
+            acted += 1
+
+    if acted == 0:
+        log(f"chrome-hygiene: nothing to do (available {avail} MB, idle {idle} ms)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

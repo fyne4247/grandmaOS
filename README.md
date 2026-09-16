@@ -108,6 +108,12 @@ account, re-add the Chrome repo, etc. if they're already there.
   content sharing, and local AI-model download are explicitly disabled.
   DuckDuckGo replaces Google on startup, new tabs, Home, and address-bar search
   so Google-hosted AI promotions are not the default browsing surface.
+  Chrome Memory Saver is enabled by policy (`HighEfficiencyModeEnabled`, balanced
+  savings) so idle background tabs are discarded and reloaded on demand. The
+  `grandma-browser-hygiene` helper covers what that policy leaves alone --
+  app-mode windows and runaway/unresponsive ones -- by closing an unresponsive
+  *background* window or reloading a background RAM hog only after grandma has
+  been idle. The heartbeat runs it silently; it never touches the active window.
 - Automatic updates via `unattended-upgrades`, covering both the Mint/Ubuntu
   archives and Chrome's own repo, with a scheduled 4:30am reboot so patches
   actually take effect

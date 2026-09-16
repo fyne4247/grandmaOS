@@ -41,6 +41,9 @@
   "PasswordManagerEnabled": true,
   "SafeBrowsingProtectionLevel": 1,
 
+  "HighEfficiencyModeEnabled": true,
+  "MemorySaverModeSavings": 1,
+
   "GeminiSettings": 1,
   "GeminiActOnWebSettings": 1,
   "GeminiSparkSettings": 1,
