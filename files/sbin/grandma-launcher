@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""GrandmaOS permanent sidebar.
+"""GrandmaOS permanent bottom dock.
 
-The sidebar replaces both the fullscreen Apps screen and XFCE's window
+The dock replaces both the fullscreen Apps screen and XFCE's window
 switcher. Its fixed site buttons launch a Chrome window or raise the existing
 window for that site, while the volume buttons adjust Grandma's own PipeWire
-session. The window reserves space at the left edge so Chrome cannot cover it.
+session. The window reserves space at the bottom edge so Chrome cannot cover it.
 """
 import os
 import subprocess
+import time
+from urllib.parse import urlparse
 
 import gi
+import pyatspi
 
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
@@ -17,8 +20,8 @@ gi.require_version("GdkX11", "3.0")
 from gi.repository import Gdk, GdkPixbuf, GdkX11, GLib, Gtk  # noqa: E402
 
 ICON_DIR = "/usr/local/share/grandmaos/icons"
-MAX_SIDEBAR_PX = 220
-SIDEBAR_WIDTH_FRACTION = 10
+MAX_DOCK_HEIGHT_PX = 160
+DOCK_HEIGHT_FRACTION = 8
 
 CSS = b"""
 window { background-color: #000000; }
@@ -33,32 +36,70 @@ button {
 
 # --class gives each app-style Chrome window a stable identity. That lets the
 # same fixed button serve as both launcher and window switcher without showing
-# Grandma a separate task list.
+# Grandma a separate task list. Facebook is the only everyday site deliberately
+# opened at session start; every other site remains on-demand.
 SITES = [
     (
         "Facebook",
         "https://www.facebook.com/",
         "facebook.png",
-        "GrandmaOS-Facebook",
+        "www.facebook.com",
         True,
+        None,
+        True,
+    ),
+    (
+        "Messenger",
+        "https://www.messenger.com/",
+        "messenger.png",
+        # Chrome routes secondary-profile launches through its existing
+        # process and may ignore --class. App-mode windows still receive this
+        # stable URL-derived WM class, so it remains a reliable fallback.
+        "www.messenger.com",
+        True,
+        None,
+        False,
     ),
     (
         "YouTube",
         "https://www.youtube.com/",
         "youtube.png",
-        "GrandmaOS-YouTube",
+        "www.youtube.com",
         True,
+        None,
+        False,
     ),
-    ("Internet", "chrome://newtab/", None, "GrandmaOS-Internet", False),
+    (
+        "Internet",
+        "chrome://newtab/",
+        None,
+        "GrandmaOS-Internet",
+        False,
+        None,
+        False,
+    ),
     (
         "Banking",
         "https://www.truist.com/",
         "truist.png",
-        "GrandmaOS-Banking",
+        "www.truist.com",
         True,
+        None,
+        False,
     ),
-    ("AOL", "https://www.aol.com/", "aol.png", "GrandmaOS-AOL", True),
+    (
+        "AOL",
+        "https://mail.aol.com/",
+        "aol.png",
+        "mail.aol.com",
+        True,
+        None,
+        False,
+    ),
 ]
+
+LAUNCH_GUARD_SECONDS = 8
+last_launch_time = {}
 
 
 def quiet_run(command):
@@ -85,22 +126,116 @@ def focus_window(window_class: str) -> bool:
     marker = window_class.casefold()
     for line in listing.splitlines():
         fields = line.split(None, 4)
-        if len(fields) >= 4 and marker in fields[3].casefold():
+        # wmctrl -lx columns are: window ID, desktop, WM_CLASS, client
+        # machine, title. Match the WM_CLASS column, not the machine name.
+        if len(fields) >= 3 and marker in fields[2].casefold():
             result = quiet_run(["wmctrl", "-ia", fields[0]])
             return result is not None and result.returncode == 0
     return False
 
 
-def launch_or_focus(url: str, window_class: str, app_mode: bool):
-    if focus_window(window_class):
+def focus_existing_tab(url: str) -> bool:
+    """Activate an existing Chrome tab matching the target site's hostname."""
+    hostname = (urlparse(url).hostname or "").casefold()
+    site_name = hostname.removeprefix("www.").split(".", 1)[0]
+    if not site_name or site_name == "newtab":
+        return False
+
+    def descendants(node):
+        yield node
+        try:
+            # The browser UI contains the tab strip and one document node per
+            # active tab. Its URI is enough; walking the entire webpage DOM
+            # would make a button press unnecessarily slow on complex sites.
+            if node.getRoleName() == "document web":
+                return
+            for child in node:
+                yield from descendants(child)
+        except Exception:
+            return
+
+    try:
+        desktop = pyatspi.Registry.getDesktop(0)
+    except Exception:
+        return False
+
+    for app in desktop:
+        try:
+            if "chrome" not in (app.name or "").casefold():
+                continue
+        except Exception:
+            continue
+
+        for node in descendants(app):
+            try:
+                role = node.getRoleName()
+                name = (node.name or "").casefold()
+            except Exception:
+                continue
+
+            matches = role == "page tab" and site_name in name
+            if site_name == "facebook" and "messenger" in name:
+                matches = False
+            if role == "document web":
+                try:
+                    current_uri = node.queryDocument().getAttributeValue("URI")
+                    matches = (urlparse(current_uri).hostname or "").casefold() == hostname
+                except Exception:
+                    matches = False
+            if not matches:
+                continue
+
+            # Present the containing Chrome window, then activate the tab.
+            ancestor = node
+            try:
+                while ancestor and ancestor.getRoleName() != "frame":
+                    ancestor = ancestor.parent
+                if ancestor:
+                    ancestor.queryComponent().grabFocus()
+            except Exception:
+                pass
+            try:
+                actions = node.queryAction()
+                for index in range(actions.nActions):
+                    if actions.getName(index) == "doDefault":
+                        actions.doAction(index)
+                        return True
+            except Exception:
+                pass
+            try:
+                if node.queryComponent().grabFocus():
+                    return True
+            except Exception:
+                pass
+    return False
+
+
+def launch_or_focus(
+    url: str, window_class: str, app_mode: bool, profile_directory=None
+):
+    # App-mode Chrome windows expose the target hostname in WM_CLASS. Prefer
+    # that exact, fast path before the broader tab-title scan; Messenger and
+    # Facebook can otherwise have confusingly similar titles.
+    if focus_window(window_class) or focus_existing_tab(url):
         return
+
+    # A newly requested Chrome window takes a moment to register its WM class
+    # and accessibility tree. Ignore repeat taps during that interval instead
+    # of creating a row of duplicate windows.
+    now = time.monotonic()
+    if now - last_launch_time.get(window_class, 0) < LAUNCH_GUARD_SECONDS:
+        return
+    last_launch_time[window_class] = now
 
     command = [
         "google-chrome-stable",
         "--no-first-run",
+        "--force-renderer-accessibility",
         "--start-maximized",
         f"--class={window_class}",
     ]
+    if profile_directory:
+        command.append(f"--profile-directory={profile_directory}")
     if app_mode:
         command.append(f"--app={url}")
     else:
@@ -157,10 +292,10 @@ def make_button(label_text, icon_px, icon_file=None, icon_name=None):
     return button
 
 
-class Sidebar(Gtk.Window):
+class Dock(Gtk.Window):
     def __init__(self):
-        super().__init__(title="GrandmaOS Sidebar")
-        self.set_wmclass("grandmaos-sidebar", "GrandmaOS-Sidebar")
+        super().__init__(title="GrandmaOS Bottom Dock")
+        self.set_wmclass("grandmaos-dock", "GrandmaOS-Dock")
         self.set_type_hint(Gdk.WindowTypeHint.DOCK)
         self.set_decorated(False)
         self.set_resizable(False)
@@ -176,62 +311,89 @@ class Sidebar(Gtk.Window):
             monitor_number = 0
         self.monitor = screen.get_monitor_geometry(monitor_number)
 
-        # Never consume more than one tenth of the active monitor's logical
-        # width. A modest absolute cap avoids an oversized bar on 4K panels.
-        self.sidebar_width = max(
-            1, min(MAX_SIDEBAR_PX, self.monitor.width // SIDEBAR_WIDTH_FRACTION)
+        # Keep the controls large enough for touch without putting an app
+        # button beside the keyboard where a resting hand can hit it. Include
+        # one blank, non-clickable column at each end as an edge-touch buffer.
+        self.dock_height = max(
+            1, min(MAX_DOCK_HEIGHT_PX, self.monitor.height // DOCK_HEIGHT_FRACTION)
         )
-        item_height = max(1, self.monitor.height // (len(SITES) + 2))
-        icon_px = max(32, min(72, self.sidebar_width * 2 // 5, item_height * 2 // 5))
+        item_width = max(1, self.monitor.width // (len(SITES) + 4))
+        site_icon_px = max(
+            48, min(88, self.dock_height * 11 // 20, item_width * 2 // 5)
+        )
+        control_icon_px = max(
+            32, min(64, self.dock_height * 2 // 5, item_width * 2 // 5)
+        )
 
-        self.set_size_request(self.sidebar_width, self.monitor.height)
-        self.set_default_size(self.sidebar_width, self.monitor.height)
-        self.move(self.monitor.x, self.monitor.y)
+        self.set_size_request(self.monitor.width, self.dock_height)
+        self.set_default_size(self.monitor.width, self.dock_height)
+        self.move(
+            self.monitor.x,
+            self.monitor.y + self.monitor.height - self.dock_height,
+        )
 
-        buttons = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        buttons.set_homogeneous(True)
         self.add(buttons)
+        buttons.pack_start(Gtk.Box(), True, True, 0)
 
         icon_names = {
             "Internet": "web-browser",
             "Banking": "emblem-money",
             "AOL": "web-browser",
         }
-        for name, url, icon_file, window_class, app_mode in SITES:
+        for (
+            name,
+            url,
+            icon_file,
+            window_class,
+            app_mode,
+            profile_directory,
+            _open_at_session_start,
+        ) in SITES:
             button = make_button(
                 name,
-                icon_px,
+                site_icon_px,
                 icon_file=icon_file,
                 icon_name=icon_names.get(name),
             )
             button.connect(
                 "clicked",
-                lambda _button, u=url, c=window_class, a=app_mode: launch_or_focus(
-                    u, c, a
+                lambda _button, u=url, c=window_class, a=app_mode, p=profile_directory: launch_or_focus(
+                    u, c, a, p
                 ),
             )
             buttons.pack_start(button, True, True, 0)
 
-        volume_up = make_button("Volume\nUp", icon_px, icon_name="audio-volume-high")
-        volume_up.set_tooltip_text("Turn the sound up")
-        volume_up.connect("clicked", lambda _button: adjust_volume(1))
-        buttons.pack_start(volume_up, True, True, 0)
-
-        volume_down = make_button("Volume\nDown", icon_px, icon_name="audio-volume-low")
+        volume_down = make_button(
+            "Volume\nDown", control_icon_px, icon_name="audio-volume-low"
+        )
         volume_down.set_tooltip_text("Turn the sound down")
         volume_down.connect("clicked", lambda _button: adjust_volume(-1))
         buttons.pack_start(volume_down, True, True, 0)
 
+        volume_up = make_button(
+            "Volume\nUp", control_icon_px, icon_name="audio-volume-high"
+        )
+        volume_up.set_tooltip_text("Turn the sound up")
+        volume_up.connect("clicked", lambda _button: adjust_volume(1))
+        buttons.pack_start(volume_up, True, True, 0)
+        buttons.pack_start(Gtk.Box(), True, True, 0)
+
     def reserve_desktop_space(self):
-        """Publish EWMH struts so maximized windows stop at the sidebar."""
+        """Publish EWMH struts so maximized windows stop above the dock."""
         gdk_window = self.get_window()
         if not gdk_window:
             return GLib.SOURCE_CONTINUE
 
         xid = GdkX11.X11Window.get_xid(gdk_window)
-        left_edge = self.monitor.x + self.sidebar_width
-        start_y = self.monitor.y
-        end_y = self.monitor.y + self.monitor.height - 1
-        partial = f"{left_edge}, 0, 0, 0, {start_y}, {end_y}, 0, 0, 0, 0, 0, 0"
+        screen_height = Gdk.Screen.get_default().get_height()
+        bottom_edge = screen_height - (
+            self.monitor.y + self.monitor.height - self.dock_height
+        )
+        start_x = self.monitor.x
+        end_x = self.monitor.x + self.monitor.width - 1
+        partial = f"0, 0, 0, {bottom_edge}, 0, 0, 0, 0, 0, 0, {start_x}, {end_x}"
         quiet_run(
             [
                 "xprop", "-id", str(xid),
@@ -243,25 +405,42 @@ class Sidebar(Gtk.Window):
             [
                 "xprop", "-id", str(xid),
                 "-f", "_NET_WM_STRUT", "32c",
-                "-set", "_NET_WM_STRUT", f"{left_edge}, 0, 0, 0",
+                "-set", "_NET_WM_STRUT", f"0, 0, 0, {bottom_edge}",
             ]
         )
         return GLib.SOURCE_REMOVE
 
     @staticmethod
-    def open_facebook_once_this_boot():
+    def open_everyday_sites_once_this_boot():
+        """Open exactly one window for each daily-use site per login session.
+
+        Windows are started one at a time so Chrome has time to register the
+        preceding app window.  That avoids a startup race where several
+        simultaneous --app requests are routed into the wrong window.
+        """
         runtime_dir = os.environ.get("XDG_RUNTIME_DIR")
         if not runtime_dir or not os.path.isdir(runtime_dir):
             return GLib.SOURCE_REMOVE
-        marker = os.path.join(runtime_dir, "grandmaos-facebook-started")
+        marker = os.path.join(runtime_dir, "grandmaos-everyday-sites-started")
         try:
             descriptor = os.open(marker, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
             os.close(descriptor)
         except FileExistsError:
             return GLib.SOURCE_REMOVE
 
-        _name, url, _icon, window_class, app_mode = SITES[0]
-        launch_or_focus(url, window_class, app_mode)
+        startup_sites = [site for site in SITES if site[6]]
+
+        def launch_next(index=0):
+            if index >= len(startup_sites):
+                return GLib.SOURCE_REMOVE
+            _name, url, _icon, window_class, app_mode, profile_directory, _start = (
+                startup_sites[index]
+            )
+            launch_or_focus(url, window_class, app_mode, profile_directory)
+            GLib.timeout_add_seconds(2, launch_next, index + 1)
+            return GLib.SOURCE_REMOVE
+
+        launch_next()
         return GLib.SOURCE_REMOVE
 
 
@@ -273,10 +452,10 @@ def main():
         provider,
         Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
     )
-    sidebar = Sidebar()
-    sidebar.show_all()
-    GLib.idle_add(sidebar.reserve_desktop_space)
-    GLib.timeout_add_seconds(2, sidebar.open_facebook_once_this_boot)
+    dock = Dock()
+    dock.show_all()
+    GLib.idle_add(dock.reserve_desktop_space)
+    GLib.timeout_add_seconds(2, dock.open_everyday_sites_once_this_boot)
     Gtk.main()
 
 

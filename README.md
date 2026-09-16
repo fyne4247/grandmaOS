@@ -48,7 +48,7 @@ GrandmaOS or `--wifi-connection="NAME"` to select a specific connection.
    - Add `--dry-run` first to preview every change with no side effects.
    - Add `--wifi-connection="Your SSID"` if you want DNS blocking applied to
      a connection other than whichever one is currently active.
-4. Reboot. Grandma's account should autologin with the permanent sidebar
+4. Reboot. Grandma's account should autologin with the permanent bottom dock
    visible and Facebook already open in Chrome, with no lock screen or admin
    authority.
 5. Do the manual steps below.
@@ -63,7 +63,7 @@ account, re-add the Chrome repo, etc. if they're already there.
   can reach her session non-interactively (needed for the next item)
 - LightDM autologin as `grandma`
 - All `grandma-*` maintenance/diagnostic scripts to `/usr/local/sbin`
-- XFCE accessibility baseline (high-DPI text, large cursor/panel/icons,
+- XFCE accessibility baseline (20-point high-DPI text, large cursor/panel/icons,
   high-contrast theme) and
   full lock-screen elimination (3 mechanisms: LockCommand, power-manager
   suspend-lock, light-locker/xscreensaver autostart disabled) for grandma
@@ -73,19 +73,37 @@ account, re-add the Chrome repo, etc. if they're already there.
   sleep, and launcher actions. Volume down, volume up, and speaker mute remain
   enabled, and ordinary F1-F12 behavior is unchanged. Firmware-handled keys
   still require a physical first-boot test on the Dell.
-- A permanent left sidebar that replaces both the fullscreen Apps screen and
-  XFCE's window switcher. Its large Facebook / YouTube / Internet / Truist
-  Banking / AOL buttons open or raise stable Chrome windows, and its Volume Up
-  and Volume Down buttons change sound in ten-percent steps. The sidebar
-  measures the active logical display at login, never uses more than one tenth
-  of its width, reserves that space so Chrome cannot cover it, and relaunches
-  automatically if closed. Facebook opens automatically once per boot.
+- A permanent bottom dock that replaces both the fullscreen Apps screen and
+  XFCE's window switcher. Its large Facebook / Messenger / YouTube / Internet /
+  Truist Banking / AOL Mail buttons open or raise stable Chrome windows, and its
+  Volume Up and Volume Down buttons use the same clamped sound control as the
+  keyboard, with Volume Down to the left of Volume Up. Messenger sits between
+  Facebook and YouTube and uses a site-specific 125% zoom while sharing the
+  main Chrome profile. All dock-launched sites therefore share Better Text
+  View's single global, enable-everywhere configuration instead of maintaining
+  separate per-profile settings.
+  Before opening anything, each app button scans all Chrome windows and tabs
+  for that site and activates an existing match; rapid repeat taps are ignored
+  while a new window is starting, preventing duplicate-window pileups.
+  The dock measures the active logical display at login, never uses more than
+  one eighth of its height, has a blank touch buffer at each end, reserves that
+  space so Chrome cannot cover it, and relaunches automatically if closed.
+  Facebook opens automatically once per login. Messenger, YouTube, AOL Mail,
+  and Banking stay closed until their button is tapped.
 - Mint Update Manager hidden for Grandma's account while remaining available
   to the administrator
-- Google Chrome + a root-owned enterprise policy: extensions, notifications,
-  browser sign-in/sync, guest mode, and extra profiles are blocked; the
-  password manager remains ON since she doesn't reliably remember passwords.
-  Pages default to 125% zoom while pinch zoom remains available.
+- Google Chrome + a root-owned enterprise policy: notifications, browser
+  sign-in/sync, guest mode, extra profiles, and unapproved extension installs
+  are blocked; the password manager remains ON since she doesn't reliably
+  remember passwords. Better Text View is force-installed and pinned, but
+  cannot read or modify pages on `truist.com`. uBlock Origin Lite is also
+  force-installed and starts off the toolbar to block ads without adding
+  another button or presenting donation, subscription, or upgrade prompts.
+  Better Text View is enabled everywhere with a 25% font increase, a 25-pixel
+  threshold, 115% contrast, maximum text opacity, gradient processing, and
+  colorblind color adjustment; all dock sites share that configuration.
+  Pages default to 200% zoom with a 24-pixel default font and 20-pixel minimum
+  font, while pinch zoom remains available.
   Gemini and Chrome's other generative-AI surfaces, built-in AI APIs, webpage
   content sharing, and local AI-model download are explicitly disabled.
   DuckDuckGo replaces Google on startup, new tabs, Home, and address-bar search

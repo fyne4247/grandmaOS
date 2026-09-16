@@ -43,21 +43,25 @@ xset_prop xfce4-power-manager /xfce4-power-manager/lock-screen-suspend-hibernate
 # by root -- grandma's own account has no write access to that directory.)
 
 echo "[grandma-apply-baseline] accessibility baseline..."
+# Expose Chrome's tabs to the launcher through Linux's accessibility tree so
+# dock buttons can activate existing tabs instead of opening duplicates.
+gsettings set org.gnome.desktop.interface toolkit-accessibility true
 # 192 DPI gives an effective 2x desktop scale on the Dell's small high-DPI
 # panel. Keep window scaling at 1 so GTK does not apply a second 2x factor.
 xset_prop xsettings /Xft/DPI int 192
 xset_prop xsettings /Gdk/WindowScalingFactor int 1
 xset_prop xsettings /Gdk/UnscaledDPI int 196608
-xset_prop xsettings /Gtk/FontName string "Ubuntu 13"
+xset_prop xsettings /Gtk/FontName string "Ubuntu 20"
+xset_prop xsettings /Gtk/MonospaceFontName string "Ubuntu Mono 20"
 xset_prop xsettings /Gtk/CursorThemeName string "Adwaita"
 xset_prop xsettings /Gtk/CursorThemeSize int 48
 xset_prop xsettings /Net/ThemeName string "HighContrast"
 xset_prop xsettings /Net/IconThemeName string "HighContrast"
-xset_prop xfwm4 /general/title_font string "Ubuntu Bold 13"
+xset_prop xfwm4 /general/title_font string "Ubuntu Bold 20"
 xset_prop xfwm4 /general/theme string "Default"
 xset_prop xfce4-desktop /desktop-icons/icon-size int 64
 xset_prop xfce4-desktop /desktop-icons/tooltip-size int 96
-# GrandmaOS's permanent sidebar replaces the XFCE panel and its task list.
+# GrandmaOS's permanent bottom dock replaces the XFCE panel and its task list.
 # Rebuild Mint XFCE's failsafe client list without xfce4-panel so it remains
 # absent at future logins. The live panel is stopped by the root-side baseline
 # wrapper after these session settings have been written.
@@ -78,17 +82,17 @@ xset_prop xfce4-session /sessions/Failsafe/Client3_PerScreen bool false
 xfconf-query -c xfce4-session -p /sessions/Failsafe/Client4_Command -r -R >/dev/null 2>&1 || true
 
 # Keep XFWM's large Alt-Tab preview as a fallback for any unexpected window
-# that is not represented by one of the sidebar's fixed app buttons.
+# that is not represented by one of the dock's fixed app buttons.
 xset_prop xfwm4 /general/cycle_preview bool true
 xset_prop xfwm4 /general/cycle_draw_frame bool true
 xset_prop xfwm4 /general/cycle_raise bool true
 xset_prop xfwm4 /general/cycle_tabwin_mode int 0
 
-echo "[grandma-apply-baseline] sidebar shortcut..."
-# The sidebar normally remains visible, but Super can raise it if a badly
+echo "[grandma-apply-baseline] dock shortcut..."
+# The dock normally remains visible, but Super can raise it if a badly
 # behaved window ever covers the reserved dock area.
-xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_L string "/usr/bin/wmctrl -a 'GrandmaOS Sidebar'"
-xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_R string "/usr/bin/wmctrl -a 'GrandmaOS Sidebar'"
+xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_L string "/usr/bin/wmctrl -a 'GrandmaOS Bottom Dock'"
+xset_prop xfce4-keyboard-shortcuts /commands/custom/Super_R string "/usr/bin/wmctrl -a 'GrandmaOS Bottom Dock'"
 
 echo "[grandma-apply-baseline] function-row safety..."
 # Route the volume keys through grandma-volume-step, which clamps the result to

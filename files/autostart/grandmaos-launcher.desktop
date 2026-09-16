@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=GrandmaOS Sidebar
-Comment=Permanent app and volume sidebar
+Name=GrandmaOS Bottom Dock
+Comment=Permanent app and volume controls along the bottom edge
 Exec=/usr/local/sbin/grandma-launcher-supervisor
 NoDisplay=true
 X-GNOME-Autostart-enabled=true
