@@ -38,6 +38,16 @@ echo "[grandma-apply-baseline] lock-screen elimination..."
 xset_prop xfce4-session /general/LockCommand string /bin/true
 # 2) don't re-lock on resume from suspend/hibernate either.
 xset_prop xfce4-power-manager /xfce4-power-manager/lock-screen-suspend-hibernate bool false
+# 3) do not auto-suspend on lid close (temporary, 2026-09-19). On this Dell
+#    XPS 13 (Panther Lake / xe), lid-triggered s2idle races the display driver
+#    and Xorg: we get an "Xorg FatalError / no screens found" core dump and an
+#    immediate reboot instead of a suspend. Set the XFCE power manager lid
+#    action to "do nothing" so it never initiates the suspend. The matching
+#    root-side logind HandleLidSwitch=ignore lives in
+#    /etc/systemd/logind.conf.d/10-grandmaos-lid.conf (installed by
+#    provision.sh). Remove both once the driver issue is fixed.
+xset_prop xfce4-power-manager /xfce4-power-manager/lid-action-on-battery uint 0
+xset_prop xfce4-power-manager /xfce4-power-manager/lid-action-on-ac uint 0
 # (light-locker itself and the legacy xscreensaver autostart entry are
 # disabled via root-owned ~/.config/autostart overrides, applied separately
 # by root -- grandma's own account has no write access to that directory.)
