@@ -74,12 +74,13 @@ account, re-add the Chrome repo, etc. if they're already there.
   enabled, and ordinary F1-F12 behavior is unchanged. Firmware-handled keys
   still require a physical first-boot test on the Dell.
 - A permanent bottom dock that replaces both the fullscreen Apps screen and
-  XFCE's window switcher. Its large Facebook / Messenger / YouTube / Internet /
+  XFCE's window switcher. Its large Facebook / Amazon / YouTube / Internet /
   Truist Banking / AOL Mail buttons open or raise stable Chrome windows, and its
-  Volume Up and Volume Down buttons use the same clamped sound control as the
-  keyboard, with Volume Down to the left of Volume Up. Messenger sits between
-  Facebook and YouTube and uses a site-specific 125% zoom while sharing the
-  main Chrome profile. All dock-launched sites therefore share Better Text
+  Volume Up and Volume Down buttons pair their speaker icons with oversized
+  directional arrows and use the same clamped sound control as the keyboard,
+  with Volume Down to the left of Volume Up. Amazon sits between Facebook and
+  YouTube. All dock-launched
+  sites share the main Chrome profile and Better Text
   View's single global, enable-everywhere configuration instead of maintaining
   separate per-profile settings.
   Before opening anything, each app button scans all Chrome windows and tabs
@@ -88,7 +89,7 @@ account, re-add the Chrome repo, etc. if they're already there.
   The dock measures the active logical display at login, never uses more than
   one eighth of its height, has a blank touch buffer at each end, reserves that
   space so Chrome cannot cover it, and relaunches automatically if closed.
-  Facebook opens automatically once per login. Messenger, YouTube, AOL Mail,
+  Facebook opens automatically once per login. Amazon, YouTube, AOL Mail,
   and Banking stay closed until their button is tapped.
 - Mint Update Manager hidden for Grandma's account while remaining available
   to the administrator
@@ -113,7 +114,11 @@ account, re-add the Chrome repo, etc. if they're already there.
   `grandma-browser-hygiene` helper covers what that policy leaves alone --
   app-mode windows and runaway/unresponsive ones -- by closing an unresponsive
   *background* window or reloading a background RAM hog only after grandma has
-  been idle. The heartbeat runs it silently; it never touches the active window.
+  been idle. A local 30-minute systemd timer runs it without an LLM; it never
+  touches the active window. Healthy checks and ordinary cleanup do not contact
+  OpenClaw or spend model tokens. Monitor failures and corrective actions on
+  exceptionally large background windows (at least 2500 MB) trigger a targeted, event-driven
+  OpenClaw wake; large-window alerts are limited to one every 12 hours.
 - Automatic updates via `unattended-upgrades`, covering both the Mint/Ubuntu
   archives and Chrome's own repo, with a scheduled 4:30am reboot so patches
   actually take effect
@@ -121,7 +126,10 @@ account, re-add the Chrome repo, etc. if they're already there.
   reasserts every 15 minutes (catches mid-session drift, not just login),
   browser profile backs up hourly (SQLite-safe, 14 generations kept)
 - DNS-level ad/scam/malware blocking (AdGuard Family Protection) on the
-  active Wi-Fi connection
+  active Wi-Fi connection. NetworkManager's local dnsmasq plugin conditionally
+  resolves only `openrouter.ai` through Cloudflare Families, avoiding AdGuard's
+  current DNSSEC `SERVFAIL` for that domain without bypassing filtering for
+  Grandma's browsing.
 - GRUB never shows its menu, including after a crash/unclean shutdown
 
 ## What it deliberately does NOT automate
@@ -191,16 +199,21 @@ The installer does not uninstall an existing Brave installation or delete its
 profile, in keeping with GrandmaOS's no-unattended-removal rule. On the new Dell,
 Chrome is the only browser GrandmaOS installs and launches.
 
-Icons for the launcher (Facebook/Messenger/YouTube favicons) are fetched
+Icons for the launcher (Facebook/Amazon/YouTube/Truist/AOL favicons) are fetched
 fresh from Google's public favicon proxy at provision time rather than
 bundled, to keep this directory small and avoid shipping stale logos.
 
 ## OpenClaw watchdog
 
-The optional watchdog runs every five minutes in the OpenClaw owner's user
-systemd manager. It is local/offline in scope: it checks the loopback gateway,
+The optional timers run in the OpenClaw owner's user systemd manager. The
+five-minute watchdog is local/offline in scope: it checks the loopback gateway,
 not Telegram or general internet availability. This prevents a router or
-provider outage from triggering destructive-looking repair activity.
+provider outage from triggering destructive-looking repair activity. The
+30-minute Chrome-hygiene timer also runs locally. Normal checks and ordinary
+cleanup use no model tokens; only a real monitor failure or corrective action
+on a background window using at least 2500 MB wakes OpenClaw. Large-window alerts have a 12-hour
+cooldown. The installer sets that agent's recurring
+heartbeat cadence to `0m`; targeted event wakes remain available.
 
 After two failed local probes ten seconds apart, it runs
 `openclaw doctor --fix --non-interactive`, performs one graceful
@@ -217,9 +230,10 @@ grandma-install-openclaw-watchdog
 sudo loginctl enable-linger ADMIN_USERNAME
 
 # Inspect timer, last run, and logs:
-systemctl --user status grandmaos-openclaw-watchdog.timer
+systemctl --user status grandmaos-openclaw-watchdog.timer grandmaos-browser-hygiene.timer
 cat ~/.local/state/grandmaos/openclaw-watchdog-last-result
 journalctl --user -u grandmaos-openclaw-watchdog.service
+journalctl --user -u grandmaos-browser-hygiene.service
 ```
 
 The watcher is deliberately installed only after OpenClaw setup because the

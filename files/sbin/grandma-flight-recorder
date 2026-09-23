@@ -1,0 +1,101 @@
+#!/bin/bash
+# Lightweight local crash-flight recorder for GrandmaOS.
+# Designed for systemd's root-owned oneshot service; records no network data.
+
+set -u
+umask 022
+
+LOG_ROOT=/var/log/grandma-flight-recorder
+LOCK_FILE=/run/lock/grandma-flight-recorder.lock
+
+mkdir -p -m 0755 "$LOG_ROOT" /run/lock
+exec 9>"$LOCK_FILE"
+flock -n 9 || exit 0
+
+boot_id=$(cat /proc/sys/kernel/random/boot_id) || exit 0
+uptime_line=$(cat /proc/uptime) || exit 0
+uptime_seconds=${uptime_line%% *}
+uptime_whole=${uptime_seconds%%.*}
+chunk=$((uptime_whole / 1800))
+boot_dir="$LOG_ROOT/$boot_id"
+log_file=$(printf '%s/chunk-%03d.log' "$boot_dir" "$chunk")
+
+mkdir -p -m 0755 "$boot_dir"
+
+{
+  printf '=== snapshot ===\n'
+  printf 'wall_clock: %s\n' "$(date --iso-8601=seconds)"
+  printf 'monotonic_uptime_seconds: %s\n' "$uptime_seconds"
+  printf 'loadavg: %s\n' "$(cat /proc/loadavg 2>/dev/null || printf unavailable)"
+  printf '\n-- free -m --\n'
+  free -m 2>/dev/null || true
+
+  printf '\n-- AC state --\n'
+  ac_found=0
+  for supply in /sys/class/power_supply/*; do
+    [ -e "$supply" ] || continue
+    if [ "$(cat "$supply/type" 2>/dev/null || true)" = "Mains" ]; then
+      ac_found=1
+      printf '%s: %s\n' "$(basename "$supply")" "$(cat "$supply/online" 2>/dev/null || printf unavailable)"
+    fi
+  done
+  [ "$ac_found" -eq 1 ] || printf 'unavailable\n'
+
+  printf '\n-- battery state --\n'
+  battery_found=0
+  for supply in /sys/class/power_supply/*; do
+    [ -e "$supply" ] || continue
+    if [ "$(cat "$supply/type" 2>/dev/null || true)" = "Battery" ]; then
+      battery_found=1
+      printf '%s status: %s\n' "$(basename "$supply")" "$(cat "$supply/status" 2>/dev/null || printf unavailable)"
+      printf '%s capacity: %s\n' "$(basename "$supply")" "$(cat "$supply/capacity" 2>/dev/null || printf unavailable)"
+    fi
+  done
+  [ "$battery_found" -eq 1 ] || printf 'unavailable\n'
+
+  printf '\n-- thermal zones (C) --\n'
+  thermal_found=0
+  for zone in /sys/class/thermal/thermal_zone*; do
+    [ -e "$zone" ] || continue
+    temp=$(cat "$zone/temp" 2>/dev/null || true)
+    [ -n "$temp" ] || continue
+    thermal_found=1
+    type=$(cat "$zone/type" 2>/dev/null || printf unknown)
+    if [[ "$temp" =~ ^-?[0-9]+$ ]]; then
+      printf '%s (%s): %d.%03d\n' "$(basename "$zone")" "$type" "$((temp / 1000))" "$((temp < 0 ? -(temp % 1000) : temp % 1000))"
+    else
+      printf '%s (%s): %s\n' "$(basename "$zone")" "$type" "$temp"
+    fi
+  done
+  [ "$thermal_found" -eq 1 ] || printf 'unavailable\n'
+
+  printf '\n-- sensors --\n'
+  if command -v sensors >/dev/null 2>&1; then
+    sensors 2>&1 || true
+  else
+    printf 'not installed\n'
+  fi
+
+  printf '\n-- kernel warnings/errors, previous 2 minutes --\n'
+  if command -v journalctl >/dev/null 2>&1; then
+    journalctl -k --since '2 minutes ago' -p warning..alert --no-pager 2>&1 || true
+  else
+    printf 'journalctl unavailable\n'
+  fi
+  printf '=== end snapshot ===\n\n'
+} >>"$log_file"
+
+# Flush each completed snapshot before releasing the lock.
+sync -f "$log_file" 2>/dev/null || sync "$log_file"
+
+# Keep only the newest ten recorder boot directories.  The name check prevents
+# this cleanup from touching anything except boot-ID-shaped directories here.
+mapfile -t old_boot_dirs < <(
+  find "$LOG_ROOT" -mindepth 1 -maxdepth 1 -type d \
+    -regextype posix-extended \
+    -regex '.*/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' \
+    -printf '%T@ %p\n' | sort -n | head -n -10 | cut -d' ' -f2-
+)
+for old_boot_dir in "${old_boot_dirs[@]}"; do
+  [ -n "$old_boot_dir" ] && rm -rf -- "$old_boot_dir"
+done

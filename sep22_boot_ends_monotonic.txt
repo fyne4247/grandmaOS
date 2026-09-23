@@ -1,0 +1,1206 @@
+===== BOOT -10 =====
+[ 5928.565429] Grammy grandma-browser-hygiene-monitor[47275]: [grandma-browser-hygiene-monitor] healthy/no action; OpenClaw was not contacted
+[ 5928.566052] Grammy systemd[982]: Finished grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls.
+[ 5929.572889] Grammy grandma-openclaw-watchdog[47276]: [grandma-openclaw-watchdog] local gateway healthy
+[ 5929.576736] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 5929.577027] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.866s CPU time.
+[ 6012.631951] Grammy bash[47396]: Starting app-server daemon with remote control enabled...
+[ 6012.678368] Grammy bash[47396]: Error: app server is running but is not managed by codex app-server daemon
+[ 6132.697096] Grammy bash[47577]: Starting app-server daemon with remote control enabled...
+[ 6132.755878] Grammy bash[47577]: Error: app server is running but is not managed by codex app-server daemon
+[ 6252.777808] Grammy bash[47697]: Starting app-server daemon with remote control enabled...
+[ 6252.829494] Grammy bash[47697]: Error: app server is running but is not managed by codex app-server daemon
+[ 6288.180491] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 6289.571938] Grammy grandma-openclaw-watchdog[47761]: [grandma-openclaw-watchdog] local gateway healthy
+[ 6289.574729] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 6289.574934] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.805s CPU time.
+[ 6351.068962] Grammy CRON[47830]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[ 6351.075230] Grammy CRON[47831]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)
+[ 6351.075490] Grammy CRON[47830]: pam_unix(cron:session): session closed for user root
+[ 6372.849798] Grammy bash[47851]: Starting app-server daemon with remote control enabled...
+[ 6372.904456] Grammy bash[47851]: Error: app server is running but is not managed by codex app-server daemon
+[ 6492.926136] Grammy bash[47919]: Starting app-server daemon with remote control enabled...
+[ 6492.936780] Grammy systemd[1]: Starting fwupd-refresh.service - Refresh fwupd metadata and update motd...
+[ 6492.980336] Grammy bash[47919]: Error: app server is running but is not managed by codex app-server daemon
+[ 6493.029399] Grammy systemd[1]: fwupd-refresh.service: Deactivated successfully.
+[ 6493.029815] Grammy systemd[1]: Finished fwupd-refresh.service - Refresh fwupd metadata and update motd.
+[ 6528.183984] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 6528.241082] Grammy runuser[48206]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 6528.246718] Grammy grandma-apply-baseline-system[48207]: [grandma-apply-baseline] lock-screen elimination...
+[ 6528.254554] Grammy dbus-daemon[1054]: [session uid=1001 pid=1054] Activating service name='org.xfce.Xfconf' requested by ':1.1297' (uid=1001 pid=48208 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 6528.263988] Grammy dbus-daemon[1054]: [session uid=1001 pid=1054] Successfully activated service 'org.xfce.Xfconf'
+[ 6528.340762] Grammy grandma-apply-baseline-system[48207]: [grandma-apply-baseline] accessibility baseline...
+[ 6529.026511] Grammy grandma-apply-baseline-system[48207]: [grandma-apply-baseline] dock shortcut...
+[ 6529.077426] Grammy grandma-apply-baseline-system[48207]: [grandma-apply-baseline] function-row safety...
+[ 6529.872779] Grammy grandma-apply-baseline-system[48207]: [grandma-apply-baseline] done.
+[ 6529.873508] Grammy runuser[48206]: pam_unix(runuser:session): session closed for user grandma
+[ 6529.959850] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 6529.960324] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 6529.960412] Grammy systemd[1]: grandmaos-baseline.service: Consumed 1.578s CPU time.
+[ 6612.998891] Grammy bash[49052]: Starting app-server daemon with remote control enabled...
+[ 6613.046298] Grammy bash[49052]: Error: app server is running but is not managed by codex app-server daemon
+[ 6648.181798] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 6648.183050] Grammy systemd[1]: Started anacron.service - Run anacron jobs.
+[ 6648.191875] Grammy anacron[49161]: Anacron 2.3 started on 2026-09-22
+[ 6648.192852] Grammy anacron[49161]: Normal exit (0 jobs run)
+[ 6648.194576] Grammy systemd[1]: anacron.service: Deactivated successfully.
+[ 6649.463309] Grammy grandma-openclaw-watchdog[49160]: [grandma-openclaw-watchdog] local gateway healthy
+[ 6649.466326] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 6649.466528] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.747s CPU time.
+[ 6733.060612] Grammy bash[49257]: Starting app-server daemon with remote control enabled...
+[ 6733.141029] Grammy bash[49257]: Error: app server is running but is not managed by codex app-server daemon
+[ 6853.155988] Grammy bash[49389]: Starting app-server daemon with remote control enabled...
+[ 6853.199017] Grammy bash[49389]: Error: app server is running but is not managed by codex app-server daemon
+[ 6973.217777] Grammy bash[49493]: Starting app-server daemon with remote control enabled...
+[ 6973.265352] Grammy bash[49493]: Error: app server is running but is not managed by codex app-server daemon
+[ 7008.178617] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 7009.491286] Grammy grandma-openclaw-watchdog[49546]: [grandma-openclaw-watchdog] local gateway healthy
+[ 7009.494332] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 7009.494577] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.863s CPU time.
+[ 7093.283765] Grammy bash[49618]: Starting app-server daemon with remote control enabled...
+[ 7093.335539] Grammy bash[49618]: Error: app server is running but is not managed by codex app-server daemon
+[ 7213.351131] Grammy bash[49744]: Starting app-server daemon with remote control enabled...
+[ 7213.406749] Grammy bash[49744]: Error: app server is running but is not managed by codex app-server daemon
+[ 7333.424957] Grammy bash[49835]: Starting app-server daemon with remote control enabled...
+[ 7333.474105] Grammy bash[49835]: Error: app server is running but is not managed by codex app-server daemon
+[ 7368.179440] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 7369.557324] Grammy grandma-openclaw-watchdog[49940]: [grandma-openclaw-watchdog] local gateway healthy
+[ 7369.560320] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 7369.560562] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.930s CPU time.
+[ 7436.243808] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 7436.298212] Grammy runuser[50012]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 7436.304052] Grammy grandma-apply-baseline-system[50013]: [grandma-apply-baseline] lock-screen elimination...
+[ 7436.311570] Grammy dbus-daemon[1054]: [session uid=1001 pid=1054] Activating service name='org.xfce.Xfconf' requested by ':1.1451' (uid=1001 pid=50014 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 7436.322543] Grammy dbus-daemon[1054]: [session uid=1001 pid=1054] Successfully activated service 'org.xfce.Xfconf'
+[ 7436.463263] Grammy grandma-apply-baseline-system[50013]: [grandma-apply-baseline] accessibility baseline...
+[ 7436.897381] Grammy grandma-apply-baseline-system[50013]: [grandma-apply-baseline] dock shortcut...
+[ 7436.941284] Grammy grandma-apply-baseline-system[50013]: [grandma-apply-baseline] function-row safety...
+[ 7437.510813] Grammy grandma-apply-baseline-system[50013]: [grandma-apply-baseline] done.
+[ 7437.511169] Grammy runuser[50012]: pam_unix(runuser:session): session closed for user grandma
+[ 7437.559056] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 7437.559302] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 7437.559347] Grammy systemd[1]: grandmaos-baseline.service: Consumed 1.057s CPU time.
+[ 7453.491722] Grammy bash[50803]: Starting app-server daemon with remote control enabled...
+[ 7453.539626] Grammy bash[50803]: Error: app server is running but is not managed by codex app-server daemon
+[ 7538.179593] Grammy systemd[1]: Starting grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe)...
+[ 7538.213504] Grammy grandma-browser-backup[51062]: starting backup: profile=/home/grandma/.config/google-chrome/Default
+[ 7538.252778] Grammy grandma-browser-backup[51070]: Chrome is currently running for grandma; proceeding anyway (SQLite-safe backup method)
+[ 7538.620902] Grammy grandma-browser-backup[51276]: sqlite3 .backup failed for WebStorage/QuotaManager, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7539.078021] Grammy grandma-browser-backup[51533]: sqlite3 .backup failed for Login Data For Account, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7539.388694] Grammy grandma-browser-backup[51708]: sqlite3 .backup failed for History, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7539.519203] Grammy grandma-browser-backup[51781]: sqlite3 .backup failed for Network Action Predictor, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7540.494146] Grammy grandma-browser-backup[52639]: sqlite3 .backup failed for HistoryEmbeddings, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7546.522142] Grammy grandma-browser-backup[59732]: sqlite3 .backup failed for Shortcuts, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7546.768524] Grammy grandma-browser-backup[59967]: sqlite3 .backup failed for DIPS, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7546.792980] Grammy grandma-browser-backup[59990]: sqlite3 .backup failed for declarative_performance_observer.db, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7546.805581] Grammy grandma-browser-backup[60004]: sqlite3 .backup failed for Favicons, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7553.154111] Grammy grandma-browser-backup[67217]: sqlite3 .backup failed for Web Data, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 7553.588306] Grammy grandma-browser-backup[67581]: backup OK: generation=20260922-104949 size=102M files=2350 (18 sqlite (safe .backup), 2322 plain-copy, 10 sqlite-fallback-cp (see log -- possibly inconsistent)) kept=14 pruned=1 chrome_running=yes
+[ 7553.588499] Grammy grandma-browser-backup[51045]: Backup complete: /var/backups/grandmaos/chrome/20260922-104949 (102M, 2350 files, 18 sqlite (safe .backup), 2322 plain-copy, 10 sqlite-fallback-cp (see log -- possibly inconsistent))
+[ 7553.588671] Grammy grandma-browser-backup[51045]: Kept 14 generations, pruned 1.
+[ 7553.589385] Grammy systemd[1]: grandmaos-browser-backup.service: Deactivated successfully.
+[ 7553.589592] Grammy systemd[1]: Finished grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe).
+[ 7553.589731] Grammy systemd[1]: grandmaos-browser-backup.service: Consumed 17.834s CPU time.
+[ 7573.550767] Grammy bash[67615]: Starting app-server daemon with remote control enabled...
+[ 7573.583450] Grammy bash[67615]: Error: app server is running but is not managed by codex app-server daemon
+[ 7693.599281] Grammy bash[67722]: Starting app-server daemon with remote control enabled...
+[ 7693.656235] Grammy bash[67722]: Error: app server is running but is not managed by codex app-server daemon
+[ 7728.174287] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 7729.472024] Grammy grandma-openclaw-watchdog[67785]: [grandma-openclaw-watchdog] local gateway healthy
+[ 7729.474957] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 7729.475191] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.796s CPU time.
+[ 7788.176470] Grammy systemd[982]: Starting grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls...
+[ 7788.245331] Grammy sudo[67869]:     fish : PWD=/home/fish ; USER=grandma ; COMMAND=/usr/bin/env DISPLAY=:0 XAUTHORITY=/home/grandma/.Xauthority XDG_RUNTIME_DIR=/run/user/1001 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1001/bus /usr/local/sbin/grandma-browser-hygiene
+[ 7788.247607] Grammy sudo[67869]: pam_unix(sudo:session): session opened for user grandma(uid=1001) by fish(uid=1000)
+[ 7788.870420] Grammy sudo[67869]: pam_unix(sudo:session): session closed for user grandma
+[ 7788.871956] Grammy grandma-browser-hygiene-monitor[67866]: chrome-hygiene: nothing to do (available 2758 MB, idle 618 ms)
+[ 7788.876036] Grammy grandma-browser-hygiene-monitor[67866]: [grandma-browser-hygiene-monitor] healthy/no action; OpenClaw was not contacted
+[ 7788.878254] Grammy systemd[982]: Finished grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls.
+[ 7813.674858] Grammy bash[67881]: Starting app-server daemon with remote control enabled...
+[ 7813.722403] Grammy bash[67881]: Error: app server is running but is not managed by codex app-server daemon
+[ 7874.521013] Grammy kernel: perf: interrupt took too long (2511 > 2500), lowering kernel.perf_event_max_sample_rate to 79000
+[ 7933.740117] Grammy bash[67986]: Starting app-server daemon with remote control enabled...
+[ 7933.785616] Grammy bash[67986]: Error: app server is running but is not managed by codex app-server daemon
+[ 8024.565613] Grammy wpa_supplicant[764]: wlp0s20f3: WPA: Group rekeying completed with 20:c0:47:be:3c:42 [GTK=CCMP]
+[ 8053.803960] Grammy bash[68141]: Starting app-server daemon with remote control enabled...
+[ 8053.853196] Grammy bash[68141]: Error: app server is running but is not managed by codex app-server daemon
+[ 8088.180361] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 8089.990680] Grammy grandma-openclaw-watchdog[68195]: [grandma-openclaw-watchdog] local gateway healthy
+[ 8089.995499] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 8089.995772] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 2.225s CPU time.
+[ 8173.906771] Grammy bash[68324]: Starting app-server daemon with remote control enabled...
+[ 8173.938058] Grammy bash[68324]: Error: app server is running but is not managed by codex app-server daemon
+[ 8293.951910] Grammy bash[68385]: Starting app-server daemon with remote control enabled...
+[ 8293.992534] Grammy bash[68385]: Error: app server is running but is not managed by codex app-server daemon
+[ 8347.119473] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 8347.205221] Grammy runuser[68457]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 8347.209981] Grammy grandma-apply-baseline-system[68458]: [grandma-apply-baseline] lock-screen elimination...
+[ 8347.216480] Grammy dbus-daemon[1054]: [session uid=1001 pid=1054] Activating service name='org.xfce.Xfconf' requested by ':1.1605' (uid=1001 pid=68459 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 8347.224764] Grammy dbus-daemon[1054]: [session uid=1001 pid=1054] Successfully activated service 'org.xfce.Xfconf'
+[ 8347.294732] Grammy grandma-apply-baseline-system[68458]: [grandma-apply-baseline] accessibility baseline...
+[ 8347.710234] Grammy grandma-apply-baseline-system[68458]: [grandma-apply-baseline] dock shortcut...
+[ 8347.738846] Grammy grandma-apply-baseline-system[68458]: [grandma-apply-baseline] function-row safety...
+[ 8348.219560] Grammy grandma-apply-baseline-system[68458]: [grandma-apply-baseline] done.
+[ 8348.219955] Grammy runuser[68457]: pam_unix(runuser:session): session closed for user grandma
+[ 8348.267641] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 8348.267907] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 8414.011261] Grammy bash[69280]: Starting app-server daemon with remote control enabled...
+[ 8414.059787] Grammy bash[69280]: Error: app server is running but is not managed by codex app-server daemon
+[ 8448.180674] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 8449.573730] Grammy grandma-openclaw-watchdog[69339]: [grandma-openclaw-watchdog] local gateway healthy
+[ 8449.576546] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 8449.576766] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.813s CPU time.
+[ 8534.079490] Grammy bash[69411]: Starting app-server daemon with remote control enabled...
+[ 8534.129377] Grammy bash[69411]: Error: app server is running but is not managed by codex app-server daemon
+[ 8654.151442] Grammy bash[69475]: Starting app-server daemon with remote control enabled...
+[ 8654.200513] Grammy bash[69475]: Error: app server is running but is not managed by codex app-server daemon
+[ 8748.193123] Grammy systemd[1]: Starting fwupd-refresh.service - Refresh fwupd metadata and update motd...
+[ 8748.291018] Grammy systemd[1]: fwupd-refresh.service: Deactivated successfully.
+[ 8748.291302] Grammy systemd[1]: Finished fwupd-refresh.service - Refresh fwupd metadata and update motd.
+[ 8774.228324] Grammy bash[69554]: Starting app-server daemon with remote control enabled...
+[ 8774.289092] Grammy bash[69554]: Error: app server is running but is not managed by codex app-server daemon
+[ 8808.183468] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 8809.618744] Grammy grandma-openclaw-watchdog[69605]: [grandma-openclaw-watchdog] local gateway healthy
+[ 8809.621665] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 8809.621860] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.964s CPU time.
+[ 8894.308402] Grammy bash[69669]: Starting app-server daemon with remote control enabled...
+[ 8894.356952] Grammy bash[69669]: Error: app server is running but is not managed by codex app-server daemon
+[ 9014.383312] Grammy bash[69747]: Starting app-server daemon with remote control enabled...
+[ 9014.441450] Grammy bash[69747]: Error: app server is running but is not managed by codex app-server daemon
+[ 9134.469867] Grammy bash[69800]: Starting app-server daemon with remote control enabled...
+[ 9134.529631] Grammy bash[69800]: Error: app server is running but is not managed by codex app-server daemon
+[ 9168.180717] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 9169.574082] Grammy grandma-openclaw-watchdog[69851]: [grandma-openclaw-watchdog] local gateway healthy
+[ 9169.576899] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 9169.577103] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.976s CPU time.
+[ 9171.094076] Grammy CRON[69903]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[ 9171.096074] Grammy CRON[69904]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)
+[ 9171.100779] Grammy CRON[69903]: pam_unix(cron:session): session closed for user root
+[ 9254.554728] Grammy bash[69928]: Starting app-server daemon with remote control enabled...
+[ 9254.609839] Grammy bash[69928]: Error: app server is running but is not managed by codex app-server daemon
+[ 9287.087876] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 9287.150268] Grammy runuser[69995]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 9287.156928] Grammy grandma-apply-baseline-system[69996]: [grandma-apply-baseline] lock-screen elimination...
+[ 9287.164726] Grammy dbus-daemon[1054]: [session uid=1001 pid=1054] Activating service name='org.xfce.Xfconf' requested by ':1.1759' (uid=1001 pid=69997 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 9287.175196] Grammy dbus-daemon[1054]: [session uid=1001 pid=1054] Successfully activated service 'org.xfce.Xfconf'
+[ 9287.256826] Grammy grandma-apply-baseline-system[69996]: [grandma-apply-baseline] accessibility baseline...
+[ 9287.961536] Grammy grandma-apply-baseline-system[69996]: [grandma-apply-baseline] dock shortcut...
+[ 9288.010350] Grammy grandma-apply-baseline-system[69996]: [grandma-apply-baseline] function-row safety...
+[ 9288.789955] Grammy grandma-apply-baseline-system[69996]: [grandma-apply-baseline] done.
+[ 9288.790399] Grammy runuser[69995]: pam_unix(runuser:session): session closed for user grandma
+[ 9288.872656] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 9288.873103] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 9288.873185] Grammy systemd[1]: grandmaos-baseline.service: Consumed 1.602s CPU time.
+[ 9374.634049] Grammy bash[70808]: Starting app-server daemon with remote control enabled...
+[ 9374.687387] Grammy bash[70808]: Error: app server is running but is not managed by codex app-server daemon
+[ 9494.708275] Grammy bash[70878]: Starting app-server daemon with remote control enabled...
+[ 9494.756719] Grammy bash[70878]: Error: app server is running but is not managed by codex app-server daemon
+[ 9528.183896] Grammy systemd[982]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 9529.588796] Grammy grandma-openclaw-watchdog[70931]: [grandma-openclaw-watchdog] local gateway healthy
+[ 9529.591485] Grammy systemd[982]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 9529.591585] Grammy systemd[982]: grandmaos-openclaw-watchdog.service: Consumed 1.966s CPU time.
+===== BOOT -9 =====
+[ 2833.431229] Grammy systemd[1]: grandmaos-baseline.service: Consumed 1.375s CPU time.
+[ 2891.096804] Grammy bash[25215]: Starting app-server daemon with remote control enabled...
+[ 2891.139951] Grammy bash[25215]: Error: app server is running but is not managed by codex app-server daemon
+[ 3009.979461] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 3011.152407] Grammy bash[25334]: Starting app-server daemon with remote control enabled...
+[ 3011.182978] Grammy bash[25334]: Error: app server is running but is not managed by codex app-server daemon
+[ 3011.224772] Grammy grandma-openclaw-watchdog[25286]: [grandma-openclaw-watchdog] local gateway healthy
+[ 3011.227450] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 3011.227650] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 1.641s CPU time.
+[ 3131.197961] Grammy bash[25393]: Starting app-server daemon with remote control enabled...
+[ 3131.247585] Grammy bash[25393]: Error: app server is running but is not managed by codex app-server daemon
+[ 3251.253937] Grammy bash[25451]: Starting app-server daemon with remote control enabled...
+[ 3251.296389] Grammy bash[25451]: Error: app server is running but is not managed by codex app-server daemon
+[ 3334.259105] Grammy CRON[25522]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[ 3334.264557] Grammy CRON[25523]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)
+[ 3334.264734] Grammy CRON[25522]: pam_unix(cron:session): session closed for user root
+[ 3369.975672] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 3371.129037] Grammy grandma-openclaw-watchdog[25524]: [grandma-openclaw-watchdog] local gateway healthy
+[ 3371.132752] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 3371.133014] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 1.598s CPU time.
+[ 3371.312585] Grammy bash[25577]: Starting app-server daemon with remote control enabled...
+[ 3371.352809] Grammy bash[25577]: Error: app server is running but is not managed by codex app-server daemon
+[ 3491.368350] Grammy bash[25640]: Starting app-server daemon with remote control enabled...
+[ 3491.417836] Grammy bash[25640]: Error: app server is running but is not managed by codex app-server daemon
+[ 3549.974932] Grammy systemd[1]: Starting fwupd-refresh.service - Refresh fwupd metadata and update motd...
+[ 3550.057697] Grammy dbus-daemon[662]: [system] Activating via systemd: service name='org.freedesktop.fwupd' unit='fwupd.service' requested by ':1.75' (uid=988 pid=25708 comm="/usr/bin/fwupdmgr refresh" label="unconfined")
+[ 3550.067674] Grammy systemd[1]: Starting modprobe@sd_mod.service - Load Kernel Module sd_mod...
+[ 3550.071726] Grammy systemd[1]: modprobe@sd_mod.service: Deactivated successfully.
+[ 3550.071897] Grammy systemd[1]: Finished modprobe@sd_mod.service - Load Kernel Module sd_mod.
+[ 3550.080470] Grammy systemd[1]: Starting fwupd.service - Firmware update daemon...
+[ 3551.208137] Grammy fwupd[25716]: 16:33:38.209 FuMain               fwupd 2.0.20 ready for requests (locale en_US.UTF-8)
+[ 3551.211180] Grammy dbus-daemon[662]: [system] Successfully activated service 'org.freedesktop.fwupd'
+[ 3551.211610] Grammy systemd[1]: Started fwupd.service - Firmware update daemon.
+[ 3551.265396] Grammy systemd[1]: fwupd-refresh.service: Deactivated successfully.
+[ 3551.265632] Grammy systemd[1]: Finished fwupd-refresh.service - Refresh fwupd metadata and update motd.
+[ 3611.428037] Grammy bash[25739]: Starting app-server daemon with remote control enabled...
+[ 3611.470117] Grammy bash[25739]: Error: app server is running but is not managed by codex app-server daemon
+[ 3642.979522] Grammy systemd[1]: Started anacron.service - Run anacron jobs.
+[ 3642.981631] Grammy anacron[25789]: Anacron 2.3 started on 2026-09-22
+[ 3642.982441] Grammy anacron[25789]: Normal exit (0 jobs run)
+[ 3642.984050] Grammy systemd[1]: anacron.service: Deactivated successfully.
+[ 3729.974614] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 3731.155792] Grammy grandma-openclaw-watchdog[25793]: [grandma-openclaw-watchdog] local gateway healthy
+[ 3731.158546] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 3731.158752] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 1.593s CPU time.
+[ 3731.486764] Grammy bash[25845]: Starting app-server daemon with remote control enabled...
+[ 3731.525762] Grammy bash[25845]: Error: app server is running but is not managed by codex app-server daemon
+[ 3741.353939] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 3741.402134] Grammy runuser[25912]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 3741.406940] Grammy grandma-apply-baseline-system[25913]: [grandma-apply-baseline] lock-screen elimination...
+[ 3741.413068] Grammy dbus-daemon[1051]: [session uid=1001 pid=1051] Activating service name='org.xfce.Xfconf' requested by ':1.834' (uid=1001 pid=25914 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 3741.420184] Grammy dbus-daemon[1051]: [session uid=1001 pid=1051] Successfully activated service 'org.xfce.Xfconf'
+[ 3741.490076] Grammy grandma-apply-baseline-system[25913]: [grandma-apply-baseline] accessibility baseline...
+[ 3742.047377] Grammy grandma-apply-baseline-system[25913]: [grandma-apply-baseline] dock shortcut...
+[ 3742.088769] Grammy grandma-apply-baseline-system[25913]: [grandma-apply-baseline] function-row safety...
+[ 3742.793743] Grammy grandma-apply-baseline-system[25913]: [grandma-apply-baseline] done.
+[ 3742.794404] Grammy runuser[25912]: pam_unix(runuser:session): session closed for user grandma
+[ 3742.862611] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 3742.862850] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 3742.862886] Grammy systemd[1]: grandmaos-baseline.service: Consumed 1.350s CPU time.
+[ 3851.541054] Grammy bash[26733]: Starting app-server daemon with remote control enabled...
+[ 3851.591135] Grammy bash[26733]: Error: app server is running but is not managed by codex app-server daemon
+[ 3908.565160] Grammy systemd[1]: Starting grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe)...
+[ 3908.614594] Grammy grandma-browser-backup[26935]: starting backup: profile=/home/grandma/.config/google-chrome/Default
+[ 3908.627660] Grammy grandma-browser-backup[26943]: Chrome is currently running for grandma; proceeding anyway (SQLite-safe backup method)
+[ 3908.890170] Grammy grandma-browser-backup[27149]: sqlite3 .backup failed for WebStorage/QuotaManager, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3909.440636] Grammy grandma-browser-backup[27574]: sqlite3 .backup failed for History, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3909.542067] Grammy grandma-browser-backup[27647]: sqlite3 .backup failed for Network Action Predictor, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3910.489536] Grammy grandma-browser-backup[28505]: sqlite3 .backup failed for HistoryEmbeddings, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3915.661744] Grammy grandma-browser-backup[35813]: sqlite3 .backup failed for DIPS, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3915.690497] Grammy grandma-browser-backup[35836]: sqlite3 .backup failed for declarative_performance_observer.db, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3920.827177] Grammy grandma-browser-backup[43056]: sqlite3 .backup failed for Web Data, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3921.389787] Grammy grandma-browser-backup[43434]: backup OK: generation=20260922-123935 size=102M files=2350 (21 sqlite (safe .backup), 2322 plain-copy, 7 sqlite-fallback-cp (see log -- possibly inconsistent)) kept=14 pruned=1 chrome_running=yes
+[ 3921.390140] Grammy grandma-browser-backup[26918]: Backup complete: /var/backups/grandmaos/chrome/20260922-123935 (102M, 2350 files, 21 sqlite (safe .backup), 2322 plain-copy, 7 sqlite-fallback-cp (see log -- possibly inconsistent))
+[ 3921.390140] Grammy grandma-browser-backup[26918]: Kept 14 generations, pruned 1.
+[ 3921.391975] Grammy systemd[1]: grandmaos-browser-backup.service: Deactivated successfully.
+[ 3921.392288] Grammy systemd[1]: Finished grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe).
+[ 3921.392559] Grammy systemd[1]: grandmaos-browser-backup.service: Consumed 14.882s CPU time.
+[ 3971.598634] Grammy bash[43437]: Starting app-server daemon with remote control enabled...
+[ 3971.639398] Grammy bash[43437]: Error: app server is running but is not managed by codex app-server daemon
+[ 4021.811614] Grammy systemd-logind[716]: Lid opened.
+[ 4029.979731] Grammy systemd[987]: Starting grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls...
+[ 4029.997667] Grammy sudo[43505]:     fish : PWD=/home/fish ; USER=grandma ; COMMAND=/usr/bin/env DISPLAY=:0 XAUTHORITY=/home/grandma/.Xauthority XDG_RUNTIME_DIR=/run/user/1001 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1001/bus /usr/local/sbin/grandma-browser-hygiene
+[ 4030.000578] Grammy sudo[43505]: pam_unix(sudo:session): session opened for user grandma(uid=1001) by fish(uid=1000)
+[ 4030.170105] Grammy sudo[43505]: pam_unix(sudo:session): session closed for user grandma
+[ 4030.171485] Grammy grandma-browser-hygiene-monitor[43502]: chrome-hygiene: nothing to do (available 5091 MB, idle 7825 ms)
+[ 4030.173442] Grammy grandma-browser-hygiene-monitor[43502]: [grandma-browser-hygiene-monitor] healthy/no action; OpenClaw was not contacted
+[ 4030.174309] Grammy systemd[987]: Finished grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls.
+[ 4089.975892] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 4091.361146] Grammy grandma-openclaw-watchdog[43649]: [grandma-openclaw-watchdog] local gateway healthy
+[ 4091.364334] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 4091.364592] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 1.845s CPU time.
+[ 4091.650412] Grammy bash[43701]: Starting app-server daemon with remote control enabled...
+[ 4091.682084] Grammy bash[43701]: Error: app server is running but is not managed by codex app-server daemon
+[ 4211.697390] Grammy bash[43776]: Starting app-server daemon with remote control enabled...
+[ 4211.747282] Grammy bash[43776]: Error: app server is running but is not managed by codex app-server daemon
+[ 4331.755692] Grammy bash[43841]: Starting app-server daemon with remote control enabled...
+[ 4331.796329] Grammy bash[43841]: Error: app server is running but is not managed by codex app-server daemon
+[ 4449.975648] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 4451.406486] Grammy grandma-openclaw-watchdog[43965]: [grandma-openclaw-watchdog] local gateway healthy
+[ 4451.409420] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 4451.409632] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 2.059s CPU time.
+[ 4451.813836] Grammy bash[44017]: Starting app-server daemon with remote control enabled...
+[ 4451.854580] Grammy bash[44017]: Error: app server is running but is not managed by codex app-server daemon
+[ 4571.870698] Grammy bash[44138]: Starting app-server daemon with remote control enabled...
+[ 4571.915507] Grammy bash[44138]: Error: app server is running but is not managed by codex app-server daemon
+[ 4649.974610] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 4650.015650] Grammy runuser[44290]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 4650.020011] Grammy grandma-apply-baseline-system[44291]: [grandma-apply-baseline] lock-screen elimination...
+[ 4650.025702] Grammy dbus-daemon[1051]: [session uid=1001 pid=1051] Activating service name='org.xfce.Xfconf' requested by ':1.988' (uid=1001 pid=44292 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 4650.032637] Grammy dbus-daemon[1051]: [session uid=1001 pid=1051] Successfully activated service 'org.xfce.Xfconf'
+[ 4650.090714] Grammy grandma-apply-baseline-system[44291]: [grandma-apply-baseline] accessibility baseline...
+[ 4650.462501] Grammy grandma-apply-baseline-system[44291]: [grandma-apply-baseline] dock shortcut...
+[ 4650.490053] Grammy grandma-apply-baseline-system[44291]: [grandma-apply-baseline] function-row safety...
+[ 4650.904811] Grammy grandma-apply-baseline-system[44291]: [grandma-apply-baseline] done.
+[ 4650.904995] Grammy runuser[44290]: pam_unix(runuser:session): session closed for user grandma
+[ 4650.953613] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 4650.953732] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 4691.931677] Grammy bash[45168]: Starting app-server daemon with remote control enabled...
+[ 4691.976112] Grammy bash[45168]: Error: app server is running but is not managed by codex app-server daemon
+[ 4809.971104] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 4811.310253] Grammy grandma-openclaw-watchdog[45289]: [grandma-openclaw-watchdog] local gateway healthy
+[ 4811.313252] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 4811.313481] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 1.800s CPU time.
+[ 4811.993286] Grammy bash[45342]: Starting app-server daemon with remote control enabled...
+[ 4812.034147] Grammy bash[45342]: Error: app server is running but is not managed by codex app-server daemon
+[ 4932.053442] Grammy bash[45452]: Starting app-server daemon with remote control enabled...
+[ 4932.101794] Grammy bash[45452]: Error: app server is running but is not managed by codex app-server daemon
+[ 5052.120338] Grammy bash[45563]: Starting app-server daemon with remote control enabled...
+[ 5052.170467] Grammy bash[45563]: Error: app server is running but is not managed by codex app-server daemon
+[ 5116.965038] Grammy NetworkManager[773]: <info>  [1790096383.9668] manager: NetworkManager state is now CONNECTED_SITE
+[ 5116.971252] Grammy dbus-daemon[662]: [system] Activating via systemd: service name='org.freedesktop.nm_dispatcher' unit='dbus-org.freedesktop.nm-dispatcher.service' requested by ':1.14' (uid=0 pid=773 comm="/usr/sbin/NetworkManager --no-daemon" label="unconfined")
+[ 5116.976621] Grammy systemd[1]: Starting NetworkManager-dispatcher.service - Network Manager Script Dispatcher Service...
+[ 5116.991047] Grammy dbus-daemon[662]: [system] Successfully activated service 'org.freedesktop.nm_dispatcher'
+[ 5116.991359] Grammy systemd[1]: Started NetworkManager-dispatcher.service - Network Manager Script Dispatcher Service.
+[ 5117.012314] Grammy NetworkManager[773]: <info>  [1790096384.0141] manager: NetworkManager state is now CONNECTED_GLOBAL
+[ 5127.004570] Grammy systemd[1]: NetworkManager-dispatcher.service: Deactivated successfully.
+[ 5169.974445] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 5171.493801] Grammy grandma-openclaw-watchdog[45641]: [grandma-openclaw-watchdog] local gateway healthy
+[ 5171.497054] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 5171.497271] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 1.993s CPU time.
+[ 5172.187753] Grammy bash[45694]: Starting app-server daemon with remote control enabled...
+[ 5172.231685] Grammy bash[45694]: Error: app server is running but is not managed by codex app-server daemon
+[ 5250.109721] Grammy wpa_supplicant[778]: wlp0s20f3: WPA: Group rekeying completed with 20:c0:47:be:3c:42 [GTK=CCMP]
+[ 5292.248557] Grammy bash[45850]: Starting app-server daemon with remote control enabled...
+[ 5292.297106] Grammy bash[45850]: Error: app server is running but is not managed by codex app-server daemon
+[ 5412.315090] Grammy bash[45908]: Starting app-server daemon with remote control enabled...
+[ 5412.361153] Grammy bash[45908]: Error: app server is running but is not managed by codex app-server daemon
+[ 5529.976738] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 5529.978017] Grammy systemd[1]: Starting fwupd-refresh.service - Refresh fwupd metadata and update motd...
+[ 5530.132426] Grammy systemd[1]: fwupd-refresh.service: Deactivated successfully.
+[ 5530.132657] Grammy systemd[1]: Finished fwupd-refresh.service - Refresh fwupd metadata and update motd.
+[ 5531.368086] Grammy grandma-openclaw-watchdog[46043]: [grandma-openclaw-watchdog] local gateway healthy
+[ 5531.371474] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 5531.371743] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 1.978s CPU time.
+[ 5532.378904] Grammy bash[46106]: Starting app-server daemon with remote control enabled...
+[ 5532.428014] Grammy bash[46106]: Error: app server is running but is not managed by codex app-server daemon
+[ 5559.853557] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 5559.907037] Grammy runuser[46232]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 5559.913512] Grammy grandma-apply-baseline-system[46233]: [grandma-apply-baseline] lock-screen elimination...
+[ 5559.921338] Grammy dbus-daemon[1051]: [session uid=1001 pid=1051] Activating service name='org.xfce.Xfconf' requested by ':1.1142' (uid=1001 pid=46234 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 5559.932537] Grammy dbus-daemon[1051]: [session uid=1001 pid=1051] Successfully activated service 'org.xfce.Xfconf'
+[ 5560.017273] Grammy grandma-apply-baseline-system[46233]: [grandma-apply-baseline] accessibility baseline...
+[ 5560.725577] Grammy grandma-apply-baseline-system[46233]: [grandma-apply-baseline] dock shortcut...
+[ 5560.773395] Grammy grandma-apply-baseline-system[46233]: [grandma-apply-baseline] function-row safety...
+[ 5561.555484] Grammy grandma-apply-baseline-system[46233]: [grandma-apply-baseline] done.
+[ 5561.556140] Grammy runuser[46232]: pam_unix(runuser:session): session closed for user grandma
+[ 5561.639423] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 5561.639919] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 5561.640039] Grammy systemd[1]: grandmaos-baseline.service: Consumed 1.571s CPU time.
+[ 5652.446768] Grammy bash[47116]: Starting app-server daemon with remote control enabled...
+[ 5652.494012] Grammy bash[47116]: Error: app server is running but is not managed by codex app-server daemon
+[ 5772.511497] Grammy bash[47248]: Starting app-server daemon with remote control enabled...
+[ 5772.561563] Grammy bash[47248]: Error: app server is running but is not managed by codex app-server daemon
+[ 5889.970261] Grammy systemd[987]: Starting grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls...
+[ 5889.972538] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 5889.981676] Grammy sudo[47362]:     fish : PWD=/home/fish ; USER=grandma ; COMMAND=/usr/bin/env DISPLAY=:0 XAUTHORITY=/home/grandma/.Xauthority XDG_RUNTIME_DIR=/run/user/1001 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1001/bus /usr/local/sbin/grandma-browser-hygiene
+[ 5889.983799] Grammy sudo[47362]: pam_unix(sudo:session): session opened for user grandma(uid=1001) by fish(uid=1000)
+[ 5890.229083] Grammy sudo[47362]: pam_unix(sudo:session): session closed for user grandma
+[ 5890.231072] Grammy grandma-browser-hygiene-monitor[47358]: chrome-hygiene: nothing to do (available 3569 MB, idle 3494 ms)
+[ 5890.234365] Grammy grandma-browser-hygiene-monitor[47358]: [grandma-browser-hygiene-monitor] healthy/no action; OpenClaw was not contacted
+[ 5890.235817] Grammy systemd[987]: Finished grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls.
+[ 5891.423206] Grammy grandma-openclaw-watchdog[47359]: [grandma-openclaw-watchdog] local gateway healthy
+[ 5891.426247] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 5891.426511] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 2.014s CPU time.
+[ 5892.577103] Grammy bash[47421]: Starting app-server daemon with remote control enabled...
+[ 5892.608716] Grammy bash[47421]: Error: app server is running but is not managed by codex app-server daemon
+[ 6012.618128] Grammy bash[47571]: Starting app-server daemon with remote control enabled...
+[ 6012.648714] Grammy bash[47571]: Error: app server is running but is not managed by codex app-server daemon
+[ 6132.664646] Grammy bash[47703]: Starting app-server daemon with remote control enabled...
+[ 6132.713717] Grammy bash[47703]: Error: app server is running but is not managed by codex app-server daemon
+[ 6154.279480] Grammy CRON[47753]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[ 6154.284916] Grammy CRON[47754]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)
+[ 6154.285113] Grammy CRON[47753]: pam_unix(cron:session): session closed for user root
+[ 6249.973614] Grammy systemd[987]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 6251.376193] Grammy grandma-openclaw-watchdog[47779]: [grandma-openclaw-watchdog] local gateway healthy
+[ 6251.379503] Grammy systemd[987]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 6251.379763] Grammy systemd[987]: grandmaos-openclaw-watchdog.service: Consumed 1.878s CPU time.
+[ 6252.729519] Grammy bash[47831]: Starting app-server daemon with remote control enabled...
+[ 6252.774865] Grammy bash[47831]: Error: app server is running but is not managed by codex app-server daemon
+===== BOOT -8 =====
+[    8.215632] Grammy avahi-daemon[655]: Registering new address record for fe80::a2a2:a3fc:81be:35f3 on wlp0s20f3.*.
+[    8.219149] Grammy NetworkManager[771]: <info>  [1790097552.4298] dhcp4 (wlp0s20f3): state changed new lease, address=192.168.1.168, acd pending
+[    8.219704] Grammy dnsmasq[1936]: started, version 2.91 cache disabled
+[    8.219832] Grammy dnsmasq[1936]: compile time options: IPv6 GNU-getopt DBus no-UBus i18n IDN2 DHCP DHCPv6 no-Lua TFTP conntrack ipset nftset auth DNSSEC loop-detect inotify dumpfile
+[    8.219849] Grammy dnsmasq[1936]: chown of PID file /run/NetworkManager/dnsmasq.pid failed: please add capability CAP_CHOWN
+[    8.219861] Grammy dnsmasq[1936]: DBus support enabled: connected to system bus
+[    8.219873] Grammy dnsmasq[1936]: using nameserver 1.1.1.3#53 for domain openrouter.ai
+[    8.219888] Grammy dnsmasq[1936]: using nameserver 1.0.0.3#53 for domain openrouter.ai
+[    8.219903] Grammy dnsmasq[1936]: setting upstream servers from DBus
+[    8.219916] Grammy dnsmasq[1936]: using nameserver 1.1.1.3#53 for domain openrouter.ai
+[    8.219926] Grammy dnsmasq[1936]: using nameserver 1.0.0.3#53 for domain openrouter.ai
+[    8.219938] Grammy dnsmasq[1936]: using nameserver 94.140.14.15#53(via wlp0s20f3)
+[    8.219953] Grammy dnsmasq[1936]: using nameserver 94.140.15.16#53(via wlp0s20f3)
+[    8.219963] Grammy dnsmasq[1936]: using nameserver 2a10:50c0::bad1:ff#53(via wlp0s20f3)
+[    8.219977] Grammy dnsmasq[1936]: using nameserver 2a10:50c0::bad2:ff#53(via wlp0s20f3)
+[    8.360274] Grammy NetworkManager[771]: <info>  [1790097552.5708] dhcp4 (wlp0s20f3): state changed new lease, address=192.168.1.168
+[    8.360461] Grammy NetworkManager[771]: <info>  [1790097552.5711] policy: set 'Fios-IFJS1-5G' (wlp0s20f3) as default for IPv4 routing and DNS
+[    8.360849] Grammy dnsmasq[1936]: setting upstream servers from DBus
+[    8.360904] Grammy dnsmasq[1936]: using nameserver 1.1.1.3#53 for domain openrouter.ai
+[    8.360922] Grammy dnsmasq[1936]: using nameserver 1.0.0.3#53 for domain openrouter.ai
+[    8.360938] Grammy dnsmasq[1936]: using nameserver 94.140.14.15#53(via wlp0s20f3)
+[    8.360948] Grammy dnsmasq[1936]: using nameserver 94.140.14.15#53 for domain 1.168.192.in-addr.arpa
+[    8.360963] Grammy dnsmasq[1936]: using nameserver 94.140.15.16#53(via wlp0s20f3)
+[    8.360973] Grammy dnsmasq[1936]: using nameserver 94.140.15.16#53 for domain 1.168.192.in-addr.arpa
+[    8.360987] Grammy dnsmasq[1936]: using nameserver 2a10:50c0::bad1:ff#53 for domain 0.0.0.0.0.0.0.0.0.0.0.0.0.8.e.f.ip6.arpa
+[    8.361006] Grammy dnsmasq[1936]: using nameserver 2a10:50c0::bad2:ff#53 for domain 0.0.0.0.0.0.0.0.0.0.0.0.0.8.e.f.ip6.arpa
+[    8.361027] Grammy avahi-daemon[655]: Joining mDNS multicast group on interface wlp0s20f3.IPv4 with address 192.168.1.168.
+[    8.361046] Grammy avahi-daemon[655]: New relevant interface wlp0s20f3.IPv4 for mDNS.
+[    8.361057] Grammy avahi-daemon[655]: Registering new address record for 192.168.1.168 on wlp0s20f3.IPv4.
+[    8.363996] Grammy NetworkManager[771]: <info>  [1790097552.5746] device (wlp0s20f3): state change: ip-config -> ip-check (reason 'none', sys-iface-state: 'managed')
+[    8.364992] Grammy NetworkManager[771]: <info>  [1790097552.5756] device (wlp0s20f3): state change: ip-check -> secondaries (reason 'none', sys-iface-state: 'managed')
+[    8.365092] Grammy NetworkManager[771]: <info>  [1790097552.5757] device (wlp0s20f3): state change: secondaries -> activated (reason 'none', sys-iface-state: 'managed')
+[    8.365301] Grammy NetworkManager[771]: <info>  [1790097552.5759] manager: NetworkManager state is now CONNECTED_SITE
+[    8.365651] Grammy NetworkManager[771]: <info>  [1790097552.5763] device (wlp0s20f3): Activation: successful, device activated.
+[    8.924726] Grammy systemd[1]: systemd-rfkill.service: Deactivated successfully.
+[    9.086650] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.freedesktop.thumbnails.Thumbnailer1' unit='tumblerd.service' requested by ':1.28' (uid=1001 pid=1987 comm="xfdesktop" label="unconfined")
+[    9.095084] Grammy systemd[970]: Starting tumblerd.service - Thumbnailing service...
+[    9.157011] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.gtk.vfs.UDisks2VolumeMonitor' unit='gvfs-udisks2-volume-monitor.service' requested by ':1.31' (uid=1001 pid=2008 comm="/usr/lib/x86_64-linux-gnu/tumbler-1/tumblerd" label="unconfined")
+[    9.164816] Grammy systemd[970]: Starting gvfs-udisks2-volume-monitor.service - Virtual filesystem service - disk device monitor...
+[    9.167139] Grammy polkitd[680]: Registered Authentication Agent for unix-session:c1 (system bus name :1.54 [/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1], object path /org/gnome/PolicyKit1/AuthenticationAgent, locale en_US.UTF-8)
+[    9.181369] Grammy dbus-daemon[659]: [system] Activating via systemd: service name='org.freedesktop.ColorManager' unit='colord.service' requested by ':1.55' (uid=1001 pid=2063 comm="xiccd" label="unconfined")
+[    9.190274] Grammy systemd[1]: Starting colord.service - Manage, Install and Generate Color Profiles...
+[    9.190869] Grammy systemd[970]: Starting xfce4-notifyd.service - XFCE notifications service...
+[    9.216592] Grammy dbus-daemon[659]: [system] Successfully activated service 'org.freedesktop.ColorManager'
+[    9.216853] Grammy systemd[1]: Started colord.service - Manage, Install and Generate Color Profiles.
+[    9.293546] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.freedesktop.Notifications' unit='xfce4-notifyd.service' requested by ':1.34' (uid=1001 pid=2013 comm="xfce4-power-manager" label="unconfined")
+[    9.300167] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.freedesktop.Notifications'
+[    9.305671] Grammy systemd[970]: Started xfce4-notifyd.service - XFCE notifications service.
+[    9.327797] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gtk.vfs.UDisks2VolumeMonitor'
+[    9.328324] Grammy systemd[970]: Started gvfs-udisks2-volume-monitor.service - Virtual filesystem service - disk device monitor.
+[    9.364459] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.gtk.vfs.AfcVolumeMonitor' unit='gvfs-afc-volume-monitor.service' requested by ':1.31' (uid=1001 pid=2008 comm="/usr/lib/x86_64-linux-gnu/tumbler-1/tumblerd" label="unconfined")
+[    9.371517] Grammy systemd[970]: Starting gvfs-afc-volume-monitor.service - Virtual filesystem service - Apple File Conduit monitor...
+[    9.377860] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='ca.desrt.dconf' unit='dconf.service' requested by ':1.50' (uid=1001 pid=2144 comm="gsettings set org.gnome.desktop.interface toolkit-" label="unconfined")
+[    9.385483] Grammy systemd[970]: Starting dconf.service - User preferences database...
+[    9.394046] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+[    9.394336] Grammy systemd[970]: Started gvfs-afc-volume-monitor.service - Virtual filesystem service - Apple File Conduit monitor.
+[    9.407249] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'ca.desrt.dconf'
+[    9.407387] Grammy systemd[970]: Started dconf.service - User preferences database.
+[    9.418479] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.gtk.vfs.MTPVolumeMonitor' unit='gvfs-mtp-volume-monitor.service' requested by ':1.31' (uid=1001 pid=2008 comm="/usr/lib/x86_64-linux-gnu/tumbler-1/tumblerd" label="unconfined")
+[    9.423409] Grammy systemd[970]: Starting gvfs-mtp-volume-monitor.service - Virtual filesystem service - Media Transfer Protocol monitor...
+[    9.424917] Grammy NetworkManager[771]: <info>  [1790097553.6355] manager: NetworkManager state is now CONNECTED_GLOBAL
+[    9.427794] Grammy NetworkManager[771]: <info>  [1790097553.6384] agent-manager: agent[60ed0d8da6082a14,:1.60/org.freedesktop.nm-applet/1001]: agent registered
+[    9.439348] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+[    9.439512] Grammy systemd[970]: Started gvfs-mtp-volume-monitor.service - Virtual filesystem service - Media Transfer Protocol monitor.
+[    9.451062] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.gtk.vfs.GPhoto2VolumeMonitor' unit='gvfs-gphoto2-volume-monitor.service' requested by ':1.31' (uid=1001 pid=2008 comm="/usr/lib/x86_64-linux-gnu/tumbler-1/tumblerd" label="unconfined")
+[    9.460272] Grammy systemd[970]: Starting gvfs-gphoto2-volume-monitor.service - Virtual filesystem service - digital camera monitor...
+[    9.471721] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+[    9.471885] Grammy systemd[970]: Started gvfs-gphoto2-volume-monitor.service - Virtual filesystem service - digital camera monitor.
+[    9.482922] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.gnome.evolution.dataserver.Sources5' unit='evolution-source-registry.service' requested by ':1.55' (uid=1001 pid=2072 comm="/usr/libexec/evolution-data-server/evolution-alarm" label="unconfined")
+[    9.484651] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.gtk.vfs.GoaVolumeMonitor' unit='gvfs-goa-volume-monitor.service' requested by ':1.31' (uid=1001 pid=2008 comm="/usr/lib/x86_64-linux-gnu/tumbler-1/tumblerd" label="unconfined")
+[    9.490271] Grammy systemd[970]: Starting evolution-source-registry.service - Evolution source registry...
+[    9.494387] Grammy systemd[970]: Starting gvfs-goa-volume-monitor.service - Virtual filesystem service - GNOME Online Accounts monitor...
+[    9.497316] Grammy pkexec[2223]: pam_unix(polkit-1:session): session opened for user root(uid=0) by (uid=1001)
+[    9.499418] Grammy pkexec[2223]: grandma: Executing command [USER=root] [TTY=unknown] [CWD=/home/grandma] [COMMAND=/usr/sbin/xfpm-power-backlight-helper --set-brightness-switch 1]
+[    9.506828] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating service name='org.gnome.OnlineAccounts' requested by ':1.65' (uid=1001 pid=2250 comm="/usr/libexec/gvfs-goa-volume-monitor" label="unconfined")
+[    9.563845] Grammy goa-daemon[2268]: goa-daemon version 3.50.4 starting
+[    9.571988] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating service name='org.gnome.Identity' requested by ':1.71' (uid=1001 pid=2268 comm="/usr/libexec/goa-daemon" label="unconfined")
+[    9.579010] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gnome.Identity'
+[    9.582468] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gnome.OnlineAccounts'
+[    9.586408] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+[    9.586804] Grammy systemd[970]: Started gvfs-goa-volume-monitor.service - Virtual filesystem service - GNOME Online Accounts monitor.
+[    9.606145] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.freedesktop.thumbnails.Thumbnailer1'
+[    9.606436] Grammy systemd[970]: Started tumblerd.service - Thumbnailing service.
+[    9.612387] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gnome.evolution.dataserver.Sources5'
+[    9.612676] Grammy systemd[970]: Started evolution-source-registry.service - Evolution source registry.
+[    9.639807] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.bluez.obex' unit='obex.service' requested by ':1.54' (uid=1001 pid=2060 comm="/usr/bin/python3 /usr/bin/blueman-applet" label="unconfined")
+[    9.646609] Grammy node[1027]: 2026-09-22T13:19:13.857-04:00 [gateway] starting HTTP server...
+[    9.649300] Grammy systemd[970]: Starting obex.service - Bluetooth OBEX service...
+[    9.654492] Grammy obexd[2355]: OBEX daemon 5.72
+[    9.655960] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.bluez.obex'
+[    9.656168] Grammy systemd[970]: Started obex.service - Bluetooth OBEX service.
+[    9.675661] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.gnome.evolution.dataserver.Calendar8' unit='evolution-calendar-factory.service' requested by ':1.55' (uid=1001 pid=2072 comm="/usr/libexec/evolution-data-server/evolution-alarm" label="unconfined")
+[    9.685251] Grammy systemd[970]: Starting evolution-calendar-factory.service - Evolution calendar service...
+[    9.709012] Grammy bash[1029]: Error: Remote control is enabled on Grammy but the connection is errored.
+[    9.724014] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gnome.evolution.dataserver.Calendar8'
+[    9.724115] Grammy systemd[970]: Started evolution-calendar-factory.service - Evolution calendar service.
+[    9.731260] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.gnome.evolution.dataserver.AddressBook10' unit='evolution-addressbook-factory.service' requested by ':1.86' (uid=1001 pid=2379 comm="/usr/libexec/evolution-calendar-factory" label="unconfined")
+[    9.738169] Grammy systemd[970]: Starting evolution-addressbook-factory.service - Evolution address book service...
+[    9.774095] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.gnome.evolution.dataserver.AddressBook10'
+[    9.774168] Grammy systemd[970]: Started evolution-addressbook-factory.service - Evolution address book service.
+[    9.987097] Grammy node[1027]: 2026-09-22T13:19:14.197-04:00 [health-monitor] started (interval: 300s, startup-grace: 60s, channel-connect-grace: 120s)
+[   10.471757] Grammy node[1027]: 2026-09-22T13:19:14.682-04:00 [gateway] starting channels and sidecars...
+[   10.514129] Grammy node[1027]: 2026-09-22T13:19:14.724-04:00 [gateway] agent model: openrouter/deepseek/deepseek-v4.1-flash (thinking=medium, fast=off)
+[   10.514463] Grammy node[1027]: 2026-09-22T13:19:14.725-04:00 [gateway] http server listening (16 plugins: anthropic, browser, canvas, cua-computer, device-pair, duckduckgo, file-transfer, geolocation, linux-node, memory-core, ollama, openai, openrouter, talk-voice, telegram, xai; 2.6s)
+[   10.514952] Grammy node[1027]: 2026-09-22T13:19:14.725-04:00 [gateway] log file: /tmp/openclaw/openclaw-2026-09-22.log
+[   10.528332] Grammy node[1027]: 2026-09-22T13:19:14.738-04:00 [hooks] loaded 1 internal hook handler
+[   10.758050] Grammy node[1027]: 2026-09-22T13:19:14.968-04:00 [gateway] startup outcomes: internal-hooks=loaded; internal-startup-hook=scheduled; gateway-start-hooks=scheduled; gmail-watcher=skipped (hooks-disabled); gmail-model=skipped (not-configured)
+[   10.761082] Grammy node[1027]: 2026-09-22T13:19:14.971-04:00 [gateway] ready
+[   10.800773] Grammy node[1027]: 2026-09-22T13:19:15.011-04:00 [heartbeat] disabled
+[   11.156817] Grammy node[1027]: 2026-09-22T13:19:15.367-04:00 [telegram] [default] starting provider (@GrandmaOSv3BOT)
+[   11.250634] Grammy node[1027]: 2026-09-22T13:19:15.461-04:00 [telegram] Plugin command "/dashboard" conflicts with an existing Telegram command.
+[   11.784415] Grammy node[1027]: 2026-09-22T13:19:15.994-04:00 [telegram] [diag] isolated polling ingress started spool=/home/fish/.openclaw/telegram/ingress-spool-default
+[   12.439211] Grammy kernel: warning: `ThreadPoolForeg' uses wireless extensions which will stop working for Wi-Fi 7 hardware; use nl80211
+[   12.711725] Grammy systemd[970]: Started app-com.google.Chrome-3051.scope.
+[   12.741555] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating service name='org.freedesktop.secrets' requested by ':1.211' (uid=1001 pid=3051 comm="/opt/google/chrome/chrome --no-first-run --force-r" label="chrome (unconfined)")
+[   12.754404] Grammy systemd[970]: Started gnome-keyring-daemon.service - GNOME Keyring daemon.
+[   12.760035] Grammy gnome-keyring-daemon[3180]: GNOME_KEYRING_CONTROL=/run/user/1001/keyring
+[   12.764956] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.freedesktop.secrets'
+[   12.765296] Grammy gnome-keyring-daemon[3180]: The Secret Service was already initialized
+[   12.765397] Grammy gnome-keyring-daemon[3178]: discover_other_daemon: 1
+[   12.765574] Grammy org.freedesktop.secrets[3178]: GNOME_KEYRING_CONTROL=/run/user/1001/keyring
+[   12.765597] Grammy gnome-keyring-d[3180]: The Secret Service was already initialized
+[   12.801546] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.freedesktop.portal.Desktop' unit='xdg-desktop-portal.service' requested by ':1.211' (uid=1001 pid=3051 comm="/opt/google/chrome/chrome --no-first-run --force-r" label="chrome (unconfined)")
+[   12.808261] Grammy systemd[970]: Starting xdg-desktop-portal.service - Portal service...
+[   12.823523] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.freedesktop.portal.Documents' unit='xdg-document-portal.service' requested by ':1.214' (uid=1001 pid=3194 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+[   12.834271] Grammy systemd[970]: Starting xdg-document-portal.service - flatpak document portal service...
+[   12.839659] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.freedesktop.portal.Documents'
+[   12.839807] Grammy systemd[970]: Started xdg-document-portal.service - flatpak document portal service.
+[   12.843274] Grammy xdg-document-portal[3199]: Ignoring invalid max threads value 4294967295 > max (100000).
+[   12.845406] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.freedesktop.impl.portal.desktop.gtk' unit='xdg-desktop-portal-gtk.service' requested by ':1.214' (uid=1001 pid=3194 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+[   12.847251] Grammy systemd[970]: Starting xdg-desktop-portal-gtk.service - Portal service (GTK/GNOME implementation)...
+[   12.883402] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+[   12.883538] Grammy systemd[970]: Started xdg-desktop-portal-gtk.service - Portal service (GTK/GNOME implementation).
+[   12.897461] Grammy rtkit-daemon[1042]: Supervising 0 threads of 0 processes of 2 users.
+[   12.897823] Grammy rtkit-daemon[1042]: Supervising 0 threads of 0 processes of 2 users.
+[   12.897845] Grammy rtkit-daemon[1042]: Supervising 0 threads of 0 processes of 2 users.
+[   12.898214] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Activating via systemd: service name='org.freedesktop.impl.portal.desktop.xapp' unit='xdg-desktop-portal-xapp.service' requested by ':1.214' (uid=1001 pid=3194 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+[   12.909201] Grammy systemd[970]: Starting xdg-desktop-portal-xapp.service - Portal service (XApp implementation)...
+[   12.951172] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.freedesktop.impl.portal.desktop.xapp'
+[   12.951515] Grammy systemd[970]: Started xdg-desktop-portal-xapp.service - Portal service (XApp implementation).
+[   12.964290] Grammy xdg-desktop-por[3194]: Choosing xapp-gnome-keyring.portal for org.freedesktop.impl.portal.Secret via the deprecated UseIn key
+[   12.964745] Grammy xdg-desktop-por[3194]: The preferred method to match portal implementations to desktop environments is to use the portals.conf(5) configuration file
+[   12.965653] Grammy dbus-daemon[1033]: [session uid=1001 pid=1033] Successfully activated service 'org.freedesktop.portal.Desktop'
+[   12.965869] Grammy systemd[970]: Started xdg-desktop-portal.service - Portal service.
+[   13.015569] Grammy irqbalance[666]: Cannot change IRQ 150 affinity: No such file or directory
+[   13.015985] Grammy irqbalance[666]: IRQ 150 affinity is now unmanaged
+[   13.016032] Grammy irqbalance[666]: Cannot change IRQ 149 affinity: No such file or directory
+[   13.016054] Grammy irqbalance[666]: IRQ 149 affinity is now unmanaged
+[   13.016076] Grammy irqbalance[666]: Cannot change IRQ 147 affinity: No such file or directory
+[   13.016102] Grammy irqbalance[666]: IRQ 147 affinity is now unmanaged
+[   13.016125] Grammy irqbalance[666]: Cannot change IRQ 145 affinity: No such file or directory
+[   13.016147] Grammy irqbalance[666]: IRQ 145 affinity is now unmanaged
+[   13.016172] Grammy irqbalance[666]: Cannot change IRQ 148 affinity: No such file or directory
+[   13.016190] Grammy irqbalance[666]: IRQ 148 affinity is now unmanaged
+[   13.169999] Grammy wpa_supplicant[779]: wlp0s20f3: CTRL-EVENT-SIGNAL-CHANGE above=1 signal=-60 noise=9999 txrate=585000
+[   13.285515] Grammy systemd[1]: NetworkManager-dispatcher.service: Deactivated successfully.
+[   28.254308] Grammy wpa_supplicant[779]: wlp0s20f3: CTRL-EVENT-SIGNAL-CHANGE above=1 signal=-57 noise=9999 txrate=468000
+[   32.564090] Grammy systemd-journald[340]: Forwarding to syslog missed 6 messages.
+[   32.566131] Grammy systemd[1]: systemd-fsckd.service: Deactivated successfully.
+[   32.990370] Grammy systemd-resolved[606]: Clock change detected. Flushing caches.
+[   32.990945] Grammy systemd-timesyncd[607]: Contacted time server 91.189.91.157:123 (ntp.ubuntu.com).
+[   32.991169] Grammy systemd-timesyncd[607]: Initial clock synchronization to Tue 2026-09-22 15:08:45.737424 EDT.
+[   33.277404] Grammy systemd[1]: blueman-mechanism.service: Deactivated successfully.
+[   33.327010] Grammy systemd[1]: systemd-hostnamed.service: Deactivated successfully.
+[   39.968974] Grammy node[1027]: 2026-09-22T15:08:52.716-04:00 [diagnostic] liveness heartbeat delayed: overdue=6548537ms elapsed=6578537ms; deferring recovery decisions
+[   41.078299] Grammy node[1027]: 2026-09-22T15:08:53.825-04:00 [health] host timing gap detected: process was frozen ~6548538ms; restarting channels when idle and refreshing health
+[   41.080467] Grammy node[1027]: 2026-09-22T15:08:53.827-04:00 [admission] closed: suspend phase
+[   41.100332] Grammy node[1027]: 2026-09-22T15:08:53.847-04:00 [admission] reopened: suspend phase
+[   41.404682] Grammy node[1027]: 2026-09-22T15:08:54.151-04:00 [telegram] [default] starting provider (@GrandmaOSv3BOT)
+[   41.410262] Grammy node[1027]: 2026-09-22T15:08:54.157-04:00 [telegram] Plugin command "/dashboard" conflicts with an existing Telegram command.
+[   41.695032] Grammy node[1027]: 2026-09-22T15:08:54.442-04:00 [telegram] [diag] isolated polling ingress started spool=/home/fish/.openclaw/telegram/ingress-spool-default
+[   42.533626] Grammy chrome[3051]: [3051:3074:0922/150855.280740:INFO:chrome/browser/extensions/extension_garbage_collector.cc:212] Garbage collection for extensions on file thread is complete.
+[   53.007864] Grammy irqbalance[666]: Cannot change IRQ 146 affinity: Permission denied
+[   53.008636] Grammy irqbalance[666]: IRQ 146 affinity is now unmanaged
+[   56.956226] Grammy CRON[3428]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[   56.957500] Grammy CRON[3429]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)
+[   56.960097] Grammy CRON[3428]: pam_unix(cron:session): session closed for user root
+[   56.966049] Grammy CRON[3430]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[   56.967287] Grammy CRON[3431]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)
+[   56.969741] Grammy CRON[3430]: pam_unix(cron:session): session closed for user root
+[  107.573089] Grammy systemd[1]: anacron.service - Run anacron jobs was skipped because of an unmet condition check (ConditionACPower=true).
+[  125.968721] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[  126.028155] Grammy runuser[3456]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[  126.033825] Grammy grandma-apply-baseline-system[3457]: [grandma-apply-baseline] lock-screen elimination...
+[  126.113626] Grammy grandma-apply-baseline-system[3457]: [grandma-apply-baseline] accessibility baseline...
+[  126.824021] Grammy grandma-apply-baseline-system[3457]: [grandma-apply-baseline] dock shortcut...
+[  126.872367] Grammy grandma-apply-baseline-system[3457]: [grandma-apply-baseline] function-row safety...
+[  127.659232] Grammy grandma-apply-baseline-system[3457]: [grandma-apply-baseline] done.
+[  127.659923] Grammy runuser[3456]: pam_unix(runuser:session): session closed for user grandma
+[  127.747359] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[  127.747929] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[  127.748028] Grammy systemd[1]: grandmaos-baseline.service: Consumed 1.589s CPU time.
+[  129.727595] Grammy bash[4237]: Starting app-server daemon with remote control enabled...
+[  129.810460] Grammy bash[4237]: Error: app server is running but is not managed by codex app-server daemon
+[  195.960558] Grammy systemd[968]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[  197.642720] Grammy grandma-openclaw-watchdog[4366]: [grandma-openclaw-watchdog] local gateway healthy
+[  197.646736] Grammy systemd[968]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[  197.647047] Grammy systemd[968]: grandmaos-openclaw-watchdog.service: Consumed 2.200s CPU time.
+[  249.827214] Grammy bash[4472]: Starting app-server daemon with remote control enabled...
+[  249.870583] Grammy bash[4472]: Error: app server is running but is not managed by codex app-server daemon
+===== BOOT -7 =====
+[  909.250188] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[  909.250377] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 2.134s CPU time.
+[  970.024796] Grammy bash[22172]: Starting app-server daemon with remote control enabled...
+[  970.073127] Grammy bash[22172]: Error: app server is running but is not managed by codex app-server daemon
+[  983.901801] Grammy CRON[22228]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[  983.951280] Grammy CRON[22229]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)
+[  983.951536] Grammy CRON[22228]: pam_unix(cron:session): session closed for user root
+[ 1027.766404] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 1027.809628] Grammy runuser[22287]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 1027.813701] Grammy grandma-apply-baseline-system[22288]: [grandma-apply-baseline] lock-screen elimination...
+[ 1027.862212] Grammy dbus-daemon[1044]: [session uid=1001 pid=1044] Activating service name='org.xfce.Xfconf' requested by ':1.372' (uid=1001 pid=22289 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 1027.862599] Grammy dbus-daemon[1044]: [session uid=1001 pid=1044] Successfully activated service 'org.xfce.Xfconf'
+[ 1027.879436] Grammy grandma-apply-baseline-system[22288]: [grandma-apply-baseline] accessibility baseline...
+[ 1028.316248] Grammy grandma-apply-baseline-system[22288]: [grandma-apply-baseline] dock shortcut...
+[ 1028.348788] Grammy grandma-apply-baseline-system[22288]: [grandma-apply-baseline] function-row safety...
+[ 1028.897532] Grammy grandma-apply-baseline-system[22288]: [grandma-apply-baseline] done.
+[ 1028.897767] Grammy runuser[22287]: pam_unix(runuser:session): session closed for user grandma
+[ 1028.946392] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 1028.947273] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 1090.091793] Grammy bash[23129]: Starting app-server daemon with remote control enabled...
+[ 1090.139263] Grammy bash[23129]: Error: app server is running but is not managed by codex app-server daemon
+[ 1137.761653] Grammy systemd[1]: apt-daily.service - Daily apt download activities was skipped because of an unmet condition check (ConditionACPower=true).
+[ 1207.762986] Grammy systemd[1]: anacron.service - Run anacron jobs was skipped because of an unmet condition check (ConditionACPower=true).
+[ 1210.155112] Grammy bash[23242]: Starting app-server daemon with remote control enabled...
+[ 1210.181979] Grammy bash[23242]: Error: app server is running but is not managed by codex app-server daemon
+[ 1267.765664] Grammy systemd[979]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 1269.273276] Grammy grandma-openclaw-watchdog[23305]: [grandma-openclaw-watchdog] local gateway healthy
+[ 1269.276412] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 1269.276687] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 2.155s CPU time.
+[ 1330.198598] Grammy bash[23456]: Starting app-server daemon with remote control enabled...
+[ 1330.242380] Grammy bash[23456]: Error: app server is running but is not managed by codex app-server daemon
+[ 1450.258391] Grammy bash[23619]: Starting app-server daemon with remote control enabled...
+[ 1450.303982] Grammy bash[23619]: Error: app server is running but is not managed by codex app-server daemon
+[ 1570.320552] Grammy bash[23675]: Starting app-server daemon with remote control enabled...
+[ 1570.362038] Grammy bash[23675]: Error: app server is running but is not managed by codex app-server daemon
+[ 1627.764417] Grammy systemd[979]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 1629.233794] Grammy grandma-openclaw-watchdog[23818]: [grandma-openclaw-watchdog] local gateway healthy
+[ 1629.236826] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 1629.237071] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 1.951s CPU time.
+[ 1690.379753] Grammy bash[23925]: Starting app-server daemon with remote control enabled...
+[ 1690.430281] Grammy bash[23925]: Error: app server is running but is not managed by codex app-server daemon
+[ 1810.441899] Grammy bash[24057]: Starting app-server daemon with remote control enabled...
+[ 1810.461347] Grammy bash[24057]: Error: app server is running but is not managed by codex app-server daemon
+[ 1930.472257] Grammy bash[24173]: Starting app-server daemon with remote control enabled...
+[ 1930.494789] Grammy bash[24173]: Error: app server is running but is not managed by codex app-server daemon
+[ 1942.710354] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 1942.735944] Grammy runuser[24242]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 1942.738543] Grammy grandma-apply-baseline-system[24243]: [grandma-apply-baseline] lock-screen elimination...
+[ 1942.741934] Grammy dbus-daemon[1044]: [session uid=1001 pid=1044] Activating service name='org.xfce.Xfconf' requested by ':1.526' (uid=1001 pid=24244 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 1942.745881] Grammy dbus-daemon[1044]: [session uid=1001 pid=1044] Successfully activated service 'org.xfce.Xfconf'
+[ 1942.781677] Grammy grandma-apply-baseline-system[24243]: [grandma-apply-baseline] accessibility baseline...
+[ 1943.118346] Grammy grandma-apply-baseline-system[24243]: [grandma-apply-baseline] dock shortcut...
+[ 1943.142985] Grammy grandma-apply-baseline-system[24243]: [grandma-apply-baseline] function-row safety...
+[ 1943.606465] Grammy grandma-apply-baseline-system[24243]: [grandma-apply-baseline] done.
+[ 1943.606814] Grammy runuser[24242]: pam_unix(runuser:session): session closed for user grandma
+[ 1943.655394] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 1943.655493] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 1987.763231] Grammy systemd[979]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 1989.050596] Grammy grandma-openclaw-watchdog[25051]: [grandma-openclaw-watchdog] local gateway healthy
+[ 1989.053546] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 1989.053774] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 1.662s CPU time.
+[ 2050.505504] Grammy bash[25278]: Starting app-server daemon with remote control enabled...
+[ 2050.540096] Grammy bash[25278]: Error: app server is running but is not managed by codex app-server daemon
+[ 2167.764270] Grammy systemd[979]: Starting grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls...
+[ 2167.778024] Grammy sudo[25447]:     fish : PWD=/home/fish ; USER=grandma ; COMMAND=/usr/bin/env DISPLAY=:0 XAUTHORITY=/home/grandma/.Xauthority XDG_RUNTIME_DIR=/run/user/1001 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1001/bus /usr/local/sbin/grandma-browser-hygiene
+[ 2167.780054] Grammy sudo[25447]: pam_unix(sudo:session): session opened for user grandma(uid=1001) by fish(uid=1000)
+[ 2168.009013] Grammy sudo[25447]: pam_unix(sudo:session): session closed for user grandma
+[ 2168.009513] Grammy grandma-browser-hygiene-monitor[25444]: chrome-hygiene: nothing to do (available 2486 MB, idle 3279 ms)
+[ 2168.011378] Grammy grandma-browser-hygiene-monitor[25444]: [grandma-browser-hygiene-monitor] healthy/no action; OpenClaw was not contacted
+[ 2168.012387] Grammy systemd[979]: Finished grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls.
+[ 2170.550487] Grammy bash[25454]: Starting app-server daemon with remote control enabled...
+[ 2170.571173] Grammy bash[25454]: Error: app server is running but is not managed by codex app-server daemon
+[ 2290.582141] Grammy bash[25590]: Starting app-server daemon with remote control enabled...
+[ 2290.606399] Grammy bash[25590]: Error: app server is running but is not managed by codex app-server daemon
+[ 2347.764335] Grammy systemd[979]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 2349.052084] Grammy grandma-openclaw-watchdog[25642]: [grandma-openclaw-watchdog] local gateway healthy
+[ 2349.055086] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 2349.055289] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 1.843s CPU time.
+[ 2410.616231] Grammy bash[25698]: Starting app-server daemon with remote control enabled...
+[ 2410.665092] Grammy bash[25698]: Error: app server is running but is not managed by codex app-server daemon
+[ 2474.201685] Grammy kernel: perf: interrupt took too long (2514 > 2500), lowering kernel.perf_event_max_sample_rate to 79000
+[ 2530.646054] Grammy bash[25768]: Starting app-server daemon with remote control enabled...
+[ 2530.682025] Grammy bash[25768]: Error: app server is running but is not managed by codex app-server daemon
+[ 2650.689800] Grammy bash[25893]: Starting app-server daemon with remote control enabled...
+[ 2650.716321] Grammy bash[25893]: Error: app server is running but is not managed by codex app-server daemon
+[ 2707.762291] Grammy systemd[979]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 2709.018075] Grammy grandma-openclaw-watchdog[25945]: [grandma-openclaw-watchdog] local gateway healthy
+[ 2709.021301] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 2709.021516] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 1.756s CPU time.
+[ 2770.724963] Grammy bash[26020]: Starting app-server daemon with remote control enabled...
+[ 2770.773709] Grammy bash[26020]: Error: app server is running but is not managed by codex app-server daemon
+[ 2861.275480] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 2861.324205] Grammy runuser[26088]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 2861.324493] Grammy grandma-apply-baseline-system[26089]: [grandma-apply-baseline] lock-screen elimination...
+[ 2861.325314] Grammy dbus-daemon[1044]: [session uid=1001 pid=1044] Activating service name='org.xfce.Xfconf' requested by ':1.680' (uid=1001 pid=26090 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 2861.325484] Grammy dbus-daemon[1044]: [session uid=1001 pid=1044] Successfully activated service 'org.xfce.Xfconf'
+[ 2861.349536] Grammy grandma-apply-baseline-system[26089]: [grandma-apply-baseline] accessibility baseline...
+[ 2861.683683] Grammy grandma-apply-baseline-system[26089]: [grandma-apply-baseline] dock shortcut...
+[ 2861.708342] Grammy grandma-apply-baseline-system[26089]: [grandma-apply-baseline] function-row safety...
+[ 2862.152748] Grammy grandma-apply-baseline-system[26089]: [grandma-apply-baseline] done.
+[ 2862.152983] Grammy runuser[26088]: pam_unix(runuser:session): session closed for user grandma
+[ 2862.204318] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 2862.204443] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 2876.771587] Grammy kernel: perf: interrupt took too long (3152 > 3142), lowering kernel.perf_event_max_sample_rate to 63000
+[ 2890.755980] Grammy bash[26923]: Starting app-server daemon with remote control enabled...
+[ 2890.780463] Grammy bash[26923]: Error: app server is running but is not managed by codex app-server daemon
+[ 3010.788810] Grammy bash[27095]: Starting app-server daemon with remote control enabled...
+[ 3010.811232] Grammy bash[27095]: Error: app server is running but is not managed by codex app-server daemon
+[ 3067.765238] Grammy systemd[979]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 3068.996926] Grammy grandma-openclaw-watchdog[27167]: [grandma-openclaw-watchdog] local gateway healthy
+[ 3068.999899] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 3069.000146] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 1.704s CPU time.
+[ 3130.824380] Grammy bash[27254]: Starting app-server daemon with remote control enabled...
+[ 3130.848464] Grammy bash[27254]: Error: app server is running but is not managed by codex app-server daemon
+[ 3247.762282] Grammy systemd[1]: Starting fwupd-refresh.service - Refresh fwupd metadata and update motd...
+[ 3247.797048] Grammy dbus-daemon[658]: [system] Activating via systemd: service name='org.freedesktop.fwupd' unit='fwupd.service' requested by ':1.76' (uid=988 pid=27362 comm="/usr/bin/fwupdmgr refresh" label="unconfined")
+[ 3247.807496] Grammy systemd[1]: Starting modprobe@sd_mod.service - Load Kernel Module sd_mod...
+[ 3247.809861] Grammy systemd[1]: modprobe@sd_mod.service: Deactivated successfully.
+[ 3247.810012] Grammy systemd[1]: Finished modprobe@sd_mod.service - Load Kernel Module sd_mod.
+[ 3247.814224] Grammy systemd[1]: Starting fwupd.service - Firmware update daemon...
+[ 3248.626765] Grammy fwupd[27370]: 20:07:45.736 FuMain               fwupd 2.0.20 ready for requests (locale en_US.UTF-8)
+[ 3248.627654] Grammy dbus-daemon[658]: [system] Successfully activated service 'org.freedesktop.fwupd'
+[ 3248.627768] Grammy systemd[1]: Started fwupd.service - Firmware update daemon.
+[ 3248.669100] Grammy systemd[1]: fwupd-refresh.service: Deactivated successfully.
+[ 3248.669253] Grammy systemd[1]: Finished fwupd-refresh.service - Refresh fwupd metadata and update motd.
+[ 3250.857407] Grammy bash[27380]: Starting app-server daemon with remote control enabled...
+[ 3250.884478] Grammy bash[27380]: Error: app server is running but is not managed by codex app-server daemon
+[ 3260.840478] Grammy wpa_supplicant[775]: wlp0s20f3: WPA: Group rekeying completed with 20:c0:47:be:3c:42 [GTK=CCMP]
+[ 3370.892105] Grammy bash[27478]: Starting app-server daemon with remote control enabled...
+[ 3370.918484] Grammy bash[27478]: Error: app server is running but is not managed by codex app-server daemon
+[ 3427.764295] Grammy systemd[979]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 3429.091830] Grammy grandma-openclaw-watchdog[27538]: [grandma-openclaw-watchdog] local gateway healthy
+[ 3429.095712] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 3429.095918] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 1.759s CPU time.
+[ 3441.004746] Grammy kernel: perf: interrupt took too long (3966 > 3940), lowering kernel.perf_event_max_sample_rate to 50000
+[ 3490.927792] Grammy bash[27596]: Starting app-server daemon with remote control enabled...
+[ 3490.951262] Grammy bash[27596]: Error: app server is running but is not managed by codex app-server daemon
+[ 3586.267296] Grammy systemd[1]: Starting motd-news.service - Message of the Day...
+[ 3586.271859] Grammy systemd[1]: motd-news.service: Deactivated successfully.
+[ 3586.271994] Grammy systemd[1]: Finished motd-news.service - Message of the Day.
+[ 3610.959820] Grammy bash[27682]: Starting app-server daemon with remote control enabled...
+[ 3610.983200] Grammy bash[27682]: Error: app server is running but is not managed by codex app-server daemon
+[ 3730.996484] Grammy bash[27765]: Starting app-server daemon with remote control enabled...
+[ 3731.026118] Grammy bash[27765]: Error: app server is running but is not managed by codex app-server daemon
+[ 3762.379359] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[ 3762.407587] Grammy runuser[27854]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[ 3762.410299] Grammy grandma-apply-baseline-system[27855]: [grandma-apply-baseline] lock-screen elimination...
+[ 3762.413765] Grammy dbus-daemon[1044]: [session uid=1001 pid=1044] Activating service name='org.xfce.Xfconf' requested by ':1.834' (uid=1001 pid=27856 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[ 3762.418797] Grammy dbus-daemon[1044]: [session uid=1001 pid=1044] Successfully activated service 'org.xfce.Xfconf'
+[ 3762.457768] Grammy grandma-apply-baseline-system[27855]: [grandma-apply-baseline] accessibility baseline...
+[ 3762.795677] Grammy grandma-apply-baseline-system[27855]: [grandma-apply-baseline] dock shortcut...
+[ 3762.820029] Grammy grandma-apply-baseline-system[27855]: [grandma-apply-baseline] function-row safety...
+[ 3763.311646] Grammy grandma-apply-baseline-system[27855]: [grandma-apply-baseline] done.
+[ 3763.311859] Grammy runuser[27854]: pam_unix(runuser:session): session closed for user grandma
+[ 3763.357808] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[ 3763.357948] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[ 3787.764270] Grammy systemd[979]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 3789.117645] Grammy grandma-openclaw-watchdog[28647]: [grandma-openclaw-watchdog] local gateway healthy
+[ 3789.121030] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 3789.121252] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 1.791s CPU time.
+[ 3803.961456] Grammy CRON[28735]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[ 3803.962063] Grammy CRON[28736]: (root) CMD (cd / && run-parts --report /etc/cron.hourly)
+[ 3803.964128] Grammy CRON[28735]: pam_unix(cron:session): session closed for user root
+[ 3851.036338] Grammy bash[28758]: Starting app-server daemon with remote control enabled...
+[ 3851.061964] Grammy bash[28758]: Error: app server is running but is not managed by codex app-server daemon
+[ 3907.765255] Grammy systemd[1]: Starting grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe)...
+[ 3907.785089] Grammy grandma-browser-backup[28918]: starting backup: profile=/home/grandma/.config/google-chrome/Default
+[ 3907.804924] Grammy grandma-browser-backup[28926]: Chrome is currently running for grandma; proceeding anyway (SQLite-safe backup method)
+[ 3907.985666] Grammy grandma-browser-backup[29132]: sqlite3 .backup failed for WebStorage/QuotaManager, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3908.371315] Grammy grandma-browser-backup[29557]: sqlite3 .backup failed for History, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3908.441329] Grammy grandma-browser-backup[29630]: sqlite3 .backup failed for Network Action Predictor, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3909.190653] Grammy grandma-browser-backup[30509]: sqlite3 .backup failed for HistoryEmbeddings, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3915.113186] Grammy grandma-browser-backup[37876]: sqlite3 .backup failed for Shortcuts, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3915.329909] Grammy grandma-browser-backup[38111]: sqlite3 .backup failed for DIPS, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3915.349663] Grammy grandma-browser-backup[38134]: sqlite3 .backup failed for declarative_performance_observer.db, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3915.361788] Grammy grandma-browser-backup[38148]: sqlite3 .backup failed for Favicons, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3921.069984] Grammy grandma-browser-backup[45365]: sqlite3 .backup failed for Web Data, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[ 3921.454588] Grammy grandma-browser-backup[45722]: backup OK: generation=20260922-161844 size=104M files=2378 (19 sqlite (safe .backup), 2350 plain-copy, 9 sqlite-fallback-cp (see log -- possibly inconsistent)) kept=14 pruned=1 chrome_running=yes
+[ 3921.454752] Grammy grandma-browser-backup[28901]: Backup complete: /var/backups/grandmaos/chrome/20260922-161844 (104M, 2378 files, 19 sqlite (safe .backup), 2350 plain-copy, 9 sqlite-fallback-cp (see log -- possibly inconsistent))
+[ 3921.454927] Grammy grandma-browser-backup[28901]: Kept 14 generations, pruned 1.
+[ 3921.455613] Grammy systemd[1]: grandmaos-browser-backup.service: Deactivated successfully.
+[ 3921.455757] Grammy systemd[1]: Finished grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe).
+[ 3921.455933] Grammy systemd[1]: grandmaos-browser-backup.service: Consumed 15.420s CPU time.
+[ 3971.074642] Grammy bash[45814]: Starting app-server daemon with remote control enabled...
+[ 3971.098446] Grammy bash[45814]: Error: app server is running but is not managed by codex app-server daemon
+[ 4027.765336] Grammy systemd[979]: Starting grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls...
+[ 4027.781786] Grammy sudo[45877]:     fish : PWD=/home/fish ; USER=grandma ; COMMAND=/usr/bin/env DISPLAY=:0 XAUTHORITY=/home/grandma/.Xauthority XDG_RUNTIME_DIR=/run/user/1001 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1001/bus /usr/local/sbin/grandma-browser-hygiene
+[ 4027.784406] Grammy sudo[45877]: pam_unix(sudo:session): session opened for user grandma(uid=1001) by fish(uid=1000)
+[ 4028.962894] Grammy sudo[45877]: pam_unix(sudo:session): session closed for user grandma
+[ 4028.965772] Grammy grandma-browser-hygiene-monitor[45873]: chrome-hygiene: nothing to do (available 1725 MB, idle 1806 ms)
+[ 4028.970459] Grammy grandma-browser-hygiene-monitor[45873]: [grandma-browser-hygiene-monitor] healthy/no action; OpenClaw was not contacted
+[ 4028.972037] Grammy systemd[979]: Finished grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls.
+[ 4091.158724] Grammy bash[45925]: Starting app-server daemon with remote control enabled...
+[ 4091.191700] Grammy bash[45925]: Error: app server is running but is not managed by codex app-server daemon
+[ 4147.764219] Grammy systemd[979]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[ 4149.317182] Grammy grandma-openclaw-watchdog[45993]: [grandma-openclaw-watchdog] local gateway healthy
+[ 4149.321637] Grammy systemd[979]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[ 4149.321871] Grammy systemd[979]: grandmaos-openclaw-watchdog.service: Consumed 1.968s CPU time.
+[ 4211.202247] Grammy bash[46108]: Starting app-server daemon with remote control enabled...
+[ 4211.228552] Grammy bash[46108]: Error: app server is running but is not managed by codex app-server daemon
+===== BOOT -6 =====
+[    9.419573] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='ca.desrt.dconf' unit='dconf.service' requested by ':1.50' (uid=1001 pid=1941 comm="gsettings set org.gnome.desktop.interface toolkit-" label="unconfined")
+[    9.424297] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.gtk.vfs.AfcVolumeMonitor' unit='gvfs-afc-volume-monitor.service' requested by ':1.30' (uid=1001 pid=1808 comm="/usr/lib/x86_64-linux-gnu/tumbler-1/tumblerd" label="unconfined")
+[    9.426523] Grammy systemd[995]: Starting dconf.service - User preferences database...
+[    9.430597] Grammy systemd[995]: Starting gvfs-afc-volume-monitor.service - Virtual filesystem service - Apple File Conduit monitor...
+[    9.436215] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'ca.desrt.dconf'
+[    9.437082] Grammy systemd[995]: Started dconf.service - User preferences database.
+[    9.450350] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.gtk.vfs.AfcVolumeMonitor'
+[    9.450678] Grammy systemd[995]: Started gvfs-afc-volume-monitor.service - Virtual filesystem service - Apple File Conduit monitor.
+[    9.454035] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.gtk.vfs.MTPVolumeMonitor' unit='gvfs-mtp-volume-monitor.service' requested by ':1.30' (uid=1001 pid=1808 comm="/usr/lib/x86_64-linux-gnu/tumbler-1/tumblerd" label="unconfined")
+[    9.457630] Grammy NetworkManager[775]: <info>  [1790108651.2946] agent-manager: agent[b59168b974d599ae,:1.60/org.freedesktop.nm-applet/1001]: agent registered
+[    9.462292] Grammy systemd[995]: Starting gvfs-mtp-volume-monitor.service - Virtual filesystem service - Media Transfer Protocol monitor...
+[    9.471647] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.gtk.vfs.MTPVolumeMonitor'
+[    9.471920] Grammy systemd[995]: Started gvfs-mtp-volume-monitor.service - Virtual filesystem service - Media Transfer Protocol monitor.
+[    9.480526] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.gtk.vfs.GPhoto2VolumeMonitor' unit='gvfs-gphoto2-volume-monitor.service' requested by ':1.30' (uid=1001 pid=1808 comm="/usr/lib/x86_64-linux-gnu/tumbler-1/tumblerd" label="unconfined")
+[    9.489486] Grammy systemd[995]: Starting gvfs-gphoto2-volume-monitor.service - Virtual filesystem service - digital camera monitor...
+[    9.502139] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.gtk.vfs.GPhoto2VolumeMonitor'
+[    9.502349] Grammy systemd[995]: Started gvfs-gphoto2-volume-monitor.service - Virtual filesystem service - digital camera monitor.
+[    9.512243] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.gtk.vfs.GoaVolumeMonitor' unit='gvfs-goa-volume-monitor.service' requested by ':1.30' (uid=1001 pid=1808 comm="/usr/lib/x86_64-linux-gnu/tumbler-1/tumblerd" label="unconfined")
+[    9.521324] Grammy systemd[995]: Starting gvfs-goa-volume-monitor.service - Virtual filesystem service - GNOME Online Accounts monitor...
+[    9.527466] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating service name='org.gnome.OnlineAccounts' requested by ':1.60' (uid=1001 pid=2030 comm="/usr/libexec/gvfs-goa-volume-monitor" label="unconfined")
+[    9.535034] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.gnome.evolution.dataserver.Sources5' unit='evolution-source-registry.service' requested by ':1.55' (uid=1001 pid=1897 comm="/usr/libexec/evolution-data-server/evolution-alarm" label="unconfined")
+[    9.545631] Grammy systemd[995]: Starting evolution-source-registry.service - Evolution source registry...
+[    9.587577] Grammy goa-daemon[2040]: goa-daemon version 3.50.4 starting
+[    9.596909] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating service name='org.gnome.Identity' requested by ':1.66' (uid=1001 pid=2040 comm="/usr/libexec/goa-daemon" label="unconfined")
+[    9.611288] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.gnome.OnlineAccounts'
+[    9.622525] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.gtk.vfs.GoaVolumeMonitor'
+[    9.622756] Grammy systemd[995]: Started gvfs-goa-volume-monitor.service - Virtual filesystem service - GNOME Online Accounts monitor.
+[    9.632946] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.gnome.Identity'
+[    9.637578] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.freedesktop.thumbnails.Thumbnailer1'
+[    9.637777] Grammy systemd[995]: Started tumblerd.service - Thumbnailing service.
+[    9.650359] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.gnome.evolution.dataserver.Sources5'
+[    9.650568] Grammy systemd[995]: Started evolution-source-registry.service - Evolution source registry.
+[    9.659935] Grammy pkexec[2106]: pam_unix(polkit-1:session): session opened for user root(uid=0) by (uid=1001)
+[    9.660716] Grammy pkexec[2106]: grandma: Executing command [USER=root] [TTY=unknown] [CWD=/home/grandma] [COMMAND=/usr/sbin/xfpm-power-backlight-helper --set-brightness-switch 1]
+[    9.713065] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.gnome.evolution.dataserver.Calendar8' unit='evolution-calendar-factory.service' requested by ':1.55' (uid=1001 pid=1897 comm="/usr/libexec/evolution-data-server/evolution-alarm" label="unconfined")
+[    9.721446] Grammy systemd[995]: Starting evolution-calendar-factory.service - Evolution calendar service...
+[    9.769020] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.gnome.evolution.dataserver.Calendar8'
+[    9.769150] Grammy systemd[995]: Started evolution-calendar-factory.service - Evolution calendar service.
+[    9.775379] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.gnome.evolution.dataserver.AddressBook10' unit='evolution-addressbook-factory.service' requested by ':1.80' (uid=1001 pid=2157 comm="/usr/libexec/evolution-calendar-factory" label="unconfined")
+[    9.783269] Grammy systemd[995]: Starting evolution-addressbook-factory.service - Evolution address book service...
+[    9.813974] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.gnome.evolution.dataserver.AddressBook10'
+[    9.814168] Grammy systemd[995]: Started evolution-addressbook-factory.service - Evolution address book service.
+[    9.853626] Grammy bash[1060]: Error: Remote control is enabled on Grammy but the connection is errored.
+[    9.876134] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.bluez.obex' unit='obex.service' requested by ':1.74' (uid=1001 pid=1860 comm="/usr/bin/python3 /usr/bin/blueman-applet" label="unconfined")
+[    9.880288] Grammy systemd[995]: Starting obex.service - Bluetooth OBEX service...
+[    9.887319] Grammy obexd[2305]: OBEX daemon 5.72
+[    9.889385] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.bluez.obex'
+[    9.889550] Grammy systemd[995]: Started obex.service - Bluetooth OBEX service.
+[    9.917700] Grammy node[1056]: 2026-09-22T16:24:11.754-04:00 [gateway] starting HTTP server...
+[   10.209925] Grammy node[1056]: 2026-09-22T16:24:12.046-04:00 [health-monitor] started (interval: 300s, startup-grace: 60s, channel-connect-grace: 120s)
+[   10.632678] Grammy node[1056]: 2026-09-22T16:24:12.469-04:00 [gateway] starting channels and sidecars...
+[   10.674300] Grammy node[1056]: 2026-09-22T16:24:12.511-04:00 [gateway] agent model: openrouter/deepseek/deepseek-v4.1-flash (thinking=medium, fast=off)
+[   10.674700] Grammy node[1056]: 2026-09-22T16:24:12.511-04:00 [gateway] http server listening (16 plugins: anthropic, browser, canvas, cua-computer, device-pair, duckduckgo, file-transfer, geolocation, linux-node, memory-core, ollama, openai, openrouter, talk-voice, telegram, xai; 2.6s)
+[   10.675090] Grammy node[1056]: 2026-09-22T16:24:12.512-04:00 [gateway] log file: /tmp/openclaw/openclaw-2026-09-22.log
+[   10.688641] Grammy node[1056]: 2026-09-22T16:24:12.525-04:00 [hooks] loaded 1 internal hook handler
+[   10.919219] Grammy node[1056]: 2026-09-22T16:24:12.756-04:00 [gateway] startup outcomes: internal-hooks=loaded; internal-startup-hook=scheduled; gateway-start-hooks=scheduled; gmail-watcher=skipped (hooks-disabled); gmail-model=skipped (not-configured)
+[   10.922260] Grammy node[1056]: 2026-09-22T16:24:12.759-04:00 [gateway] ready
+[   10.961549] Grammy node[1056]: 2026-09-22T16:24:12.798-04:00 [heartbeat] disabled
+[   11.322837] Grammy node[1056]: 2026-09-22T16:24:13.159-04:00 [telegram] [default] starting provider (@GrandmaOSv3BOT)
+[   11.407044] Grammy node[1056]: 2026-09-22T16:24:13.244-04:00 [telegram] Plugin command "/dashboard" conflicts with an existing Telegram command.
+[   11.915231] Grammy node[1056]: 2026-09-22T16:24:13.752-04:00 [telegram] [diag] isolated polling ingress started spool=/home/fish/.openclaw/telegram/ingress-spool-default
+[   12.430538] Grammy kernel: warning: `ThreadPoolForeg' uses wireless extensions which will stop working for Wi-Fi 7 hardware; use nl80211
+[   12.683462] Grammy systemd[995]: Started app-com.google.Chrome-2847.scope.
+[   12.724482] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating service name='org.freedesktop.secrets' requested by ':1.211' (uid=1001 pid=2847 comm="/opt/google/chrome/chrome --no-first-run --force-r" label="chrome (unconfined)")
+[   12.736290] Grammy systemd[995]: Started gnome-keyring-daemon.service - GNOME Keyring daemon.
+[   12.740604] Grammy gnome-keyring-daemon[2980]: GNOME_KEYRING_CONTROL=/run/user/1001/keyring
+[   12.745516] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.freedesktop.secrets'
+[   12.746215] Grammy gnome-keyring-daemon[2980]: The Secret Service was already initialized
+[   12.746279] Grammy gnome-keyring-d[2980]: The Secret Service was already initialized
+[   12.746345] Grammy gnome-keyring-daemon[2978]: discover_other_daemon: 1
+[   12.746537] Grammy org.freedesktop.secrets[2978]: GNOME_KEYRING_CONTROL=/run/user/1001/keyring
+[   12.783171] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.freedesktop.portal.Desktop' unit='xdg-desktop-portal.service' requested by ':1.211' (uid=1001 pid=2847 comm="/opt/google/chrome/chrome --no-first-run --force-r" label="chrome (unconfined)")
+[   12.789424] Grammy systemd[995]: Starting xdg-desktop-portal.service - Portal service...
+[   12.806343] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.freedesktop.portal.Documents' unit='xdg-document-portal.service' requested by ':1.214' (uid=1001 pid=2994 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+[   12.807548] Grammy systemd[995]: Starting xdg-document-portal.service - flatpak document portal service...
+[   12.817437] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.freedesktop.portal.Documents'
+[   12.817627] Grammy systemd[995]: Started xdg-document-portal.service - flatpak document portal service.
+[   12.820299] Grammy xdg-document-portal[2999]: Ignoring invalid max threads value 4294967295 > max (100000).
+[   12.822759] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.freedesktop.impl.portal.desktop.gtk' unit='xdg-desktop-portal-gtk.service' requested by ':1.214' (uid=1001 pid=2994 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+[   12.831244] Grammy systemd[995]: Starting xdg-desktop-portal-gtk.service - Portal service (GTK/GNOME implementation)...
+[   12.856713] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+[   12.856988] Grammy systemd[995]: Started xdg-desktop-portal-gtk.service - Portal service (GTK/GNOME implementation).
+[   12.868018] Grammy rtkit-daemon[1070]: Supervising 0 threads of 0 processes of 2 users.
+[   12.868271] Grammy rtkit-daemon[1070]: Supervising 0 threads of 0 processes of 2 users.
+[   12.868614] Grammy rtkit-daemon[1070]: Supervising 0 threads of 0 processes of 2 users.
+[   12.869308] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Activating via systemd: service name='org.freedesktop.impl.portal.desktop.xapp' unit='xdg-desktop-portal-xapp.service' requested by ':1.214' (uid=1001 pid=2994 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+[   12.878273] Grammy systemd[995]: Starting xdg-desktop-portal-xapp.service - Portal service (XApp implementation)...
+[   12.916901] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.freedesktop.impl.portal.desktop.xapp'
+[   12.917023] Grammy systemd[995]: Started xdg-desktop-portal-xapp.service - Portal service (XApp implementation).
+[   12.930697] Grammy xdg-desktop-por[2994]: Choosing xapp-gnome-keyring.portal for org.freedesktop.impl.portal.Secret via the deprecated UseIn key
+[   12.931025] Grammy xdg-desktop-por[2994]: The preferred method to match portal implementations to desktop environments is to use the portals.conf(5) configuration file
+[   12.932229] Grammy dbus-daemon[1062]: [session uid=1001 pid=1062] Successfully activated service 'org.freedesktop.portal.Desktop'
+[   12.932393] Grammy systemd[995]: Started xdg-desktop-portal.service - Portal service.
+[   13.015907] Grammy irqbalance[677]: Cannot change IRQ 150 affinity: No such file or directory
+[   13.016351] Grammy irqbalance[677]: IRQ 150 affinity is now unmanaged
+[   13.016390] Grammy irqbalance[677]: Cannot change IRQ 149 affinity: No such file or directory
+[   13.016409] Grammy irqbalance[677]: IRQ 149 affinity is now unmanaged
+[   13.016429] Grammy irqbalance[677]: Cannot change IRQ 147 affinity: No such file or directory
+[   13.016447] Grammy irqbalance[677]: IRQ 147 affinity is now unmanaged
+[   13.016464] Grammy irqbalance[677]: Cannot change IRQ 145 affinity: No such file or directory
+[   13.016480] Grammy irqbalance[677]: IRQ 145 affinity is now unmanaged
+[   13.016494] Grammy irqbalance[677]: Cannot change IRQ 148 affinity: No such file or directory
+[   13.016516] Grammy irqbalance[677]: IRQ 148 affinity is now unmanaged
+[   13.488647] Grammy wpa_supplicant[777]: wlp0s20f3: CTRL-EVENT-SIGNAL-CHANGE above=1 signal=-57 noise=9999 txrate=26000
+[   13.536714] Grammy systemd[1]: NetworkManager-dispatcher.service: Deactivated successfully.
+[   32.787884] Grammy systemd-journald[340]: Forwarding to syslog missed 904 messages.
+[   32.789919] Grammy systemd[1]: systemd-fsckd.service: Deactivated successfully.
+[   33.012098] Grammy irqbalance[677]: Cannot change IRQ 146 affinity: Permission denied
+[   33.012693] Grammy irqbalance[677]: IRQ 146 affinity is now unmanaged
+[   33.327617] Grammy systemd-resolved[607]: Clock change detected. Flushing caches.
+[   33.328318] Grammy systemd-timesyncd[608]: Contacted time server 91.189.91.157:123 (ntp.ubuntu.com).
+[   33.328558] Grammy systemd-timesyncd[608]: Initial clock synchronization to Tue 2026-09-22 16:39:04.744220 EDT.
+[   33.419969] Grammy systemd[1]: blueman-mechanism.service: Deactivated successfully.
+[   33.505465] Grammy systemd[1]: systemd-hostnamed.service: Deactivated successfully.
+[   40.191625] Grammy node[1056]: 2026-09-22T16:39:11.608-04:00 [diagnostic] liveness heartbeat delayed: overdue=869581ms elapsed=899581ms; deferring recovery decisions
+[   41.240890] Grammy node[1056]: 2026-09-22T16:39:12.657-04:00 [health] host timing gap detected: process was frozen ~869581ms; restarting channels when idle and refreshing health
+[   41.248385] Grammy node[1056]: 2026-09-22T16:39:12.664-04:00 [admission] closed: suspend phase
+[   41.280504] Grammy node[1056]: 2026-09-22T16:39:12.697-04:00 [admission] reopened: suspend phase
+[   41.602035] Grammy node[1056]: 2026-09-22T16:39:13.018-04:00 [telegram] [default] starting provider (@GrandmaOSv3BOT)
+[   41.624494] Grammy node[1056]: 2026-09-22T16:39:13.040-04:00 [telegram] Plugin command "/dashboard" conflicts with an existing Telegram command.
+[   41.944272] Grammy node[1056]: 2026-09-22T16:39:13.360-04:00 [telegram] [diag] isolated polling ingress started spool=/home/fish/.openclaw/telegram/ingress-spool-default
+[   42.535975] Grammy chrome[2847]: [2847:2870:0922/163913.952510:INFO:chrome/browser/extensions/extension_garbage_collector.cc:212] Garbage collection for extensions on file thread is complete.
+[   60.141404] Grammy CRON[3154]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[   60.142535] Grammy CRON[3155]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)
+[   60.145928] Grammy CRON[3154]: pam_unix(cron:session): session closed for user root
+[  127.413822] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[  127.513163] Grammy runuser[3175]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[  127.518128] Grammy grandma-apply-baseline-system[3176]: [grandma-apply-baseline] lock-screen elimination...
+[  127.591698] Grammy grandma-apply-baseline-system[3176]: [grandma-apply-baseline] accessibility baseline...
+[  128.181713] Grammy grandma-apply-baseline-system[3176]: [grandma-apply-baseline] dock shortcut...
+[  128.221892] Grammy grandma-apply-baseline-system[3176]: [grandma-apply-baseline] function-row safety...
+[  128.910027] Grammy grandma-apply-baseline-system[3176]: [grandma-apply-baseline] done.
+[  128.910646] Grammy runuser[3175]: pam_unix(runuser:session): session closed for user grandma
+[  128.988599] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[  128.988979] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[  128.989057] Grammy systemd[1]: grandmaos-baseline.service: Consumed 1.392s CPU time.
+[  129.869614] Grammy bash[3950]: Starting app-server daemon with remote control enabled...
+[  129.916873] Grammy bash[3950]: This machine is available for remote control as Grammy.
+[  129.916873] Grammy bash[3950]: Daemon used app-server:
+[  129.916873] Grammy bash[3950]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[  129.916873] Grammy bash[3950]:   version: 0.156.0
+[  163.974561] Grammy wpa_supplicant[777]: wlp0s20f3: CTRL-EVENT-SIGNAL-CHANGE above=1 signal=-58 noise=9999 txrate=585000
+[  167.414715] Grammy systemd[994]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[  169.147103] Grammy grandma-openclaw-watchdog[4009]: [grandma-openclaw-watchdog] local gateway healthy
+[  169.150694] Grammy systemd[994]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[  169.150884] Grammy systemd[994]: grandmaos-openclaw-watchdog.service: Consumed 2.278s CPU time.
+[  249.935047] Grammy bash[4128]: Starting app-server daemon with remote control enabled...
+[  249.979664] Grammy bash[4128]: This machine is available for remote control as Grammy.
+[  249.979664] Grammy bash[4128]: Daemon used app-server:
+[  249.979664] Grammy bash[4128]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[  249.979664] Grammy bash[4128]:   version: 0.156.0
+[  287.411928] Grammy systemd[1]: anacron.service - Run anacron jobs was skipped because of an unmet condition check (ConditionACPower=true).
+[  301.377504] Grammy systemd[1]: Starting grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe)...
+[  301.417634] Grammy grandma-browser-backup[4224]: starting backup: profile=/home/grandma/.config/google-chrome/Default
+[  301.454074] Grammy grandma-browser-backup[4232]: Chrome is currently running for grandma; proceeding anyway (SQLite-safe backup method)
+[  301.780705] Grammy grandma-browser-backup[4438]: sqlite3 .backup failed for WebStorage/QuotaManager, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[  302.402786] Grammy grandma-browser-backup[4863]: sqlite3 .backup failed for History, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[  302.508662] Grammy grandma-browser-backup[4936]: sqlite3 .backup failed for Network Action Predictor, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[  303.708995] Grammy grandma-browser-backup[5790]: sqlite3 .backup failed for HistoryEmbeddings, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[  310.087587] Grammy grandma-browser-backup[13166]: sqlite3 .backup failed for Shortcuts, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[  310.233016] Grammy systemd[995]: launchpadlib-cache-clean.service - Clean up old files in the Launchpadlib cache was skipped because of an unmet condition check (ConditionPathExists=/home/grandma/.launchpadlib/api.launchpad.net/cache).
+[  310.325301] Grammy grandma-browser-backup[13405]: sqlite3 .backup failed for DIPS, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[  310.348947] Grammy grandma-browser-backup[13428]: sqlite3 .backup failed for declarative_performance_observer.db, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[  310.360011] Grammy grandma-browser-backup[13442]: sqlite3 .backup failed for Favicons, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[  311.155699] Grammy node[1056]: 2026-09-22T16:43:42.572-04:00 [state/database-verify] database integrity verification passed
+[  311.156762] Grammy node[1056]: 2026-09-22T16:43:42.572-04:00 [state/database-verify] database integrity verification passed
+[  317.170941] Grammy grandma-browser-backup[20667]: sqlite3 .backup failed for Web Data, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[  317.648713] Grammy grandma-browser-backup[21024]: backup OK: generation=20260922-164332 size=102M files=2372 (19 sqlite (safe .backup), 2344 plain-copy, 9 sqlite-fallback-cp (see log -- possibly inconsistent)) kept=14 pruned=1 chrome_running=yes
+[  317.648858] Grammy grandma-browser-backup[4207]: Backup complete: /var/backups/grandmaos/chrome/20260922-164332 (102M, 2372 files, 19 sqlite (safe .backup), 2344 plain-copy, 9 sqlite-fallback-cp (see log -- possibly inconsistent))
+[  317.648858] Grammy grandma-browser-backup[4207]: Kept 14 generations, pruned 1.
+[  317.649762] Grammy systemd[1]: grandmaos-browser-backup.service: Deactivated successfully.
+[  317.649945] Grammy systemd[1]: Finished grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe).
+[  317.650189] Grammy systemd[1]: grandmaos-browser-backup.service: Consumed 18.510s CPU time.
+[  347.412591] Grammy systemd[994]: Starting grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls...
+[  347.413148] Grammy systemd[994]: launchpadlib-cache-clean.service - Clean up old files in the Launchpadlib cache was skipped because of an unmet condition check (ConditionPathExists=/home/fish/.launchpadlib/api.launchpad.net/cache).
+[  347.435406] Grammy sudo[21044]:     fish : PWD=/home/fish ; USER=grandma ; COMMAND=/usr/bin/env DISPLAY=:0 XAUTHORITY=/home/grandma/.Xauthority XDG_RUNTIME_DIR=/run/user/1001 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1001/bus /usr/local/sbin/grandma-browser-hygiene
+[  347.437631] Grammy sudo[21044]: pam_unix(sudo:session): session opened for user grandma(uid=1001) by fish(uid=1000)
+[  347.645330] Grammy sudo[21044]: pam_unix(sudo:session): session closed for user grandma
+[  347.646981] Grammy grandma-browser-hygiene-monitor[21041]: chrome-hygiene: nothing to do (available 4431 MB, idle 425 ms)
+[  347.648594] Grammy grandma-browser-hygiene-monitor[21041]: [grandma-browser-hygiene-monitor] healthy/no action; OpenClaw was not contacted
+[  347.649240] Grammy systemd[994]: Finished grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls.
+[  369.997443] Grammy bash[21051]: Starting app-server daemon with remote control enabled...
+[  370.044662] Grammy bash[21051]: This machine is available for remote control as Grammy.
+[  370.044662] Grammy bash[21051]: Daemon used app-server:
+[  370.044662] Grammy bash[21051]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[  370.044662] Grammy bash[21051]:   version: 0.156.0
+[  490.062507] Grammy bash[21120]: Starting app-server daemon with remote control enabled...
+[  490.106657] Grammy bash[21120]: This machine is available for remote control as Grammy.
+[  490.106657] Grammy bash[21120]: Daemon used app-server:
+[  490.106657] Grammy bash[21120]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[  490.106657] Grammy bash[21120]:   version: 0.156.0
+[  527.410335] Grammy systemd[994]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[  528.892115] Grammy grandma-openclaw-watchdog[21171]: [grandma-openclaw-watchdog] local gateway healthy
+[  528.895493] Grammy systemd[994]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[  528.895748] Grammy systemd[994]: grandmaos-openclaw-watchdog.service: Consumed 1.968s CPU time.
+[  610.125310] Grammy bash[21237]: Starting app-server daemon with remote control enabled...
+[  610.177024] Grammy bash[21237]: This machine is available for remote control as Grammy.
+[  610.177024] Grammy bash[21237]: Daemon used app-server:
+[  610.177024] Grammy bash[21237]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[  610.177024] Grammy bash[21237]:   version: 0.156.0
+===== BOOT -5 =====
+[16456.422176] Grammy bash[119419]: Daemon used app-server:
+[16456.422176] Grammy bash[119419]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[16456.422176] Grammy bash[119419]:   version: 0.156.0
+[16576.434678] Grammy bash[119472]: Starting app-server daemon with remote control enabled...
+[16576.461247] Grammy bash[119472]: This machine is available for remote control as Grammy.
+[16576.461247] Grammy bash[119472]: Daemon used app-server:
+[16576.461247] Grammy bash[119472]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[16576.461247] Grammy bash[119472]:   version: 0.156.0
+[16647.191526] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[16647.225758] Grammy runuser[119558]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[16647.228532] Grammy grandma-apply-baseline-system[119559]: [grandma-apply-baseline] lock-screen elimination...
+[16647.231935] Grammy dbus-daemon[1036]: [session uid=1001 pid=1036] Activating service name='org.xfce.Xfconf' requested by ':1.3001' (uid=1001 pid=119560 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[16647.236122] Grammy dbus-daemon[1036]: [session uid=1001 pid=1036] Successfully activated service 'org.xfce.Xfconf'
+[16647.273840] Grammy grandma-apply-baseline-system[119559]: [grandma-apply-baseline] accessibility baseline...
+[16647.618417] Grammy grandma-apply-baseline-system[119559]: [grandma-apply-baseline] dock shortcut...
+[16647.641662] Grammy grandma-apply-baseline-system[119559]: [grandma-apply-baseline] function-row safety...
+[16648.063295] Grammy grandma-apply-baseline-system[119559]: [grandma-apply-baseline] done.
+[16648.063522] Grammy runuser[119558]: pam_unix(runuser:session): session closed for user grandma
+[16648.111404] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[16648.111537] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[16696.474409] Grammy bash[120452]: Starting app-server daemon with remote control enabled...
+[16696.496330] Grammy bash[120452]: This machine is available for remote control as Grammy.
+[16696.496330] Grammy bash[120452]: Daemon used app-server:
+[16696.496330] Grammy bash[120452]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[16696.496330] Grammy bash[120452]:   version: 0.156.0
+[16729.254265] Grammy systemd[966]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[16730.885298] Grammy grandma-openclaw-watchdog[120540]: [grandma-openclaw-watchdog] local gateway healthy
+[16730.889149] Grammy systemd[966]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[16730.889377] Grammy systemd[966]: grandmaos-openclaw-watchdog.service: Consumed 1.970s CPU time.
+[16731.137451] Grammy CRON[120592]: pam_unix(cron:session): session opened for user root(uid=0) by root(uid=0)
+[16731.137926] Grammy CRON[120593]: (root) CMD ([ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi)
+[16731.139667] Grammy CRON[120592]: pam_unix(cron:session): session closed for user root
+[16754.805738] Grammy systemd[1]: Started anacron.service - Run anacron jobs.
+[16754.808220] Grammy anacron[120612]: Anacron 2.3 started on 2026-09-22
+[16754.809509] Grammy anacron[120612]: Normal exit (0 jobs run)
+[16754.810869] Grammy systemd[1]: anacron.service: Deactivated successfully.
+[16816.554284] Grammy bash[120621]: Starting app-server daemon with remote control enabled...
+[16816.583487] Grammy bash[120621]: This machine is available for remote control as Grammy.
+[16816.583487] Grammy bash[120621]: Daemon used app-server:
+[16816.583487] Grammy bash[120621]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[16816.583487] Grammy bash[120621]:   version: 0.156.0
+[16936.597155] Grammy bash[120801]: Starting app-server daemon with remote control enabled...
+[16936.644435] Grammy bash[120801]: This machine is available for remote control as Grammy.
+[16936.644435] Grammy bash[120801]: Daemon used app-server:
+[16936.644435] Grammy bash[120801]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[16936.644435] Grammy bash[120801]:   version: 0.156.0
+[17056.650027] Grammy bash[120937]: Starting app-server daemon with remote control enabled...
+[17056.673664] Grammy bash[120937]: This machine is available for remote control as Grammy.
+[17056.673664] Grammy bash[120937]: Daemon used app-server:
+[17056.673664] Grammy bash[120937]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[17056.673664] Grammy bash[120937]:   version: 0.156.0
+[17089.257250] Grammy systemd[966]: Starting grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls...
+[17089.257936] Grammy systemd[966]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[17089.270147] Grammy sudo[121058]:     fish : PWD=/home/fish ; USER=grandma ; COMMAND=/usr/bin/env DISPLAY=:0 XAUTHORITY=/home/grandma/.Xauthority XDG_RUNTIME_DIR=/run/user/1001 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1001/bus /usr/local/sbin/grandma-browser-hygiene
+[17089.272049] Grammy sudo[121058]: pam_unix(sudo:session): session opened for user grandma(uid=1001) by fish(uid=1000)
+[17089.619254] Grammy sudo[121058]: pam_unix(sudo:session): session closed for user grandma
+[17089.620760] Grammy grandma-browser-hygiene-monitor[121054]: chrome-hygiene: nothing to do (available 2361 MB, idle 11151 ms)
+[17089.623287] Grammy grandma-browser-hygiene-monitor[121054]: [grandma-browser-hygiene-monitor] healthy/no action; OpenClaw was not contacted
+[17089.624661] Grammy systemd[966]: Finished grandmaos-browser-hygiene.service - Run GrandmaOS Chrome hygiene without routine model calls.
+[17090.506356] Grammy grandma-openclaw-watchdog[121055]: [grandma-openclaw-watchdog] local gateway healthy
+[17090.509184] Grammy systemd[966]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[17090.509376] Grammy systemd[966]: grandmaos-openclaw-watchdog.service: Consumed 1.682s CPU time.
+[17176.683199] Grammy bash[121166]: Starting app-server daemon with remote control enabled...
+[17176.706172] Grammy bash[121166]: This machine is available for remote control as Grammy.
+[17176.706172] Grammy bash[121166]: Daemon used app-server:
+[17176.706172] Grammy bash[121166]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[17176.706172] Grammy bash[121166]:   version: 0.156.0
+[17296.716714] Grammy bash[121303]: Starting app-server daemon with remote control enabled...
+[17296.742842] Grammy bash[121303]: This machine is available for remote control as Grammy.
+[17296.742842] Grammy bash[121303]: Daemon used app-server:
+[17296.742842] Grammy bash[121303]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[17296.742842] Grammy bash[121303]:   version: 0.156.0
+[17416.752406] Grammy bash[121454]: Starting app-server daemon with remote control enabled...
+[17416.780299] Grammy bash[121454]: This machine is available for remote control as Grammy.
+[17416.780299] Grammy bash[121454]: Daemon used app-server:
+[17416.780299] Grammy bash[121454]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[17416.780299] Grammy bash[121454]:   version: 0.156.0
+[17449.252225] Grammy systemd[966]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[17450.716320] Grammy grandma-openclaw-watchdog[121516]: [grandma-openclaw-watchdog] local gateway healthy
+[17450.720319] Grammy systemd[966]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[17450.720568] Grammy systemd[966]: grandmaos-openclaw-watchdog.service: Consumed 1.783s CPU time.
+[17536.788928] Grammy bash[121570]: Starting app-server daemon with remote control enabled...
+[17536.810895] Grammy bash[121570]: This machine is available for remote control as Grammy.
+[17536.810895] Grammy bash[121570]: Daemon used app-server:
+[17536.810895] Grammy bash[121570]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[17536.810895] Grammy bash[121570]:   version: 0.156.0
+[17556.332427] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[17556.400317] Grammy runuser[121626]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[17556.402793] Grammy grandma-apply-baseline-system[121627]: [grandma-apply-baseline] lock-screen elimination...
+[17556.406234] Grammy dbus-daemon[1036]: [session uid=1001 pid=1036] Activating service name='org.xfce.Xfconf' requested by ':1.3155' (uid=1001 pid=121628 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[17556.410246] Grammy dbus-daemon[1036]: [session uid=1001 pid=1036] Successfully activated service 'org.xfce.Xfconf'
+[17556.445331] Grammy grandma-apply-baseline-system[121627]: [grandma-apply-baseline] accessibility baseline...
+[17556.748660] Grammy grandma-apply-baseline-system[121627]: [grandma-apply-baseline] dock shortcut...
+[17556.769347] Grammy grandma-apply-baseline-system[121627]: [grandma-apply-baseline] function-row safety...
+[17557.162573] Grammy grandma-apply-baseline-system[121627]: [grandma-apply-baseline] done.
+[17557.162751] Grammy runuser[121626]: pam_unix(runuser:session): session closed for user grandma
+[17557.205691] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[17557.205814] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[17656.822082] Grammy bash[122609]: Starting app-server daemon with remote control enabled...
+[17656.845609] Grammy bash[122609]: This machine is available for remote control as Grammy.
+[17656.845609] Grammy bash[122609]: Daemon used app-server:
+[17656.845609] Grammy bash[122609]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[17656.845609] Grammy bash[122609]:   version: 0.156.0
+[17776.856942] Grammy bash[122697]: Starting app-server daemon with remote control enabled...
+[17776.880896] Grammy bash[122697]: This machine is available for remote control as Grammy.
+[17776.880896] Grammy bash[122697]: Daemon used app-server:
+[17776.880896] Grammy bash[122697]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[17776.880896] Grammy bash[122697]:   version: 0.156.0
+[17809.254348] Grammy systemd[966]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[17811.247817] Grammy grandma-openclaw-watchdog[122771]: [grandma-openclaw-watchdog] local gateway healthy
+[17811.252737] Grammy systemd[966]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[17811.252972] Grammy systemd[966]: grandmaos-openclaw-watchdog.service: Consumed 2.151s CPU time.
+[17896.931809] Grammy bash[122856]: Starting app-server daemon with remote control enabled...
+[17896.958434] Grammy bash[122856]: This machine is available for remote control as Grammy.
+[17896.958434] Grammy bash[122856]: Daemon used app-server:
+[17896.958434] Grammy bash[122856]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[17896.958434] Grammy bash[122856]:   version: 0.156.0
+[18016.969100] Grammy bash[122941]: Starting app-server daemon with remote control enabled...
+[18017.017803] Grammy bash[122941]: This machine is available for remote control as Grammy.
+[18017.017803] Grammy bash[122941]: Daemon used app-server:
+[18017.017803] Grammy bash[122941]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[18017.017803] Grammy bash[122941]:   version: 0.156.0
+[18137.030330] Grammy bash[123080]: Starting app-server daemon with remote control enabled...
+[18137.062044] Grammy bash[123080]: This machine is available for remote control as Grammy.
+[18137.062044] Grammy bash[123080]: Daemon used app-server:
+[18137.062044] Grammy bash[123080]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[18137.062044] Grammy bash[123080]:   version: 0.156.0
+[18169.252546] Grammy systemd[966]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[18170.433571] Grammy grandma-openclaw-watchdog[123140]: [grandma-openclaw-watchdog] local gateway healthy
+[18170.437149] Grammy systemd[966]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[18170.437402] Grammy systemd[966]: grandmaos-openclaw-watchdog.service: Consumed 1.633s CPU time.
+[18257.073457] Grammy bash[123194]: Starting app-server daemon with remote control enabled...
+[18257.099804] Grammy bash[123194]: This machine is available for remote control as Grammy.
+[18257.099804] Grammy bash[123194]: Daemon used app-server:
+[18257.099804] Grammy bash[123194]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[18257.099804] Grammy bash[123194]:   version: 0.156.0
+[18377.109385] Grammy bash[123493]: Starting app-server daemon with remote control enabled...
+[18377.116340] Grammy systemd[1]: Starting grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe)...
+[18377.140442] Grammy grandma-browser-backup[123548]: starting backup: profile=/home/grandma/.config/google-chrome/Default
+[18377.140851] Grammy bash[123493]: This machine is available for remote control as Grammy.
+[18377.140851] Grammy bash[123493]: Daemon used app-server:
+[18377.140851] Grammy bash[123493]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[18377.140851] Grammy bash[123493]:   version: 0.156.1
+[18377.159887] Grammy grandma-browser-backup[123557]: Chrome is currently running for grandma; proceeding anyway (SQLite-safe backup method)
+[18377.410143] Grammy grandma-browser-backup[123817]: sqlite3 .backup failed for WebStorage/QuotaManager, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18377.652985] Grammy grandma-browser-backup[124074]: sqlite3 .backup failed for Login Data For Account, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18377.826704] Grammy grandma-browser-backup[124249]: sqlite3 .backup failed for History, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18377.903230] Grammy grandma-browser-backup[124322]: sqlite3 .backup failed for Network Action Predictor, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18378.679650] Grammy grandma-browser-backup[125183]: sqlite3 .backup failed for HistoryEmbeddings, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18385.192850] Grammy grandma-browser-backup[132451]: sqlite3 .backup failed for Login Data, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18385.206824] Grammy grandma-browser-backup[132465]: sqlite3 .backup failed for Shortcuts, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18385.241321] Grammy grandma-browser-backup[132496]: sqlite3 .backup failed for MediaDeviceSalts, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18385.458982] Grammy grandma-browser-backup[132707]: sqlite3 .backup failed for DIPS, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18385.480090] Grammy grandma-browser-backup[132730]: sqlite3 .backup failed for declarative_performance_observer.db, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18385.494744] Grammy grandma-browser-backup[132744]: sqlite3 .backup failed for Favicons, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18392.041175] Grammy grandma-browser-backup[139957]: sqlite3 .backup failed for Web Data, falling back to plain copy (result may be inconsistent if Chrome was mid-write)
+[18392.483918] Grammy grandma-browser-backup[140328]: backup OK: generation=20260922-225727 size=107M files=2385 (16 sqlite (safe .backup), 2357 plain-copy, 12 sqlite-fallback-cp (see log -- possibly inconsistent)) kept=14 pruned=1 chrome_running=yes
+[18392.484199] Grammy grandma-browser-backup[123503]: Backup complete: /var/backups/grandmaos/chrome/20260922-225727 (107M, 2385 files, 16 sqlite (safe .backup), 2357 plain-copy, 12 sqlite-fallback-cp (see log -- possibly inconsistent))
+[18392.484199] Grammy grandma-browser-backup[123503]: Kept 14 generations, pruned 1.
+[18392.484953] Grammy systemd[1]: grandmaos-browser-backup.service: Deactivated successfully.
+[18392.485169] Grammy systemd[1]: Finished grandmaos-browser-backup.service - Backup grandma's Chrome browser profile (SQLite-safe).
+[18392.485259] Grammy systemd[1]: grandmaos-browser-backup.service: Consumed 17.101s CPU time.
+[18462.294509] Grammy systemd[1]: Starting grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma...
+[18462.322999] Grammy runuser[140350]: pam_unix(runuser:session): session opened for user grandma(uid=1001) by (uid=0)
+[18462.325776] Grammy grandma-apply-baseline-system[140351]: [grandma-apply-baseline] lock-screen elimination...
+[18462.330027] Grammy dbus-daemon[1036]: [session uid=1001 pid=1036] Activating service name='org.xfce.Xfconf' requested by ':1.3309' (uid=1001 pid=140352 comm="xfconf-query -c xfce4-session -p /general/LockComm" label="unconfined")
+[18462.334259] Grammy dbus-daemon[1036]: [session uid=1001 pid=1036] Successfully activated service 'org.xfce.Xfconf'
+[18462.369830] Grammy grandma-apply-baseline-system[140351]: [grandma-apply-baseline] accessibility baseline...
+[18462.724790] Grammy grandma-apply-baseline-system[140351]: [grandma-apply-baseline] dock shortcut...
+[18462.750448] Grammy grandma-apply-baseline-system[140351]: [grandma-apply-baseline] function-row safety...
+[18463.199670] Grammy grandma-apply-baseline-system[140351]: [grandma-apply-baseline] done.
+[18463.199927] Grammy runuser[140350]: pam_unix(runuser:session): session closed for user grandma
+[18463.246837] Grammy systemd[1]: grandmaos-baseline.service: Deactivated successfully.
+[18463.246982] Grammy systemd[1]: Finished grandmaos-baseline.service - Reassert GrandmaOS lock-screen/accessibility baseline for grandma.
+[18497.150268] Grammy bash[141273]: Starting app-server daemon with remote control enabled...
+[18497.174416] Grammy bash[141273]: This machine is available for remote control as Grammy.
+[18497.174416] Grammy bash[141273]: Daemon used app-server:
+[18497.174416] Grammy bash[141273]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[18497.174416] Grammy bash[141273]:   version: 0.156.1
+[18529.255291] Grammy systemd[966]: Starting grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway...
+[18529.257606] Grammy systemd[1]: Starting fwupd-refresh.service - Refresh fwupd metadata and update motd...
+[18529.305330] Grammy systemd[1]: fwupd-refresh.service: Deactivated successfully.
+[18529.305879] Grammy systemd[1]: Finished fwupd-refresh.service - Refresh fwupd metadata and update motd.
+[18531.089925] Grammy grandma-openclaw-watchdog[141347]: [grandma-openclaw-watchdog] local gateway healthy
+[18531.093399] Grammy systemd[966]: Finished grandmaos-openclaw-watchdog.service - Check and recover the local OpenClaw gateway.
+[18531.093518] Grammy systemd[966]: grandmaos-openclaw-watchdog.service: Consumed 2.095s CPU time.
+[18617.185370] Grammy bash[141449]: Starting app-server daemon with remote control enabled...
+[18617.218623] Grammy bash[141449]: This machine is available for remote control as Grammy.
+[18617.218623] Grammy bash[141449]: Daemon used app-server:
+[18617.218623] Grammy bash[141449]:   path: /home/fish/.codex/packages/standalone/current/bin/codex
+[18617.218623] Grammy bash[141449]:   version: 0.156.1
+[18666.726473] Grammy systemd-logind[703]: Power key pressed short.
+[18672.590106] Grammy systemd-logind[703]: Lid closed.
+[18680.781209] Grammy systemd-logind[703]: Lid opened.
+[18684.659259] Grammy systemd-logind[703]: Power key pressed short.
+[18689.887232] Grammy systemd-logind[703]: Lid closed.
+[18700.606059] Grammy systemd-logind[703]: Lid opened.
+[18705.987266] Grammy systemd-logind[703]: Power key pressed short.
+[18711.431248] Grammy systemd-logind[703]: Power key pressed short.
+[18715.067161] Grammy systemd-logind[703]: Lid closed.

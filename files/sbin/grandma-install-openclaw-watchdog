@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install/enable the OpenClaw watchdog for the current OpenClaw owner account.
+# Install OpenClaw health and token-free Chrome-hygiene timers for its owner.
 set -euo pipefail
 
 SHARE_DIR="/usr/local/share/grandmaos/systemd-user"
@@ -10,9 +10,11 @@ if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
 Usage: grandma-install-openclaw-watchdog
 
 Run as the non-root admin account that owns and runs OpenClaw, after
-`openclaw gateway install` succeeds. Installs and enables a five-minute local
-gateway watchdog. Root execution is refused to avoid creating root-owned
-OpenClaw state.
+`openclaw gateway install` succeeds. Installs a five-minute local gateway
+watchdog and a 30-minute Chrome-hygiene timer. The Chrome check runs locally
+and wakes OpenClaw only for a failure or an unusually large background window;
+ordinary cleanup stays silent. Recurring model heartbeats are disabled. Root
+execution is refused to avoid creating root-owned OpenClaw state.
 EOF
   exit 0
 fi
@@ -26,6 +28,12 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 openclaw_bin=$(command -v openclaw 2>/dev/null || true)
+if [ -z "$openclaw_bin" ] && [ -x "$HOME/.openclaw/bin/openclaw" ]; then
+  openclaw_bin="$HOME/.openclaw/bin/openclaw"
+fi
+if [ -z "$openclaw_bin" ] && [ -x "$HOME/.local/bin/openclaw" ]; then
+  openclaw_bin="$HOME/.local/bin/openclaw"
+fi
 if [ -z "$openclaw_bin" ] || [ ! -x "$openclaw_bin" ]; then
   echo "error: openclaw is not installed or is not on this user's PATH" >&2
   exit 1
@@ -33,24 +41,74 @@ fi
 for required in \
   "$SHARE_DIR/grandmaos-openclaw-watchdog.service.in" \
   "$SHARE_DIR/grandmaos-openclaw-watchdog.timer" \
-  /usr/local/sbin/grandma-openclaw-watchdog; do
+  "$SHARE_DIR/grandmaos-browser-hygiene.service.in" \
+  "$SHARE_DIR/grandmaos-browser-hygiene.timer" \
+  /usr/local/sbin/grandma-openclaw-watchdog \
+  /usr/local/sbin/grandma-browser-hygiene-monitor; do
   [ -r "$required" ] || { echo "error: missing installed GrandmaOS file: $required" >&2; exit 1; }
 done
+
+agent_id=$(python3 - "$HOME/.openclaw/openclaw.json" <<'PY'
+import json
+import re
+import sys
+
+with open(sys.argv[1]) as handle:
+    config = json.load(handle)
+entries = config.get("agents", {}).get("entries", {})
+candidates = [
+    name for name, value in entries.items()
+    if isinstance(value, dict) and isinstance(value.get("heartbeat"), dict)
+]
+if len(candidates) != 1:
+    raise SystemExit(
+        "error: expected exactly one OpenClaw agent with heartbeat settings; "
+        f"found {len(candidates)}"
+    )
+agent_id = candidates[0]
+if not re.fullmatch(r"[A-Za-z0-9_-]+", agent_id):
+    raise SystemExit("error: unsupported OpenClaw agent id")
+print(agent_id)
+PY
+)
+session_key="agent:${agent_id}:main"
 
 mkdir -p "$USER_UNIT_DIR"
 escaped_openclaw=$(printf '%s' "$openclaw_bin" | sed 's/[&|]/\\&/g')
 escaped_watchdog=$(printf '%s' /usr/local/sbin/grandma-openclaw-watchdog | sed 's/[&|]/\\&/g')
+escaped_monitor=$(printf '%s' /usr/local/sbin/grandma-browser-hygiene-monitor | sed 's/[&|]/\\&/g')
+escaped_session_key=$(printf '%s' "$session_key" | sed 's/[&|]/\\&/g')
 sed -e "s|@OPENCLAW_BIN@|$escaped_openclaw|g" \
     -e "s|@WATCHDOG_BIN@|$escaped_watchdog|g" \
     "$SHARE_DIR/grandmaos-openclaw-watchdog.service.in" \
     >"$USER_UNIT_DIR/grandmaos-openclaw-watchdog.service"
 install -m 0644 "$SHARE_DIR/grandmaos-openclaw-watchdog.timer" \
   "$USER_UNIT_DIR/grandmaos-openclaw-watchdog.timer"
+sed -e "s|@OPENCLAW_BIN@|$escaped_openclaw|g" \
+    -e "s|@MONITOR_BIN@|$escaped_monitor|g" \
+    -e "s|@SESSION_KEY@|$escaped_session_key|g" \
+    "$SHARE_DIR/grandmaos-browser-hygiene.service.in" \
+    >"$USER_UNIT_DIR/grandmaos-browser-hygiene.service"
+install -m 0644 "$SHARE_DIR/grandmaos-browser-hygiene.timer" \
+  "$USER_UNIT_DIR/grandmaos-browser-hygiene.timer"
+
+# A recurring OpenClaw heartbeat is a full model turn. Keep only event-driven
+# wakes, which still work with every=0m and occur only after the local monitor
+# has something actionable to report.
+heartbeat_prompt='A trusted local GrandmaOS monitor has sent a System event that needs the owner attention. Relay that event in one short factual line. Do not run commands or repeat the monitor. If there is no actionable System event, reply exactly: NO_REPLY'
+heartbeat_prompt_json=$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$heartbeat_prompt")
+"$openclaw_bin" config set "agents.entries.${agent_id}.heartbeat.every" '"0m"' --strict-json
+"$openclaw_bin" config set "agents.entries.${agent_id}.heartbeat.prompt" "$heartbeat_prompt_json" --strict-json
 
 systemctl --user daemon-reload
 systemctl --user enable --now grandmaos-openclaw-watchdog.timer
+systemctl --user enable --now grandmaos-browser-hygiene.timer
 
 echo "OpenClaw watchdog enabled for $(id -un): every 5 minutes after each completed check."
+echo "Chrome hygiene enabled every 30 minutes; routine cleanup uses no model tokens."
+echo "Large-window alerts require 2500 MB and are limited to one every 12 hours."
+echo "Recurring OpenClaw model heartbeat disabled; actionable events can still wake it."
 echo "For operation while logged out, run once: sudo loginctl enable-linger $(id -un)"
-echo "Inspect with: systemctl --user status grandmaos-openclaw-watchdog.timer"
+echo "Inspect with: systemctl --user status grandmaos-openclaw-watchdog.timer grandmaos-browser-hygiene.timer"
 echo "Logs: journalctl --user -u grandmaos-openclaw-watchdog.service"
+echo "      journalctl --user -u grandmaos-browser-hygiene.service"

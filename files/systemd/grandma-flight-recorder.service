@@ -1,0 +1,7 @@
+[Unit]
+Description=GrandmaOS local crash flight recorder
+ConditionPathExists=/proc/uptime
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/grandma-flight-recorder

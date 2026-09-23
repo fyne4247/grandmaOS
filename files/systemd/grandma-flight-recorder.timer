@@ -1,0 +1,12 @@
+[Unit]
+Description=Run GrandmaOS local crash flight recorder every minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=60sec
+AccuracySec=1sec
+Persistent=false
+Unit=grandma-flight-recorder.service
+
+[Install]
+WantedBy=timers.target

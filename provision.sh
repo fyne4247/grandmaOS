@@ -122,9 +122,9 @@ phase_install_scripts() {
   local icon_dir=/usr/local/share/grandmaos/icons
   run install -d -m 0755 -o root -g root "$icon_dir"
   if [ "$DRY_RUN" -eq 1 ]; then
-    note "[dry-run] would fetch facebook/messenger/youtube/truist/aol favicons into $icon_dir"
+    note "[dry-run] would fetch facebook/amazon/youtube/truist/aol favicons into $icon_dir"
   else
-    for pair in "facebook.com:facebook" "messenger.com:messenger" "youtube.com:youtube" "truist.com:truist" "aol.com:aol"; do
+    for pair in "facebook.com:facebook" "amazon.com:amazon" "youtube.com:youtube" "truist.com:truist" "aol.com:aol"; do
       local domain="${pair%%:*}" name="${pair##*:}"
       if [ ! -s "$icon_dir/$name.png" ]; then
         curl -fsSL "https://www.google.com/s2/favicons?domain=${domain}&sz=128" -o "$icon_dir/$name.png" \
@@ -304,89 +304,6 @@ PY
 }
 
 # ---------------------------------------------------------------------------
-phase_messenger_zoom() {
-  log "Phase: Messenger site-specific Chrome zoom"
-  local home="/home/$GRANDMA_USER"
-  local profile_dir="$home/.config/google-chrome/Default"
-  local preferences="$profile_dir/Preferences"
-  local zoom_level=1.2239010857415449 # Chrome's internal value for 125%.
-
-  if [ "$DRY_RUN" -eq 1 ]; then
-    note "[dry-run] would set messenger.com to 125% zoom in Grandma's main Chrome profile"
-    return
-  fi
-
-  # Chrome owns Preferences while it is running. Do not interrupt an active
-  # browser session or overwrite the owner's current per-site zoom experiment;
-  # this setting can be initialized during a later stopped-browser provision.
-  if pgrep -u "$GRANDMA_USER" -f '/opt/google/chrome/chrome' >/dev/null 2>&1; then
-    note "Chrome is running; preserving its current Messenger zoom setting"
-    return
-  fi
-
-  local needs_update
-  needs_update=$(python3 - "$preferences" "$zoom_level" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-zoom_level = float(sys.argv[2])
-try:
-    data = json.loads(path.read_text()) if path.exists() else {}
-except (OSError, json.JSONDecodeError):
-    print("yes")
-    raise SystemExit
-
-hosts = data.get("partition", {}).get("per_host_zoom_levels", {}).get("x", {})
-zoom_matches = all(
-    hosts.get(hostname, {}).get("zoom_level") == zoom_level
-    for hostname in ("messenger.com", "www.messenger.com")
-)
-print("no" if zoom_matches else "yes")
-PY
-)
-  if [ "$needs_update" = no ]; then
-    note "Messenger site zoom already set, skipping"
-    return
-  fi
-
-  install -d -m 0700 -o "$GRANDMA_USER" -g "$GRANDMA_USER" "$profile_dir"
-  python3 - "$preferences" "$zoom_level" "$GRANDMA_USER" <<'PY'
-import json
-import os
-import pwd
-import sys
-from pathlib import Path
-
-path = Path(sys.argv[1])
-zoom_level = float(sys.argv[2])
-username = sys.argv[3]
-try:
-    data = json.loads(path.read_text()) if path.exists() else {}
-except json.JSONDecodeError as exc:
-    raise SystemExit(f"error: refusing to overwrite invalid Messenger Preferences JSON: {exc}")
-
-hosts = (
-    data.setdefault("partition", {})
-        .setdefault("per_host_zoom_levels", {})
-        .setdefault("x", {})
-)
-for hostname in ("messenger.com", "www.messenger.com"):
-    hosts.setdefault(hostname, {})["zoom_level"] = zoom_level
-
-temporary = path.with_name(path.name + ".grandmaos-new")
-temporary.write_text(json.dumps(data, separators=(",", ":")))
-account = pwd.getpwnam(username)
-os.chown(temporary, account.pw_uid, account.pw_gid)
-os.chmod(temporary, 0o600)
-os.replace(temporary, path)
-PY
-  note "Messenger set to 125% zoom in Grandma's main Chrome profile"
-
-}
-
-# ---------------------------------------------------------------------------
 phase_updates() {
   log "Phase: automatic updates"
   if ! dpkg -l unattended-upgrades >/dev/null 2>&1; then
@@ -440,18 +357,50 @@ EOF
 # ---------------------------------------------------------------------------
 phase_timers() {
   log "Phase: systemd self-healing + backup timers"
-  for u in grandmaos-baseline.service grandmaos-baseline.timer grandmaos-browser-backup.service grandmaos-browser-backup.timer; do
+  for u in grandmaos-baseline.service grandmaos-baseline.timer grandmaos-browser-backup.service grandmaos-browser-backup.timer grandma-flight-recorder.service grandma-flight-recorder.timer; do
     run install -m 0644 -o root -g root "$FILES/systemd/$u" "/etc/systemd/system/$u"
   done
   run systemctl daemon-reload
   run systemctl enable --now grandmaos-baseline.timer
   run systemctl enable --now grandmaos-browser-backup.timer
-  note "baseline reasserts every 15min; browser backup runs hourly, keeps 14 generations"
+  run systemctl enable --now grandma-flight-recorder.timer
+  note "baseline reasserts every 15min; browser backup runs hourly, keeps 14 generations; flight recorder snapshots every minute"
+}
+
+# ---------------------------------------------------------------------------
+phase_lid_power() {
+  log "Phase: lid-switch power handling (temporary lid-suspend disable)"
+  # TEMPORARY (2026-09-19): a lid-triggered s2idle suspend races the xe display
+  # driver / Xorg on this Dell XPS 13, producing an "Xorg FatalError / no
+  # screens found" core dump and an immediate reboot instead of a suspend.
+  # Ignore the lid switch until the driver issue is fixed. The user-side half is
+  # set in files/sbin/grandma-apply-baseline (xfpm lid action -> do nothing).
+  # Delete files/systemd/logind.conf.d/10-grandmaos-lid.conf (and this phase)
+  # to restore the distro default (HandleLidSwitch=suspend).
+  run install -d -m 0755 -o root -g root /etc/systemd/logind.conf.d
+  run install -m 0644 -o root -g root \
+    "$FILES/systemd/logind.conf.d/10-grandmaos-lid.conf" \
+    /etc/systemd/logind.conf.d/10-grandmaos-lid.conf
+  run systemctl reload systemd-logind
+  note "lid switch ignored (no auto-suspend on lid close); reload applied live"
 }
 
 # ---------------------------------------------------------------------------
 phase_dns() {
   log "Phase: DNS-level ad/scam blocking (AdGuard Family Protection)"
+  run apt-get install -y dnsmasq-base
+  run install -d -m 0755 -o root -g root \
+    /etc/NetworkManager/conf.d /etc/NetworkManager/dnsmasq.d \
+    /etc/systemd/resolved.conf.d
+  run install -m 0644 -o root -g root \
+    "$FILES/networkmanager/20-grandmaos-dns.conf" \
+    /etc/NetworkManager/conf.d/20-grandmaos-dns.conf
+  run install -m 0644 -o root -g root \
+    "$FILES/networkmanager/dnsmasq.d/20-grandmaos-openrouter.conf" \
+    /etc/NetworkManager/dnsmasq.d/20-grandmaos-openrouter.conf
+  run install -m 0644 -o root -g root \
+    "$FILES/systemd-resolved/20-grandmaos-dns.conf" \
+    /etc/systemd/resolved.conf.d/20-grandmaos-dns.conf
   local conn="$WIFI_CONNECTION"
   if [ -z "$conn" ]; then
     conn=$(nmcli -t -f NAME,TYPE connection show --active 2>/dev/null | awk -F: '$2=="802-11-wireless"{print $1; exit}')
@@ -466,6 +415,9 @@ phase_dns() {
   run nmcli connection modify "$conn" ipv6.dns "2a10:50c0::bad1:ff 2a10:50c0::bad2:ff"
   run nmcli connection modify "$conn" ipv6.ignore-auto-dns yes
   run nmcli connection up "$conn"
+  run nmcli general reload conf,dns-full
+  run systemctl restart systemd-resolved
+  note "OpenRouter-only DNS exception: Cloudflare Families (avoids AdGuard's current DNSSEC SERVFAIL without weakening browsing filters)."
   note "NOTE: this also enforces Google SafeSearch machine-wide -- affects every account, not just grandma's."
 }
 
@@ -503,9 +455,9 @@ phase_install_scripts
 phase_accessibility
 phase_chrome
 phase_chrome_font_size
-phase_messenger_zoom
 phase_updates
 phase_timers
+phase_lid_power
 phase_dns
 phase_grub
 

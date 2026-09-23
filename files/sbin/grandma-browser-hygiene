@@ -192,6 +192,10 @@ def close_window(env, xid):
 
 def main() -> int:
     dry = "--dry-run" in sys.argv
+    # --notify: print OpenClaw's silent token when nothing happened, so a
+    # scheduler command payload posts nothing on a no-op run and only speaks
+    # up when it actually touched a window.
+    notify = "--notify" in sys.argv
     env = session_env()
     windows = wmctrl_windows(env)
     if not windows:
@@ -232,7 +236,10 @@ def main() -> int:
             acted += 1
 
     if acted == 0:
-        log(f"chrome-hygiene: nothing to do (available {avail} MB, idle {idle} ms)")
+        if notify:
+            print("NO_REPLY")
+        else:
+            log(f"chrome-hygiene: nothing to do (available {avail} MB, idle {idle} ms)")
     return 0
 
 

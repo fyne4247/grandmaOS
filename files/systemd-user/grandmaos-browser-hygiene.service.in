@@ -1,0 +1,9 @@
+[Unit]
+Description=Run GrandmaOS Chrome hygiene without routine model calls
+After=openclaw-gateway.service
+
+[Service]
+Type=oneshot
+ExecStart=@MONITOR_BIN@ @OPENCLAW_BIN@ @SESSION_KEY@
+TimeoutStartSec=5min
+Restart=no

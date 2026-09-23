@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# Run Chrome hygiene locally and wake OpenClaw only when corrective action or
+# an actual monitor failure needs the owner's attention.
+set -uo pipefail
+
+OPENCLAW_BIN="${1:-${OPENCLAW_BIN:-}}"
+SESSION_KEY="${2:-${GRANDMAOS_OPENCLAW_SESSION_KEY:-}}"
+HYGIENE_BIN=/usr/local/sbin/grandma-browser-hygiene
+ALERT_MB=2500
+ALERT_COOLDOWN_SECONDS=$((12 * 60 * 60))
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/grandmaos"
+LAST_LARGE_ALERT_FILE="$STATE_DIR/browser-hygiene-last-large-alert"
+
+log() { echo "[grandma-browser-hygiene-monitor] $*"; }
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  cat <<'EOF'
+Usage: grandma-browser-hygiene-monitor OPENCLAW-BINARY SESSION-KEY
+
+Runs GrandmaOS Chrome hygiene without an LLM. Healthy checks and ordinary
+corrective actions remain entirely local. OpenClaw is woken only for a monitor
+failure or a background window using at least 2500 MB, with large-window alerts
+limited to one every 12 hours.
+EOF
+  exit 0
+fi
+
+if [ "$(id -u)" -eq 0 ]; then
+  log "refusing to run as root; run from the OpenClaw owner's user timer"
+  exit 2
+fi
+if [ -z "$OPENCLAW_BIN" ] || [ ! -x "$OPENCLAW_BIN" ]; then
+  log "OpenClaw executable is missing or not executable"
+  exit 2
+fi
+if [ -z "$SESSION_KEY" ]; then
+  log "OpenClaw session key is required"
+  exit 2
+fi
+if [ ! -x "$HYGIENE_BIN" ]; then
+  log "Chrome hygiene helper is missing: $HYGIENE_BIN"
+  exit 2
+fi
+
+output=""
+hygiene_rc=0
+output=$(sudo -n -u grandma env \
+  DISPLAY=:0 \
+  XAUTHORITY=/home/grandma/.Xauthority \
+  XDG_RUNTIME_DIR=/run/user/1001 \
+  DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1001/bus \
+  "$HYGIENE_BIN" 2>&1) || hygiene_rc=$?
+printf '%s\n' "$output"
+
+event_text=""
+if [ "$hygiene_rc" -ne 0 ]; then
+  event_text="The local GrandmaOS Chrome hygiene monitor failed (exit $hygiene_rc). Tell the owner the local monitor needs attention. Do not retry it or run commands."
+else
+  largest_mb=0
+  while IFS= read -r line; do
+    case "$line" in
+      "chrome-hygiene: reloading background RAM hog "*)
+        memory_mb=$(sed -n 's/.*(\([0-9][0-9]*\) MB)$/\1/p' <<<"$line")
+        if [ -n "$memory_mb" ] && [ "$memory_mb" -gt "$largest_mb" ]; then
+          largest_mb=$memory_mb
+        fi
+        ;;
+    esac
+  done <<<"$output"
+
+  if [ "$largest_mb" -ge "$ALERT_MB" ]; then
+    now=$(date +%s)
+    last_alert=0
+    if [ -r "$LAST_LARGE_ALERT_FILE" ]; then
+      read -r last_alert <"$LAST_LARGE_ALERT_FILE" || last_alert=0
+    fi
+    case "$last_alert" in
+      ''|*[!0-9]*) last_alert=0 ;;
+    esac
+    if [ $((now - last_alert)) -ge "$ALERT_COOLDOWN_SECONDS" ]; then
+      event_text="The local GrandmaOS Chrome hygiene monitor found and reloaded an unusually large background Chrome window (${largest_mb} MB). Tell the owner in one short line. Do not rerun the monitor or run commands."
+    else
+      log "large-window alert suppressed by 12-hour cooldown (${largest_mb} MB)"
+    fi
+  fi
+fi
+
+if [ -z "$event_text" ]; then
+  if grep -Eq '^chrome-hygiene: (closing|reloading) ' <<<"$output"; then
+    log "routine corrective action; OpenClaw was not contacted"
+  else
+    log "healthy/no action; OpenClaw was not contacted"
+  fi
+  exit 0
+fi
+
+log "attention needed; waking OpenClaw"
+if ! "$OPENCLAW_BIN" system event \
+  --text "$event_text" \
+  --mode now \
+  --session-key "$SESSION_KEY"; then
+  log "failed to deliver the OpenClaw event"
+  exit 1
+fi
+
+if [ "${largest_mb:-0}" -ge "$ALERT_MB" ]; then
+  mkdir -p "$STATE_DIR"
+  printf '%s\n' "$(date +%s)" >"$LAST_LARGE_ALERT_FILE"
+fi

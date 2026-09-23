@@ -32,6 +32,10 @@ button {
     border-width: 2px;
     padding: 4px;
 }
+.volume-arrow {
+    font-size: 42px;
+    font-weight: bold;
+}
 """
 
 # --class gives each app-style Chrome window a stable identity. That lets the
@@ -49,13 +53,10 @@ SITES = [
         True,
     ),
     (
-        "Messenger",
-        "https://www.messenger.com/",
-        "messenger.png",
-        # Chrome routes secondary-profile launches through its existing
-        # process and may ignore --class. App-mode windows still receive this
-        # stable URL-derived WM class, so it remains a reliable fallback.
-        "www.messenger.com",
+        "Amazon",
+        "https://www.amazon.com/",
+        "amazon.png",
+        "www.amazon.com",
         True,
         None,
         False,
@@ -214,8 +215,8 @@ def launch_or_focus(
     url: str, window_class: str, app_mode: bool, profile_directory=None
 ):
     # App-mode Chrome windows expose the target hostname in WM_CLASS. Prefer
-    # that exact, fast path before the broader tab-title scan; Messenger and
-    # Facebook can otherwise have confusingly similar titles.
+    # that exact, fast path before the broader tab-title scan. Some Facebook
+    # page titles include "Messenger", so title matching alone can be noisy.
     if focus_window(window_class) or focus_existing_tab(url):
         return
 
@@ -292,6 +293,32 @@ def make_button(label_text, icon_px, icon_file=None, icon_name=None):
     return button
 
 
+def make_volume_button(direction, label_text, icon_px, icon_name):
+    """Build a volume control with a speaker and a large directional arrow."""
+    button = Gtk.Button()
+    button.set_hexpand(True)
+    button.set_vexpand(True)
+
+    contents = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+    contents.set_halign(Gtk.Align.CENTER)
+    contents.set_valign(Gtk.Align.CENTER)
+
+    symbols = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+    symbols.set_halign(Gtk.Align.CENTER)
+    symbols.pack_start(make_image(None, icon_name, icon_px), False, False, 0)
+
+    arrow = Gtk.Label(label="↑" if direction == "up" else "↓")
+    arrow.get_style_context().add_class("volume-arrow")
+    symbols.pack_start(arrow, False, False, 0)
+    contents.pack_start(symbols, False, False, 0)
+
+    label = Gtk.Label(label=label_text)
+    label.set_justify(Gtk.Justification.CENTER)
+    contents.pack_start(label, False, False, 0)
+    button.add(contents)
+    return button
+
+
 class Dock(Gtk.Window):
     def __init__(self):
         super().__init__(title="GrandmaOS Bottom Dock")
@@ -324,7 +351,6 @@ class Dock(Gtk.Window):
         control_icon_px = max(
             32, min(64, self.dock_height * 2 // 5, item_width * 2 // 5)
         )
-
         self.set_size_request(self.monitor.width, self.dock_height)
         self.set_default_size(self.monitor.width, self.dock_height)
         self.move(
@@ -365,15 +391,15 @@ class Dock(Gtk.Window):
             )
             buttons.pack_start(button, True, True, 0)
 
-        volume_down = make_button(
-            "Volume\nDown", control_icon_px, icon_name="audio-volume-low"
+        volume_down = make_volume_button(
+            "down", "Volume Down", control_icon_px, "audio-volume-low"
         )
         volume_down.set_tooltip_text("Turn the sound down")
         volume_down.connect("clicked", lambda _button: adjust_volume(-1))
         buttons.pack_start(volume_down, True, True, 0)
 
-        volume_up = make_button(
-            "Volume\nUp", control_icon_px, icon_name="audio-volume-high"
+        volume_up = make_volume_button(
+            "up", "Volume Up", control_icon_px, "audio-volume-high"
         )
         volume_up.set_tooltip_text("Turn the sound up")
         volume_up.connect("clicked", lambda _button: adjust_volume(1))

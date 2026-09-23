@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodically run local GrandmaOS Chrome hygiene
+
+[Timer]
+OnBootSec=5min
+OnUnitInactiveSec=30min
+RandomizedDelaySec=30s
+Persistent=false
+Unit=grandmaos-browser-hygiene.service
+
+[Install]
+WantedBy=timers.target
