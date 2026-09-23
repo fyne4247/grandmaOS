@@ -76,9 +76,9 @@ mkdir -p -m 0755 "$boot_dir"
     printf 'not installed\n'
   fi
 
-  printf '\n-- kernel warnings/errors, previous 2 minutes --\n'
+  printf '\n-- recent kernel warnings/errors --\n'
   if command -v journalctl >/dev/null 2>&1; then
-    journalctl -k --since '2 minutes ago' -p warning..alert --no-pager 2>&1 || true
+    journalctl -k -b 0 -p warning..alert -n 50 --no-pager -o short-monotonic 2>&1 || true
   else
     printf 'journalctl unavailable\n'
   fi
