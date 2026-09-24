@@ -30,6 +30,18 @@ mkdir -p -m 0755 "$boot_dir"
   printf '\n-- free -m --\n'
   free -m 2>/dev/null || true
 
+  printf '\n-- top processes by CPU --\n'
+  ps -eo pid,ppid,user,%cpu,%mem,rss,comm,args --sort=-%cpu | head -15 2>&1 || true
+
+  printf '\n-- top processes by RSS --\n'
+  ps -eo pid,ppid,user,%cpu,%mem,rss,comm,args --sort=-rss | head -15 2>&1 || true
+
+  printf '\n-- pressure stall information --\n'
+  for resource in cpu memory io; do
+    printf '[%s]\n' "$resource"
+    cat "/proc/pressure/$resource" 2>/dev/null || printf 'unavailable\n'
+  done
+
   printf '\n-- AC state --\n'
   ac_found=0
   for supply in /sys/class/power_supply/*; do
