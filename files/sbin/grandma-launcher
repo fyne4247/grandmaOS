@@ -347,12 +347,10 @@ class Dock(Gtk.Window):
             1, min(MAX_DOCK_HEIGHT_PX, self.monitor.height // DOCK_HEIGHT_FRACTION)
         )
         item_width = max(1, self.monitor.width // (len(SITES) + 4))
-        site_icon_px = max(
-            48, min(88, self.dock_height * 11 // 20, item_width * 2 // 5)
-        )
-        control_icon_px = max(
-            32, min(64, self.dock_height * 2 // 5, item_width * 2 // 5)
-        )
+        # With captions removed, icons can use nearly the full fixed button
+        # height. The volume buttons still reserve horizontal room for arrows.
+        site_icon_px = max(48, min(self.dock_height - 12, item_width - 12))
+        control_icon_px = max(32, min(self.dock_height - 12, item_width - 60))
         self.set_size_request(self.monitor.width, self.dock_height)
         self.set_default_size(self.monitor.width, self.dock_height)
         self.move(
