@@ -1,0 +1,9 @@
+[Unit]
+Description=GrandmaOS keyboard auto-heal (clear stuck-key HID floods)
+ConditionPathExists=/proc/uptime
+
+[Service]
+Type=oneshot
+User=grandma
+Environment=DISPLAY=:0
+ExecStart=/usr/local/sbin/grandma-input-watchdog

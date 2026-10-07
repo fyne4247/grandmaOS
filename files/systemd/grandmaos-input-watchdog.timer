@@ -1,0 +1,12 @@
+[Unit]
+Description=Run GrandmaOS keyboard auto-heal every 2 minutes
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=2min
+AccuracySec=10sec
+Persistent=false
+Unit=grandmaos-input-watchdog.service
+
+[Install]
+WantedBy=timers.target

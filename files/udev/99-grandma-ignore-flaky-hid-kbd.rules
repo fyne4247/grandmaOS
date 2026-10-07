@@ -1,0 +1,11 @@
+# GrandmaOS: ignore the flaky HID "keyboard" interface on the TTGK USB-audio
+# dock (3302:29e3). On 2026-10-07 it left a media key stuck down inside X; X
+# then auto-repeated it ~20x/second and wedged grandma's typing. Telling
+# libinput to ignore that interface removes the failure mode entirely.
+#
+# Only the dock's media keys are lost -- grandma's built-in keyboard and her
+# F2/F3 / on-screen volume controls are unaffected (and audio output is a
+# separate, untouched subsystem).
+#
+# Added 2026-10-07. Delete this file to restore the dock's media buttons.
+ACTION=="add|change", SUBSYSTEM=="input", ATTRS{idVendor}=="3302", ATTRS{idProduct}=="29e3", ENV{LIBINPUT_IGNORE_DEVICE}="1"

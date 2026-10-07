@@ -137,6 +137,24 @@ phase_install_scripts() {
 }
 
 # ---------------------------------------------------------------------------
+phase_udev_rules() {
+  log "Phase: udev rules (ignore flaky HID keyboard interfaces)"
+  # libinput honours the udev property LIBINPUT_IGNORE_DEVICE. The TTGK USB-audio
+  # dock (3302:29e3) exposes a HID keyboard interface that can leave a media key
+  # stuck down inside X, which then auto-repeats and wedges grandma's typing.
+  # Ignoring that interface removes the failure mode; audio is a separate
+  # subsystem and is untouched.
+  run install -d -m 0755 -o root -g root /etc/udev/rules.d
+  for f in "$FILES"/udev/*.rules; do
+    [ -e "$f" ] || continue
+    run install -m 0644 -o root -g root "$f" "/etc/udev/rules.d/$(basename "$f")"
+  done
+  run udevadm control --reload-rules
+  run udevadm trigger --subsystem-match=input --action=change
+  note "flaky HID keyboards (TTGK USB-audio dock) ignored by libinput"
+}
+
+# ---------------------------------------------------------------------------
 phase_accessibility() {
   log "Phase: XFCE accessibility baseline + lock-screen elimination"
   local auto_dir="/home/$GRANDMA_USER/.config/autostart"
@@ -357,14 +375,15 @@ EOF
 # ---------------------------------------------------------------------------
 phase_timers() {
   log "Phase: systemd self-healing + backup timers"
-  for u in grandmaos-baseline.service grandmaos-baseline.timer grandmaos-browser-backup.service grandmaos-browser-backup.timer grandma-flight-recorder.service grandma-flight-recorder.timer; do
+  for u in grandmaos-baseline.service grandmaos-baseline.timer grandmaos-browser-backup.service grandmaos-browser-backup.timer grandma-flight-recorder.service grandma-flight-recorder.timer grandmaos-input-watchdog.service grandmaos-input-watchdog.timer; do
     run install -m 0644 -o root -g root "$FILES/systemd/$u" "/etc/systemd/system/$u"
   done
   run systemctl daemon-reload
   run systemctl enable --now grandmaos-baseline.timer
   run systemctl enable --now grandmaos-browser-backup.timer
   run systemctl enable --now grandma-flight-recorder.timer
-  note "baseline reasserts every 15min; browser backup runs hourly, keeps 14 generations; flight recorder snapshots every minute"
+  run systemctl enable --now grandmaos-input-watchdog.timer
+  note "baseline reasserts every 15min; browser backup runs hourly, keeps 14 generations; flight recorder snapshots every minute; keyboard auto-heal checks every 2 minutes"
 }
 
 # ---------------------------------------------------------------------------
@@ -452,6 +471,7 @@ log "GrandmaOS provisioning starting$( [ "$DRY_RUN" -eq 1 ] && echo ' (DRY RUN -
 phase_grandma_account
 phase_autologin
 phase_install_scripts
+phase_udev_rules
 phase_accessibility
 phase_chrome
 phase_chrome_font_size

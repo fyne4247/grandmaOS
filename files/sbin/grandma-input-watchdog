@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# GrandmaOS: auto-heal phantom/stuck-key keyboard floods in grandma's X session.
+#
+# A flaky HID keyboard (e.g. the TTGK USB-audio dock) can leave a key stuck
+# down inside X. X then auto-repeats that key forever (~20 events/second),
+# which can wedge normal typing. This samples the live X input stream and, if
+# one non-primary keyboard floods events, re-initialises that device
+# (disable + enable) so the stuck key clears.
+#
+# Runs from grandmaos-input-watchdog.timer (systemd, as grandma). Safe to run
+# repeatedly and idempotent: exits quietly when X is unreachable or all is well.
+#
+# Tunables (env):
+#   GRANDMAOS_INPUT_WATCHDOG_SAMPLE     seconds to sample (default 3)
+#   GRANDMAOS_INPUT_WATCHDOG_THRESHOLD  key events to call a flood (default 40)
+#   GRANDMAOS_INPUT_WATCHDOG_PRIMARY    keyboard name to never touch
+set -uo pipefail
+
+SAMPLE_SECONDS=${GRANDMAOS_INPUT_WATCHDOG_SAMPLE:-3}
+THRESHOLD=${GRANDMAOS_INPUT_WATCHDOG_THRESHOLD:-40}
+PRIMARY=${GRANDMAOS_INPUT_WATCHDOG_PRIMARY:-"AT Translated Set 2 keyboard"}
+export DISPLAY=${DISPLAY:-:0}
+export XAUTHORITY=${XAUTHORITY:-$HOME/.Xauthority}
+export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+LOG_TAG=grandma-input-watchdog
+log() { echo "[$LOG_TAG] $*"; }
+
+command -v xinput >/dev/null 2>&1 || { log "xinput not installed; nothing to do"; exit 0; }
+xinput list >/dev/null 2>&1 || { log "X session not reachable; nothing to do"; exit 0; }
+
+# Serialise concurrent runs.
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"${XDG_RUNTIME_DIR}/grandmaos-input-watchdog.lock" 2>/dev/null || true
+  flock -n 9 2>/dev/null || { log "another run is active; exiting"; exit 0; }
+fi
+
+# Map device id -> name (keyboards only).
+declare -A NAME
+while IFS= read -r line; do
+  case "$line" in
+    *[Kk]eyboard*) ;;
+    *) continue ;;
+  esac
+  id=$(sed -n 's/.*id=\([0-9]\+\).*/\1/p' <<<"$line")
+  [ -n "$id" ] || continue
+  prefix=${line%%id=*}
+  name=$(sed -E 's/^[^A-Za-z0-9]+//; s/[[:space:]]+$//' <<<"$prefix")
+  NAME[$id]=$name
+done < <(xinput list --short 2>/dev/null)
+
+# Sample the X input event stream and count KeyPress events per device.
+declare -A COUNT
+cur=""
+while IFS= read -r line; do
+  case "$line" in
+    *"EVENT type 2"*) cur="" ;;
+    *"device: "*)
+      if [ -z "$cur" ]; then
+        cur=$(sed -n 's/.*device: \([0-9]\+\).*/\1/p' <<<"$line")
+        [ -n "$cur" ] && COUNT[$cur]=$(( ${COUNT[$cur]:-0} + 1 ))
+      fi
+      ;;
+  esac
+done < <(timeout "$SAMPLE_SECONDS" xinput test-xi2 --root 2>/dev/null)
+
+cleared=0
+for id in "${!COUNT[@]}"; do
+  n=${COUNT[$id]}
+  [ "$n" -ge "$THRESHOLD" ] || continue
+  name=${NAME[$id]:-unknown device}
+  case "$name" in
+    *"$PRIMARY"*|*XTEST*|*"Virtual core"*) continue ;;
+  esac
+  log "key flood from '$name' (id=$id): $n key events in ${SAMPLE_SECONDS}s -- reinitialising device to clear the stuck key"
+  xinput disable "$id" >/dev/null 2>&1 || true
+  sleep 1
+  xinput enable "$id" >/dev/null 2>&1 || true
+  if xinput list --short 2>/dev/null | grep -q "id=$id"; then
+    log "device id=$id re-enabled"
+  else
+    log "device id=$id did not come back; leaving it to udev"
+  fi
+  cleared=$((cleared + 1))
+done
+
+[ "$cleared" -eq 0 ] && log "ok (no keyboard flood detected)"
+exit 0
