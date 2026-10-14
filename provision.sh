@@ -104,6 +104,22 @@ phase_autologin() {
 }
 
 # ---------------------------------------------------------------------------
+phase_display_manager_wait() {
+  log "Phase: LightDM waits for the graphics device"
+  # On the Dell (xe driver) LightDM started Xorg in the gap between simpledrm
+  # going away and xe registering its DRM card, so Xorg aborted twice per boot.
+  # The drop-in delays LightDM (at most 10 s) until a non-simpledrm DRM card
+  # exists. Takes effect at the next boot; LightDM is deliberately not
+  # restarted here because that would end grandma's session.
+  run install -d -m 0755 -o root -g root /etc/systemd/system/lightdm.service.d
+  run install -m 0644 -o root -g root \
+    "$FILES/systemd/lightdm.service.d/10-grandmaos-wait-drm.conf" \
+    /etc/systemd/system/lightdm.service.d/10-grandmaos-wait-drm.conf
+  run systemctl daemon-reload
+  note "LightDM waits for the GPU DRM card before starting X (active next boot)"
+}
+
+# ---------------------------------------------------------------------------
 phase_install_scripts() {
   log "Phase: grandma-* maintenance scripts + launcher"
   install -d -m 0755 -o root -g root /usr/local/sbin
@@ -470,6 +486,7 @@ phase_grub() {
 log "GrandmaOS provisioning starting$( [ "$DRY_RUN" -eq 1 ] && echo ' (DRY RUN -- no changes will be made)' )"
 phase_grandma_account
 phase_autologin
+phase_display_manager_wait
 phase_install_scripts
 phase_udev_rules
 phase_accessibility
