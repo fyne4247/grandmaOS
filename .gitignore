@@ -1,0 +1,3 @@
+# Raw diagnostic logs stay local; the repository is public.
+reports/
+*.log
