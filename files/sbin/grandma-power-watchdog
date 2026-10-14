@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# Watch Dell power telemetry and UCSI errors, then wake the existing OpenClaw
+# agent for a bounded diagnosis/remediation attempt. Runs as its non-root owner.
+set -uo pipefail
+
+OPENCLAW_BIN="${1:-${OPENCLAW_BIN:-}}"
+SESSION_KEY="${2:-${GRANDMAOS_OPENCLAW_SESSION_KEY:-}}"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/grandmaos/power-watchdog"
+POWER_SUPPLY_ROOT="${GRANDMAOS_POWER_SUPPLY_ROOT:-/sys/class/power_supply}"
+COOLDOWN_SECONDS=$((30 * 60))
+DEBOUNCE_SAMPLES=2
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/grandmaos-power-watchdog.lock"
+
+log() { echo "[grandma-power-watchdog] $*"; }
+usage() { cat <<'EOF'
+Usage: grandma-power-watchdog OPENCLAW-BINARY SESSION-KEY
+
+Watches AC/battery telemetry and new kernel UCSI PPM failures. A power
+condition needs two consecutive timer runs before OpenClaw is woken. Each
+condition is then limited to one event every 30 minutes.
+EOF
+}
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then usage; exit 0; fi
+if [ "$(id -u)" -eq 0 ]; then log "refusing to run as root"; exit 2; fi
+if [ -z "$OPENCLAW_BIN" ] || [ ! -x "$OPENCLAW_BIN" ]; then log "OpenClaw executable is missing or not executable"; exit 2; fi
+if [ -z "$SESSION_KEY" ]; then log "OpenClaw session key is required"; exit 2; fi
+
+mkdir -p "$STATE_DIR"
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$LOCK_FILE"
+  flock -n 9 || { log "another run is active; exiting"; exit 0; }
+fi
+
+read_value() { local value; [ -r "$1" ] && IFS= read -r value <"$1" && printf '%s' "$value"; }
+find_supply() {
+  local type=$1 supply
+  for supply in "$POWER_SUPPLY_ROOT"/*; do
+    [ -r "$supply/type" ] || continue
+    [ "$(read_value "$supply/type")" = "$type" ] && { printf '%s\n' "$supply"; return 0; }
+  done
+  return 1
+}
+event_allowed() {
+  local name now last=0 file
+  name=$1; file="$STATE_DIR/$name.last-alert"
+  now=$(date +%s); [ -r "$file" ] && read -r last <"$file" || true
+  case "$last" in ''|*[!0-9]*) last=0 ;; esac
+  [ $((now - last)) -ge "$COOLDOWN_SECONDS" ]
+}
+mark_alerted() { date +%s >"$STATE_DIR/$1.last-alert"; }
+debounced() {
+  local name active file count=0
+  name=$1; active=$2; file="$STATE_DIR/$name.samples"
+  if [ "$active" -eq 1 ]; then
+    [ -r "$file" ] && read -r count <"$file" || true
+    case "$count" in ''|*[!0-9]*) count=0 ;; esac
+    count=$((count + 1)); printf '%s\n' "$count" >"$file"
+    [ "$count" -ge "$DEBOUNCE_SAMPLES" ]
+  else
+    rm -f "$file"; return 1
+  fi
+}
+send_event() {
+  local name=$1 text=$2
+  event_allowed "$name" || { log "$name alert suppressed by 30-minute cooldown"; return 0; }
+  log "$name needs attention; waking OpenClaw"
+  if "$OPENCLAW_BIN" system event --text "$text" --mode now --session-key "$SESSION_KEY"; then
+    mark_alerted "$name"
+  else
+    log "failed to deliver $name event; it will retry on the next run"; return 1
+  fi
+}
+
+battery=$(find_supply Battery || true)
+ac=$(find_supply Mains || true)
+[ -d "$POWER_SUPPLY_ROOT/ADP1" ] && ac="$POWER_SUPPLY_ROOT/ADP1"
+if [ -n "$battery" ] && [ -n "$ac" ]; then
+  capacity=$(read_value "$battery/capacity" 2>/dev/null || true)
+  status=$(read_value "$battery/status" 2>/dev/null || true)
+  online=$(read_value "$ac/online" 2>/dev/null || true)
+  case "$capacity" in ''|*[!0-9]*) capacity=-1 ;; esac
+  case "$online" in 0|1) ;; *) online=-1 ;; esac
+  low_ac_absent=0; [ "$online" -eq 0 ] && [ "$capacity" -ge 0 ] && [ "$capacity" -lt 60 ] && low_ac_absent=1
+  discharging_on_ac=0; [ "$online" -eq 1 ] && [ "$status" = Discharging ] && discharging_on_ac=1
+  if debounced ac_absent_low "$low_ac_absent"; then
+    send_event ac_absent_low "GrandmaOS confirmed twice that AC is absent and battery is ${capacity}% (below 60%). Check current power status and, if available, attempt only safe non-destructive diagnostics or remediation. Then send the owner a concise Telegram update with the condition and result."
+  fi
+  if debounced discharging_on_ac "$discharging_on_ac"; then
+    send_event discharging_on_ac "GrandmaOS confirmed twice that battery is Discharging while ADP1 reports online=1. Check current power/USB-C status and, if available, attempt only safe non-destructive diagnostics or remediation. Then send the owner a concise Telegram update with the condition and result."
+  fi
+else
+  log "battery or AC supply unavailable; skipping power conditions"
+fi
+
+# A cursor prevents historical kernel messages being re-alerted after restarts.
+cursor_file="$STATE_DIR/kernel.cursor"; cursor_arg=()
+[ -r "$cursor_file" ] && cursor_arg=(--after-cursor "$(<"$cursor_file")")
+kernel_output=$(journalctl -k -b -o cat --show-cursor "${cursor_arg[@]}" 2>/dev/null) || kernel_output=""
+new_cursor=$(sed -n 's/^-- cursor: //p' <<<"$kernel_output" | tail -n 1)
+kernel_lines=$(sed '/^-- cursor: /d' <<<"$kernel_output")
+if grep -Eqi 'ucsi_acpi|failed to reset PPM|PPM init failed' <<<"$kernel_lines"; then
+  excerpt=$(grep -Ei 'ucsi_acpi|failed to reset PPM|PPM init failed' <<<"$kernel_lines" | tail -n 3 | tr '\n' ' ' | cut -c1-600)
+  send_event ucsi_ppm "GrandmaOS detected a new kernel USB-C/UCSI power-management error: ${excerpt}. Check current status and logs, and attempt only safe non-destructive remediation if appropriate. Then send the owner a concise Telegram update with the finding and result."
+fi
+[ -n "$new_cursor" ] && printf '%s\n' "$new_cursor" >"$cursor_file"

@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodically monitor GrandmaOS power and UCSI health
+
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=2min
+RandomizedDelaySec=15s
+Persistent=false
+Unit=grandmaos-power-watchdog.service
+
+[Install]
+WantedBy=timers.target

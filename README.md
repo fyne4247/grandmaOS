@@ -215,6 +215,16 @@ on a background window using at least 2500 MB wakes OpenClaw. Large-window alert
 cooldown. The installer sets that agent's recurring
 heartbeat cadence to `0m`; targeted event wakes remain available.
 
+The installer also enables a lightweight two-minute power/UCSI monitor. It
+waits for two consecutive observations before reporting AC absent below 60%
+battery or `Discharging` while `ADP1` is online. It watches the current boot's
+new kernel-journal `ucsi_acpi`, `failed to reset PPM`, and `PPM init failed`
+messages. Alert state persists across restarts and each condition has a
+30-minute cooldown. A real alert wakes the configured agent, which is asked to
+check status, attempt only safe non-destructive remediation where appropriate,
+and give the owner a concise Telegram update; GrandmaOS stores no Telegram
+credential.
+
 After two failed local probes ten seconds apart, it runs
 `openclaw doctor --fix --non-interactive`, performs one graceful
 `openclaw gateway restart`, and makes three bounded recovery probes. Concurrent
@@ -230,10 +240,11 @@ grandma-install-openclaw-watchdog
 sudo loginctl enable-linger ADMIN_USERNAME
 
 # Inspect timer, last run, and logs:
-systemctl --user status grandmaos-openclaw-watchdog.timer grandmaos-browser-hygiene.timer
+systemctl --user status grandmaos-openclaw-watchdog.timer grandmaos-browser-hygiene.timer grandmaos-power-watchdog.timer
 cat ~/.local/state/grandmaos/openclaw-watchdog-last-result
 journalctl --user -u grandmaos-openclaw-watchdog.service
 journalctl --user -u grandmaos-browser-hygiene.service
+journalctl --user -u grandmaos-power-watchdog.service
 ```
 
 The watcher is deliberately installed only after OpenClaw setup because the

@@ -1,0 +1,9 @@
+[Unit]
+Description=Monitor GrandmaOS power and UCSI health
+After=openclaw-gateway.service
+
+[Service]
+Type=oneshot
+ExecStart=@POWER_WATCHDOG_BIN@ @OPENCLAW_BIN@ @SESSION_KEY@
+TimeoutStartSec=2min
+Restart=no

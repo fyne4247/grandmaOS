@@ -11,7 +11,8 @@ Usage: grandma-install-openclaw-watchdog
 
 Run as the non-root admin account that owns and runs OpenClaw, after
 `openclaw gateway install` succeeds. Installs a five-minute local gateway
-watchdog and a 30-minute Chrome-hygiene timer. The Chrome check runs locally
+watchdog, a 30-minute Chrome-hygiene timer, and a two-minute power/UCSI monitor.
+The Chrome check runs locally
 and wakes OpenClaw only for a failure or an unusually large background window;
 ordinary cleanup stays silent. Recurring model heartbeats are disabled. Root
 execution is refused to avoid creating root-owned OpenClaw state.
@@ -43,8 +44,11 @@ for required in \
   "$SHARE_DIR/grandmaos-openclaw-watchdog.timer" \
   "$SHARE_DIR/grandmaos-browser-hygiene.service.in" \
   "$SHARE_DIR/grandmaos-browser-hygiene.timer" \
+  "$SHARE_DIR/grandmaos-power-watchdog.service.in" \
+  "$SHARE_DIR/grandmaos-power-watchdog.timer" \
   /usr/local/sbin/grandma-openclaw-watchdog \
-  /usr/local/sbin/grandma-browser-hygiene-monitor; do
+  /usr/local/sbin/grandma-browser-hygiene-monitor \
+  /usr/local/sbin/grandma-power-watchdog; do
   [ -r "$required" ] || { echo "error: missing installed GrandmaOS file: $required" >&2; exit 1; }
 done
 
@@ -77,6 +81,7 @@ mkdir -p "$USER_UNIT_DIR"
 escaped_openclaw=$(printf '%s' "$openclaw_bin" | sed 's/[&|]/\\&/g')
 escaped_watchdog=$(printf '%s' /usr/local/sbin/grandma-openclaw-watchdog | sed 's/[&|]/\\&/g')
 escaped_monitor=$(printf '%s' /usr/local/sbin/grandma-browser-hygiene-monitor | sed 's/[&|]/\\&/g')
+escaped_power_watchdog=$(printf '%s' /usr/local/sbin/grandma-power-watchdog | sed 's/[&|]/\\&/g')
 escaped_session_key=$(printf '%s' "$session_key" | sed 's/[&|]/\\&/g')
 sed -e "s|@OPENCLAW_BIN@|$escaped_openclaw|g" \
     -e "s|@WATCHDOG_BIN@|$escaped_watchdog|g" \
@@ -91,11 +96,18 @@ sed -e "s|@OPENCLAW_BIN@|$escaped_openclaw|g" \
     >"$USER_UNIT_DIR/grandmaos-browser-hygiene.service"
 install -m 0644 "$SHARE_DIR/grandmaos-browser-hygiene.timer" \
   "$USER_UNIT_DIR/grandmaos-browser-hygiene.timer"
+sed -e "s|@OPENCLAW_BIN@|$escaped_openclaw|g" \
+    -e "s|@POWER_WATCHDOG_BIN@|$escaped_power_watchdog|g" \
+    -e "s|@SESSION_KEY@|$escaped_session_key|g" \
+    "$SHARE_DIR/grandmaos-power-watchdog.service.in" \
+    >"$USER_UNIT_DIR/grandmaos-power-watchdog.service"
+install -m 0644 "$SHARE_DIR/grandmaos-power-watchdog.timer" \
+  "$USER_UNIT_DIR/grandmaos-power-watchdog.timer"
 
 # A recurring OpenClaw heartbeat is a full model turn. Keep only event-driven
 # wakes, which still work with every=0m and occur only after the local monitor
 # has something actionable to report.
-heartbeat_prompt='A trusted local GrandmaOS monitor has sent a System event that needs the owner attention. Relay that event in one short factual line. Do not run commands or repeat the monitor. If there is no actionable System event, reply exactly: NO_REPLY'
+heartbeat_prompt='A trusted local GrandmaOS monitor has sent a System event that needs the owner attention. Follow its scope: inspect current status and make only safe, non-destructive remediation when explicitly requested; otherwise do not run commands. Send the owner one concise Telegram update stating the condition and result. Do not repeat the monitor. If there is no actionable System event, reply exactly: NO_REPLY'
 heartbeat_prompt_json=$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$heartbeat_prompt")
 "$openclaw_bin" config set "agents.entries.${agent_id}.heartbeat.every" '"0m"' --strict-json
 "$openclaw_bin" config set "agents.entries.${agent_id}.heartbeat.prompt" "$heartbeat_prompt_json" --strict-json
@@ -103,12 +115,15 @@ heartbeat_prompt_json=$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1
 systemctl --user daemon-reload
 systemctl --user enable --now grandmaos-openclaw-watchdog.timer
 systemctl --user enable --now grandmaos-browser-hygiene.timer
+systemctl --user enable --now grandmaos-power-watchdog.timer
 
 echo "OpenClaw watchdog enabled for $(id -un): every 5 minutes after each completed check."
 echo "Chrome hygiene enabled every 30 minutes; routine cleanup uses no model tokens."
+echo "Power/UCSI monitor enabled every 2 minutes; it confirms power conditions twice and limits each alert to one per 30 minutes."
 echo "Large-window alerts require 2500 MB and are limited to one every 12 hours."
 echo "Recurring OpenClaw model heartbeat disabled; actionable events can still wake it."
 echo "For operation while logged out, run once: sudo loginctl enable-linger $(id -un)"
-echo "Inspect with: systemctl --user status grandmaos-openclaw-watchdog.timer grandmaos-browser-hygiene.timer"
+echo "Inspect with: systemctl --user status grandmaos-openclaw-watchdog.timer grandmaos-browser-hygiene.timer grandmaos-power-watchdog.timer"
 echo "Logs: journalctl --user -u grandmaos-openclaw-watchdog.service"
 echo "      journalctl --user -u grandmaos-browser-hygiene.service"
+echo "      journalctl --user -u grandmaos-power-watchdog.service"
