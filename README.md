@@ -85,7 +85,11 @@ account, re-add the Chrome repo, etc. if they're already there.
   separate per-profile settings.
   Before opening anything, each app button scans all Chrome windows and tabs
   for that site and activates an existing match; rapid repeat taps are ignored
-  while a new window is starting, preventing duplicate-window pileups.
+  while a new window is starting, preventing duplicate-window pileups. Internet
+  owns one ordinary, tabbed Chrome window per login: every tap raises that same
+  window (and preserves the page currently open in it), creating a replacement
+  only after it has been closed. This gives code-entry tasks a dependable place
+  to return to while the site-specific buttons remain distraction-free.
   The dock measures the active logical display at login, never uses more than
   one eighth of its height, has a blank touch buffer at each end, reserves that
   space so Chrome cannot cover it, and relaunches automatically if closed.

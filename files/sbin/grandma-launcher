@@ -7,6 +7,7 @@ window for that site, while the volume buttons adjust Grandma's own PipeWire
 session. The window reserves space at the bottom edge so Chrome cannot cover it.
 """
 import os
+import re
 import subprocess
 import time
 from urllib.parse import urlparse
@@ -51,6 +52,7 @@ SITES = [
         False,
         None,
         False,
+        True,
     ),
     (
         "Amazon",
@@ -59,6 +61,7 @@ SITES = [
         "www.amazon.com",
         True,
         None,
+        False,
         False,
     ),
     (
@@ -69,6 +72,7 @@ SITES = [
         True,
         None,
         False,
+        False,
     ),
     (
         "Facebook",
@@ -78,6 +82,7 @@ SITES = [
         True,
         None,
         True,
+        False,
     ),
     (
         "YouTube",
@@ -86,6 +91,7 @@ SITES = [
         "www.youtube.com",
         True,
         None,
+        False,
         False,
     ),
     (
@@ -96,6 +102,7 @@ SITES = [
         True,
         None,
         False,
+        False,
     ),
     (
         "RENT",
@@ -105,11 +112,13 @@ SITES = [
         True,
         None,
         False,
+        False,
     ),
 ]
 
 LAUNCH_GUARD_SECONDS = 8
 last_launch_time = {}
+INTERNET_WINDOW_STATE = "grandmaos-internet-window"
 
 
 def quiet_run(command):
@@ -142,6 +151,81 @@ def focus_window(window_class: str) -> bool:
             result = quiet_run(["wmctrl", "-ia", fields[0]])
             return result is not None and result.returncode == 0
     return False
+
+
+def chrome_window_ids():
+    """Return the X11 IDs of Chrome top-level windows currently on screen."""
+    try:
+        listing = subprocess.check_output(
+            ["wmctrl", "-lx"], stderr=subprocess.DEVNULL, text=True
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return set()
+
+    # The WM_CLASS varies by Chrome version and launch flags, but every Chrome
+    # window has "chrome" in this column. Do not match titles: a webpage can
+    # call itself Chrome and would make a saved window ID unsafe to reuse.
+    return {
+        fields[0]
+        for line in listing.splitlines()
+        if len((fields := line.split(None, 4))) >= 3
+        and "chrome" in fields[2].casefold()
+    }
+
+
+def internet_window_state_path():
+    runtime_dir = os.environ.get("XDG_RUNTIME_DIR")
+    if not runtime_dir or not os.path.isdir(runtime_dir):
+        return None
+    return os.path.join(runtime_dir, INTERNET_WINDOW_STATE)
+
+
+def focus_saved_internet_window() -> bool:
+    """Raise Grandma's normal browsing window, if it is still alive.
+
+    Chrome's single-instance service can ignore a later --class flag while
+    forwarding a launch request. A saved X11 window ID is therefore the
+    reliable identity for the one tabbed window the Internet button owns.
+    The file is in XDG_RUNTIME_DIR, so it naturally expires at logout.
+    """
+    path = internet_window_state_path()
+    if not path:
+        return False
+    try:
+        with open(path, encoding="ascii") as state:
+            window_id = state.read().strip()
+    except OSError:
+        return False
+
+    if not re.fullmatch(r"0x[0-9a-fA-F]+", window_id) or window_id not in chrome_window_ids():
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+        return False
+    result = quiet_run(["wmctrl", "-ia", window_id])
+    return result is not None and result.returncode == 0
+
+
+def save_new_internet_window(previous_windows, attempts_left=20):
+    """Remember the normal Chrome window created for the Internet button."""
+    new_windows = chrome_window_ids() - previous_windows
+    if new_windows:
+        # Chrome normally creates one window here. If it has animated a
+        # transient too, the newest ID is the browser frame in X11 practice.
+        window_id = max(new_windows, key=lambda value: int(value, 16))
+        path = internet_window_state_path()
+        if path:
+            try:
+                with open(path, "w", encoding="ascii") as state:
+                    state.write(f"{window_id}\n")
+            except OSError:
+                pass
+        return GLib.SOURCE_REMOVE
+    if attempts_left <= 1:
+        return GLib.SOURCE_REMOVE
+    GLib.timeout_add(250, save_new_internet_window, previous_windows, attempts_left - 1)
+    return GLib.SOURCE_REMOVE
 
 
 def focus_existing_tab(url: str) -> bool:
@@ -221,11 +305,14 @@ def focus_existing_tab(url: str) -> bool:
 
 
 def launch_or_focus(
-    url: str, window_class: str, app_mode: bool, profile_directory=None
+    url: str, window_class: str, app_mode: bool, profile_directory=None,
+    persistent_window=False,
 ):
     # App-mode Chrome windows expose the target hostname in WM_CLASS. Prefer
     # that exact, fast path before the broader tab-title scan. Some Facebook
     # page titles include "Messenger", so title matching alone can be noisy.
+    if persistent_window and focus_saved_internet_window():
+        return
     if focus_window(window_class) or focus_existing_tab(url):
         return
 
@@ -250,12 +337,17 @@ def launch_or_focus(
         command.append(f"--app={url}")
     else:
         command.extend(["--new-window", url])
+    previous_windows = chrome_window_ids() if persistent_window else None
     subprocess.Popen(
         command,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         start_new_session=True,
     )
+    if persistent_window:
+        # Give Chrome's existing-process handoff time to create the requested
+        # normal window, then keep that exact window for future button presses.
+        GLib.timeout_add(250, save_new_internet_window, previous_windows)
 
 
 def adjust_volume(delta: int):
@@ -377,6 +469,7 @@ class Dock(Gtk.Window):
             app_mode,
             profile_directory,
             _open_at_session_start,
+            persistent_window,
         ) in SITES:
             button = make_button(
                 name,
@@ -386,8 +479,8 @@ class Dock(Gtk.Window):
             )
             button.connect(
                 "clicked",
-                lambda _button, u=url, c=window_class, a=app_mode, p=profile_directory: launch_or_focus(
-                    u, c, a, p
+                lambda _button, u=url, c=window_class, a=app_mode, p=profile_directory, w=persistent_window: launch_or_focus(
+                    u, c, a, p, w
                 ),
             )
             buttons.pack_start(button, True, True, 0)
@@ -460,10 +553,10 @@ class Dock(Gtk.Window):
         def launch_next(index=0):
             if index >= len(startup_sites):
                 return GLib.SOURCE_REMOVE
-            _name, url, _icon, window_class, app_mode, profile_directory, _start = (
+            _name, url, _icon, window_class, app_mode, profile_directory, _start, persistent_window = (
                 startup_sites[index]
             )
-            launch_or_focus(url, window_class, app_mode, profile_directory)
+            launch_or_focus(url, window_class, app_mode, profile_directory, persistent_window)
             GLib.timeout_add_seconds(2, launch_next, index + 1)
             return GLib.SOURCE_REMOVE
 
