@@ -124,16 +124,25 @@ phase_install_scripts() {
   log "Phase: grandma-* maintenance scripts + launcher"
   install -d -m 0755 -o root -g root /usr/local/sbin
   for f in "$FILES"/sbin/*; do
+    # The AC/UCSI monitor was retired. Keep its source out of the appliance so
+    # an ordinary provisioning pass cannot bring it back; it is independent of
+    # the root-owned crash flight recorder installed below.
+    [ "$(basename "$f")" = "grandma-power-watchdog" ] && continue
     run install -m 0755 -o root -g root "$f" "/usr/local/sbin/$(basename "$f")"
   done
-  note "installed $(ls "$FILES"/sbin | wc -l) scripts to /usr/local/sbin"
+  run rm -f /usr/local/sbin/grandma-power-watchdog
+  note "installed GrandmaOS scripts to /usr/local/sbin (AC/UCSI watchdog retired)"
 
   local user_unit_share=/usr/local/share/grandmaos/systemd-user
   run install -d -m 0755 -o root -g root "$user_unit_share"
   for f in "$FILES"/systemd-user/*; do
+    case "$(basename "$f")" in
+      grandmaos-power-watchdog.service.in|grandmaos-power-watchdog.timer) continue ;;
+    esac
     run install -m 0644 -o root -g root "$f" "$user_unit_share/$(basename "$f")"
   done
-  note "installed optional OpenClaw user-watchdog unit templates"
+  run rm -f "$user_unit_share/grandmaos-power-watchdog.service.in" "$user_unit_share/grandmaos-power-watchdog.timer"
+  note "installed optional OpenClaw user-watchdog unit templates (without retired AC/UCSI monitor)"
 
   local icon_dir=/usr/local/share/grandmaos/icons
   run install -d -m 0755 -o root -g root "$icon_dir"
