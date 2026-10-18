@@ -10,6 +10,33 @@ supported configuration source for the Dell: do not copy the Chromebook's
 firmware/audio workarounds or infer Dell support from hardware that happened to
 work normally on the Samsung.
 
+## CFNA verification-code helper (AOL Mail; planned)
+
+See [CFNA-CODE-HELPER-PLAN.md](CFNA-CODE-HELPER-PLAN.md). The target use case is
+Grandma receiving a login verification code at AOL Mail while on the official
+CFNA credit-card website. The proposed Chrome extension will place an oversized
+**Get verification code** button directly on CFNA's verification screen, because
+GrandmaOS's Chrome app-mode windows have no visible extension toolbar. The
+code is retrieved over IMAP by a short-lived native application running locally
+on the Dell, inserted into the verified CFNA field, and never automatically
+submitted. Firefox is a secondary supported build.
+
+**Current status:** this repository contains the implementation plan and a
+guarded provisioning integration point, **not a functional helper**. The
+CFNA phase in provision.sh skips without making changes until a reviewed,
+executable release installer is provided at
+files/cfna-code-helper/install-grandmaos.sh. Do not assume installing or
+re-running GrandmaOS can currently read AOL verification emails or autofill CFNA.
+
+Once implemented, the installer must install a real native host and a valid
+signed Chrome extension, preserve the existing Chrome ExtensionSettings
+blocklist and approved entries, and keep AOL credentials out of the repository,
+script output, and extension storage. AOL account authorization requires
+interactive owner setup. Grandma's passwordless autologin requires a tested
+post-reboot credential-storage solution; the plan explicitly calls this out.
+If CFNA chooses SMS rather than email for a login, this helper cannot read
+that message.
+
 ## Use on a new machine
 
 If Codex or another coding agent will perform the installation, open this
