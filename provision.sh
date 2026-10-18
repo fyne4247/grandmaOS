@@ -338,6 +338,40 @@ PY
 }
 
 # ---------------------------------------------------------------------------
+phase_cfna_code_helper() {
+  log "Phase: CFNA email verification helper (AOL)"
+  # The helper is a separate, locally running native-messaging application,
+  # paired with a Chrome extension. Do not install a placeholder extension,
+  # invent a Chrome ID, embed mail credentials, or weaken ExtensionSettings.
+  # See CFNA-CODE-HELPER-PLAN.md for the audited packaging contract.
+  local installer="$FILES/cfna-code-helper/install-grandmaos.sh"
+
+  if [ ! -e "$installer" ]; then
+    note "not yet packaged: CFNA helper is planned, not installed"
+    note "implementation contract: $SCRIPT_DIR/CFNA-CODE-HELPER-PLAN.md"
+    return
+  fi
+
+  if [ ! -f "$installer" ] || [ ! -x "$installer" ]; then
+    echo "error: CFNA installer exists but is not a regular executable file: $installer" >&2
+    return 1
+  fi
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    note "[dry-run] CFNA installer present; would invoke installer --user $GRANDMA_USER with the managed Chrome policy"
+    note "[dry-run] AOL app-password enrollment remains an interactive owner-only task"
+    return
+  fi
+
+  "$installer" \
+    --user "$GRANDMA_USER" \
+    --chrome-policy /etc/opt/chrome/policies/managed/grandmaos.json
+
+  note "CFNA installer executed; verify the extension and native host on Grandma's actual Chrome profile"
+  note "AOL account authorization must be configured separately; no credential is stored by provision.sh"
+}
+
+# ---------------------------------------------------------------------------
 phase_updates() {
   log "Phase: automatic updates"
   if ! dpkg -l unattended-upgrades >/dev/null 2>&1; then
@@ -492,6 +526,7 @@ phase_udev_rules
 phase_accessibility
 phase_chrome
 phase_chrome_font_size
+phase_cfna_code_helper
 phase_updates
 phase_timers
 phase_lid_power
