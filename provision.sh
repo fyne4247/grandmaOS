@@ -492,6 +492,27 @@ phase_grub() {
 }
 
 # ---------------------------------------------------------------------------
+phase_display_psr() {
+  log "Phase: disable xe PSR / Panel Replay (Dell XPS 13 flicker + resets)"
+  # Demonstrated on the Dell: PSR selective-fetch errors every boot, PSR idle
+  # timeouts, garbage flicker, and silent resets. See the comment in
+  # files/grub.d/90-grandmaos-xe-psr.cfg. Takes effect at the next boot.
+  local src="$FILES/grub.d/90-grandmaos-xe-psr.cfg"
+  local dst=/etc/default/grub.d/90-grandmaos-xe-psr.cfg
+  local legacy=/etc/default/grub.d/90-grandmaos-xe-psr-test.cfg
+  if cmp -s "$src" "$dst" 2>/dev/null && [ ! -e "$legacy" ]; then
+    note "xe PSR/Panel Replay drop-in already installed, skipping"
+    return
+  fi
+  run install -d -m 0755 -o root -g root /etc/default/grub.d
+  run install -m 0644 -o root -g root "$src" "$dst"
+  # Replace the hand-installed test file from 2026-10-14 (same parameters).
+  [ -e "$legacy" ] && run rm -f "$legacy"
+  run update-grub
+  note "xe.enable_psr=0 xe.enable_panel_replay=0 added to the kernel command line (active next boot)"
+}
+
+# ---------------------------------------------------------------------------
 log "GrandmaOS provisioning starting$( [ "$DRY_RUN" -eq 1 ] && echo ' (DRY RUN -- no changes will be made)' )"
 phase_grandma_account
 phase_autologin
@@ -506,6 +527,7 @@ phase_timers
 phase_lid_power
 phase_dns
 phase_grub
+phase_display_psr
 
 log "Done."
 note "NOT automated (see README.md): OpenClaw setup, audio (worked out of the box on the original hardware -- re-check on new hardware with grandma-audio-status), a reboot to activate autologin."

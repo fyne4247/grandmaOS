@@ -9,6 +9,21 @@ known yet. GrandmaOS therefore uses normal Linux Mint/Ubuntu drivers and
 hardware discovery. This directory must not acquire guessed kernel parameters,
 ALSA topology overrides, Xorg snippets, or firmware workarounds.
 
+## Demonstrated device fixes
+
+- **xe PSR / Panel Replay off** (`files/grub.d/90-grandmaos-xe-psr.cfg`,
+  2026-10-14): every boot logged `Selective fetch area calculation failed in
+  pipe A`, some logged `Timed out waiting for PSR Idle for re-enable`, and the
+  panel showed garbage flicker during use alongside silent resets with no
+  kernel log. `xe.enable_psr=0` alone left Panel Replay Selective Update
+  active, so `xe.enable_panel_replay=0` is also set. Re-evaluate after kernel
+  updates; remove if the driver is fixed.
+- **LightDM waits for the xe DRM card**
+  (`files/systemd/lightdm.service.d/10-grandmaos-wait-drm.conf`): avoids two
+  Xorg "no screens found" aborts per boot while xe replaces simpledrm.
+- **Lid close never suspends**: a lid-triggered suspend once left the laptop
+  unable to power on through several power cycles. Do not test suspend.
+
 ## First-boot validation
 
 After a normal Linux Mint XFCE x86-64 UEFI installation and all offered Mint
